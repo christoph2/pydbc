@@ -89,24 +89,6 @@ class dbcListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#valueType.
-    def enterValueType(self, ctx:dbcParser.ValueTypeContext):
-        pass
-
-    # Exit a parse tree produced by dbcParser#valueType.
-    def exitValueType(self, ctx:dbcParser.ValueTypeContext):
-        pass
-
-
-    # Enter a parse tree produced by dbcParser#byteOrder.
-    def enterByteOrder(self, ctx:dbcParser.ByteOrderContext):
-        pass
-
-    # Exit a parse tree produced by dbcParser#byteOrder.
-    def exitByteOrder(self, ctx:dbcParser.ByteOrderContext):
-        pass
-
-
     # Enter a parse tree produced by dbcParser#multiplexerIndicator.
     def enterMultiplexerIndicator(self, ctx:dbcParser.MultiplexerIndicatorContext):
         pass
@@ -179,6 +161,33 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#valueDescriptions.
+    def enterValueDescriptions(self, ctx:dbcParser.ValueDescriptionsContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#valueDescriptions.
+    def exitValueDescriptions(self, ctx:dbcParser.ValueDescriptionsContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#valueDescriptionForSignal.
+    def enterValueDescriptionForSignal(self, ctx:dbcParser.ValueDescriptionForSignalContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#valueDescriptionForSignal.
+    def exitValueDescriptionForSignal(self, ctx:dbcParser.ValueDescriptionForSignalContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#valueDescriptionsForEnvVar.
+    def enterValueDescriptionsForEnvVar(self, ctx:dbcParser.ValueDescriptionsForEnvVarContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#valueDescriptionsForEnvVar.
+    def exitValueDescriptionsForEnvVar(self, ctx:dbcParser.ValueDescriptionsForEnvVarContext):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#environmentVariables.
     def enterEnvironmentVariables(self, ctx:dbcParser.EnvironmentVariablesContext):
         pass
@@ -230,6 +239,15 @@ class dbcListener(ParseTreeListener):
 
     # Exit a parse tree produced by dbcParser#signalTypes.
     def exitSignalTypes(self, ctx:dbcParser.SignalTypesContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#signalType.
+    def enterSignalType(self, ctx:dbcParser.SignalTypeContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#signalType.
+    def exitSignalType(self, ctx:dbcParser.SignalTypeContext):
         pass
 
 

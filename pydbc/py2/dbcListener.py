@@ -85,24 +85,6 @@ class dbcListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#valueType.
-    def enterValueType(self, ctx):
-        pass
-
-    # Exit a parse tree produced by dbcParser#valueType.
-    def exitValueType(self, ctx):
-        pass
-
-
-    # Enter a parse tree produced by dbcParser#byteOrder.
-    def enterByteOrder(self, ctx):
-        pass
-
-    # Exit a parse tree produced by dbcParser#byteOrder.
-    def exitByteOrder(self, ctx):
-        pass
-
-
     # Enter a parse tree produced by dbcParser#multiplexerIndicator.
     def enterMultiplexerIndicator(self, ctx):
         pass
@@ -175,6 +157,33 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#valueDescriptions.
+    def enterValueDescriptions(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#valueDescriptions.
+    def exitValueDescriptions(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#valueDescriptionForSignal.
+    def enterValueDescriptionForSignal(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#valueDescriptionForSignal.
+    def exitValueDescriptionForSignal(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#valueDescriptionsForEnvVar.
+    def enterValueDescriptionsForEnvVar(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#valueDescriptionsForEnvVar.
+    def exitValueDescriptionsForEnvVar(self, ctx):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#environmentVariables.
     def enterEnvironmentVariables(self, ctx):
         pass
@@ -226,6 +235,15 @@ class dbcListener(ParseTreeListener):
 
     # Exit a parse tree produced by dbcParser#signalTypes.
     def exitSignalTypes(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#signalType.
+    def enterSignalType(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#signalType.
+    def exitSignalType(self, ctx):
         pass
 
 

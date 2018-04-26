@@ -54,16 +54,6 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by dbcParser#valueType.
-    def visitValueType(self, ctx:dbcParser.ValueTypeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by dbcParser#byteOrder.
-    def visitByteOrder(self, ctx:dbcParser.ByteOrderContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by dbcParser#multiplexerIndicator.
     def visitMultiplexerIndicator(self, ctx:dbcParser.MultiplexerIndicatorContext):
         return self.visitChildren(ctx)
@@ -104,6 +94,21 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by dbcParser#valueDescriptions.
+    def visitValueDescriptions(self, ctx:dbcParser.ValueDescriptionsContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#valueDescriptionForSignal.
+    def visitValueDescriptionForSignal(self, ctx:dbcParser.ValueDescriptionForSignalContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#valueDescriptionsForEnvVar.
+    def visitValueDescriptionsForEnvVar(self, ctx:dbcParser.ValueDescriptionsForEnvVarContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by dbcParser#environmentVariables.
     def visitEnvironmentVariables(self, ctx:dbcParser.EnvironmentVariablesContext):
         return self.visitChildren(ctx)
@@ -131,6 +136,11 @@ class dbcVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by dbcParser#signalTypes.
     def visitSignalTypes(self, ctx:dbcParser.SignalTypesContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#signalType.
+    def visitSignalType(self, ctx:dbcParser.SignalTypeContext):
         return self.visitChildren(ctx)
 
 
