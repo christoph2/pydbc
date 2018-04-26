@@ -35,6 +35,7 @@ import sys
 import six
 import antlr4
 import antlr4.tree
+from dbcListener import dbcListener
 
 
 def indent(level):
@@ -64,7 +65,7 @@ class ParserWrapper(object):
     def _load(self, name):
         className = '{0}{1}'.format(self.grammarName, name)
         moduleName = 'pydbc.py{0}.{1}'.format(2 if six.PY2 else 3, className)
-        print(moduleName)
+#        print(moduleName)
         module = importlib.import_module(moduleName)
         klass = getattr(module, className)
         return (module, klass, )
@@ -76,8 +77,12 @@ class ParserWrapper(object):
         parser.setTrace(True if trace else False)
         meth = getattr(parser, self.startSymbol)
         self._syntaxErrors = parser._syntaxErrors
+
         tree = meth()
-        return tree
+        listener = dbcListener()
+        walker = antlr4.ParseTreeWalker()
+        walker.walk(listener, tree)
+        return listener.value
 
     def parseFromFile(self, fileName, trace = False):
         return self.parse(ParserWrapper.stringStream(fileName), trace)
@@ -87,7 +92,7 @@ class ParserWrapper(object):
 
     @staticmethod
     def stringStream(fname):
-        return antlr4.InputStream(codecs.open(fname, encoding = 'UTF-8').read())
+        return antlr4.InputStream(codecs.open(fname, encoding = 'latin-1').read())
 
     def _getNumberOfSyntaxErrors(self):
         return self._syntaxErrors
