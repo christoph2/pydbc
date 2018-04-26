@@ -1,72 +1,58 @@
+/*
+   pySART - Simplified AUTOSAR-Toolkit for Python.
+
+   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+
+   All Rights Reserved
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+   s. FLOSS-EXCEPTION.txt
+*/
 
 grammar dbc;
 
-/*
-tokens {
-    VERSION,
-    NEW_SYMBOLS,
-    BIT_TIMING,
-    NODES,
-    VALUE_TABLES,
-    MESSAGE,
-    MESSAGES,
-    MESSAGE_TRANSMITTER,
-    MESSAGE_TRANSMITTERS,
-    ENVIRONMENT_VARIABLES,
-    ENVIRONMENT_VARIABLES_DATA,
-    SIGNAL,
-    SIGNAL_TYPES,
-    COMMENTS,
-    COMMENT,
-    ATTRIBUTE_DEFINITION,
-    ATTRIBUTE_DEFINITIONS,
-    ATTRIBUTE_DEFAULTS,
-    ATTRIBUTE_DEFAULT,
-    ATTRIBUTE_VALUE_TYPE,
-    ATTRIBUTE_VALUE_FOR_OBJECT,
-    ATTRIBUTE_VALUES,
-    SIGTYPE_ATTR_LIST,
-    VALUE_DESCRIPTIONS,
-    CATEGORY_DEFINITIONS,
-    CATEGORIES,
-    FILTER,
-    SIGNAL_TYPE_REFS,
-    SIGNAL_GROUPS,
-    SIGNAL_EXTENDED_VALUE_TYPE_LIST,
-    ACCESS_NODES
-}
-*/
-
 dbcfile:
-    version
-    newSymbols
-    bitTiming
-    nodes
-    valueTables
-    messages
-    messageTransmitters
-    environmentVariables
-    environmentVariablesData
-    signalTypes
-    comments
-    attributeDefinitions
-    attributeDefaults
-    attributeValues
-/*
-    sigtypeAttrList
+    version                     // VERSION
+    newSymbols                  // NS_
+    bitTiming                   // BS_
+    nodes                       // BU_
+    valueTables                 // VAL_TABLE_
+    messages                    // BO_
+    messageTransmitters         // BO_TX_BU_
+    environmentVariables        // EV_
+    environmentVariablesData    // ENVVAR_DATA_
+    signalTypes                 // SGTYPE_
+    comments                    // CM_
+    attributeDefinitions        // BA_DEF_
+                                //
+    attributeDefaults           // BA_DEF_DEF_
+    attributeValues             // BA_
+    valueDescriptions           // VAL_
 
-    valueDescriptions
-    categoryDefinitions
-    categories
-    filter
-    signalTypeRefs
-    signalGroups
-*/
-    signalExtendedValueTypeList
+    //categoryDefinitions
+    //categories
+    //filter
+    //signalTypeRefs
+    //signalGroups
+
+    signalExtendedValueTypeList // SIG_VALTYPE_
     ;
 
 messageTransmitters:
-    messageTransmitter*
+    (items += messageTransmitter)*
     ;
 
 messageTransmitter:
@@ -74,45 +60,37 @@ messageTransmitter:
     ;
 
 signalExtendedValueTypeList:
-     'SIG_VALTYPE_' messageID = INT signalName = ID valType = ('0' | '1' | '2' | '3') ';'
+     ('SIG_VALTYPE_' messageID = INT signalName = C_IDENTIFIER valType = INT /*('0' | '1' | '2' | '3')*/ ';')*
     ;
 
 messages:
-    message*
+    (items  += message)*
     ;
 
 message :
-    ma = 'BO_' messageID = INT messageName = ID ':' messageSize = INT
-    transmt = (ID | VECTOR_XXX)  // gültiger Node-Name!? -- ID { isDefined($ID.text) }
-    signal*
+    ma = 'BO_' messageID = INT messageName = C_IDENTIFIER ':' messageSize = INT
+    transmt = (C_IDENTIFIER | VECTOR_XXX) (sgs += signal)*
     ;
 
 signal:
-    ma = 'SG_' signalName = ID multiplexerIndicator? ':' startBit = INT '|' signalSize = INT '@'
-    byteOrder valueType
-    '(' factor = FLOAT ',' offset = FLOAT ')'
-    '[' minimum = FLOAT '|' maximum = FLOAT ']'
-    unit = STRING receiver
+    ma = 'SG_' signalName = C_IDENTIFIER mind = multiplexerIndicator? ':' startBit = INT '|' signalSize = INT '@'
+    byteOrder = INT /*('0' | '1')*/ valueType = SIGN
+    '(' factor = number ',' offset = number ')'
+    '[' minimum = number '|' maximum = number ']'
+    unit = STRING rcv = receiver
     ;
 
 receiver:
-    (ID | VECTOR_XXX) (',' ID)*
+    fid = (C_IDENTIFIER | VECTOR_XXX) (',' ids += C_IDENTIFIER)*
     ;
 
 transmitter:
-    (ID) (',' ID)*
-    ;
-
-valueType:
-    '+' | '-'
-    ;
-
-byteOrder:
-    '0' | '1'
+    (fid = C_IDENTIFIER) (',' ids += C_IDENTIFIER)*
     ;
 
 multiplexerIndicator:
-    ('M' | ('m' INT))
+    mind = C_IDENTIFIER
+    //('M' | ('m' INT))
     ;
 
 valueTables:
@@ -120,15 +98,15 @@ valueTables:
     ;
 
 valueTable:
-    'VAL_TABLE_' ID valueDescription* ';'
+    'VAL_TABLE_' name = C_IDENTIFIER (desc += valueDescription)* ';'
     ;
 
 valueDescription:
-    number STRING
+    val = number name = STRING
     ;
 
 nodes:
-    'BU_' ':' ID*
+    'BU_' ':' (ids += C_IDENTIFIER)*
     ;
 
 bitTiming:
@@ -149,90 +127,112 @@ version:
     'VERSION' STRING
     ;
 
+valueDescriptions:
+    (vds += valueDescriptionForSignal | vde += valueDescriptionsForEnvVar ';')*
+    ;
+
+valueDescriptionForSignal:
+    'VAL_' messageID = INT signalName = C_IDENTIFIER (vds += valueDescription)*
+    ;
+
+valueDescriptionsForEnvVar:
+    'VAL_' signalName = C_IDENTIFIER (vds += valueDescription)*
+    ;
+
 environmentVariables:
-    environmentVariable*
+    (evs += environmentVariable)*
     ;
 
 environmentVariable:
-    'EV_' ID ':' varType = ('0' | '1' | '2') '[' minimum  = FLOAT '|' maximum = FLOAT ']'
-    unit = STRING initialValue = FLOAT envId = INT 'DUMMY_NODE_VECTOR'
-    accessType = ('0' | '1' | '2' | '3' | '8000') accessNodes ';'
+    'EV_' name = C_IDENTIFIER ':' varType = INT/*('0' | '1' | '2')*/ '[' minimum  = number '|' maximum = number ']'
+    unit = STRING initialValue = number envId = INT DUMMY_NODE_VECTOR
+    accNodes = accessNodes ';'
     ;
 
 accessNodes:
       id_ = VECTOR_XXX
-    | ids += ID (',' ids += ID)*
+    | ids += C_IDENTIFIER (',' ids += C_IDENTIFIER)*
     ;
 
 environmentVariablesData:
-    environmentVariableData*
+    (evars += environmentVariableData)*
     ;
 
 environmentVariableData:
-    'ENVVAR_DATA_' ID ':' INT ';'
+    'ENVVAR_DATA_' varname = C_IDENTIFIER ':' value = INT ';'
     ;
 
-/*
-    SIGNAL_TYPES;
-*/
-
 signalTypes:
+    (sigTypes += signalType)*
+    ;
+
+signalType:
+    'SGTYPE_' signalTypeName = C_IDENTIFIER ':' signalSize = number '@' byteOrder = INT valueType = SIGN
+    '(' factor = number ',' offset = number ')' '[' minimum = number '|' maximum = number ']'
+    unit = STRING defaultValue = number ',' valTable = C_IDENTIFIER ';'
     ;
 
 comments:
-    comment*
+    (items += comment)*
     ;
 
 comment:
-    'CM_'   (('BU_' ID) | ('BO_' INT) | ('SG_' INT) | ('EV_' ID))? STRING ';'
+    'CM_'
+    (
+          ( 'BU_' c0 = C_IDENTIFIER)
+        | ('BO_' i1 = INT)
+        | ('SG_' i2 = INT c2= C_IDENTIFIER)
+        | ('EV_' c3 = C_IDENTIFIER)
+    )? s = STRING ';'
     ;
 
 attributeDefinitions:
-    attributeDefinition*
+    (items += attributeDefinition)*
     ;
 
-attributeDefinition:        // FEHLERHAFT!!!
-    'BA_DEF_' objectType = ('BU_' | 'BO_' | 'SG_' | 'EV')? attributeName = STRING attributeValueType ';'
+attributeDefinition:
+    'BA_DEF_' objectType = ('BU_' | 'BO_' | 'SG_' | 'EV_')?   attrName = STRING  attrValue = attributeValueType ';'
     ;
 
 attributeValueType:
-      'INT' l = INT r = INT
-    | 'HEX' l = INT r = INT
-    | 'FLOAT' l = FLOAT r = FLOAT
-    | 'STRING'
-    | 'ENUM' values += STRING (',' values += STRING)*
+      'INT' i00 = INT i01 = INT
+    | 'HEX' i10 = INT i11 = INT
+    | 'FLOAT' f0 = number  f1 = number
+    | s0 = 'STRING'
+    | 'ENUM' efirst = STRING (',' eitems += STRING)*
     ;
 
 attributeDefaults:
-    attributeDefault*
+    (items += attributeDefault)*
     ;
 
 attributeDefault:
-    'BA_DEF_DEF' ID attributeValue ';'
+    'BA_DEF_DEF_' n = STRING v = attributeValue ';'
     ;
 
 attributeValue:
-      INT
-    | FLOAT
+      number
     | STRING
     ;
 
 attributeValues:
-    attributeValueForObject*
+    (items += attributeValueForObject)*
     ;
 
 attributeValueForObject:
-      'BA_' attributeName = ID (('BU_' additional = ID)
-    | ('BO_' additional = INT)
-    | ('SG_' additional = INT)
-    | ('EV_' additional = ID))?
-    attributeValue ';'
+      'BA_' attributeName = STRING (
+          attributeValue
+        | ('BU_' nodeName = C_IDENTIFIER buValue = attributeValue)
+        | ('BO_' mid1 = INT boValue = attributeValue)
+        | ('SG_' mid2 = INT signalName = C_IDENTIFIER sgValue = attributeValue)
+        | ('EV_' evName = C_IDENTIFIER evValue = attributeValue)
+      ) ';'
     ;
 
 number:
-      FLOAT
-    | INT
-    ;
+     INT
+   | FLOAT
+   ;
 
 //
 //      Lexer.
@@ -241,62 +241,61 @@ VECTOR_XXX:
     'Vector__XXX'
     ;
 
-ID:
+DUMMY_NODE_VECTOR:
+    'DUMMY_NODE_VECTOR'
+    ('0' .. '9')+
+    ;
+
+C_IDENTIFIER:
     ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
     ;
 
-INT:
-    ('-' | '+')? '0'..'9'+
-    ;
-
-FLOAT:
-      ('0'..'9')+ '.' ('0'..'9')* EXPONENT?
-    | '.' ('0'..'9')+ EXPONENT?
-    | ('0'..'9')+ EXPONENT
-    ;
-
-WS:
-      ( ' '
-    | '\t'
-    | '\r'
-    | '\n'
-      )-> channel(HIDDEN)
-    ;
-
-STRING:
-    '"' ( ESC_SEQ | ~('\\'|'"') )* '"'
-    ;
-
-CHAR:
-    '\'' ( ESC_SEQ | ~('\''|'\\') ) '\''
-    ;
 
 fragment
 EXPONENT:
     ('e'|'E') ('+'|'-')? ('0'..'9')+
     ;
 
-fragment
-HEX_DIGIT:
-    ('0'..'9'|'a'..'f'|'A'..'F')
+FLOAT:
+    SIGN?
+    (
+      ('0'..'9')+ '.' ('0'..'9')* EXPONENT?
+    | '.' ('0'..'9')+ EXPONENT?
+    | ('0'..'9')+ EXPONENT
+    )
+    ;
+
+
+INT:
+    SIGN? '0'..'9'+
     ;
 
 fragment
 ESC_SEQ:
-      '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
-    | UNICODE_ESC
-    | OCTAL_ESC
+      '\\' (
+        'b'
+      | 't'
+      | 'n'
+      | 'f'
+      | 'r'
+      | '\u0022'
+      | '\''
+      | '\\'
+    )
     ;
 
-fragment
-OCTAL_ESC:
-      '\\' ('0'..'3') ('0'..'7') ('0'..'7')
-    | '\\' ('0'..'7') ('0'..'7')
-    | '\\' ('0'..'7')
+WS:
+    (' ' | '\t' | '\r' | '\n') -> channel(HIDDEN)
     ;
 
-fragment
-UNICODE_ESC:
-    '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
+STRING:
+    '"' ( ESC_SEQ | ~('\\'|'"') )* '"'
     ;
+
+SIGN:
+      '+'
+    | '-'
+    ;
+
+
 
