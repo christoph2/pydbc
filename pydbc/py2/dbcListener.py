@@ -40,6 +40,15 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#signalExtendedValueType.
+    def enterSignalExtendedValueType(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#signalExtendedValueType.
+    def exitSignalExtendedValueType(self, ctx):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#messages.
     def enterMessages(self, ctx):
         pass
@@ -283,6 +292,24 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#customAttributeDefinitions.
+    def enterCustomAttributeDefinitions(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeDefinitions.
+    def exitCustomAttributeDefinitions(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#customAttributeDefinition.
+    def enterCustomAttributeDefinition(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeDefinition.
+    def exitCustomAttributeDefinition(self, ctx):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#attributeValueType.
     def enterAttributeValueType(self, ctx):
         pass
@@ -310,6 +337,24 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#customAttributeDefaults.
+    def enterCustomAttributeDefaults(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeDefaults.
+    def exitCustomAttributeDefaults(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#customAttributeDefault.
+    def enterCustomAttributeDefault(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeDefault.
+    def exitCustomAttributeDefault(self, ctx):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#attributeValue.
     def enterAttributeValue(self, ctx):
         pass
@@ -334,6 +379,24 @@ class dbcListener(ParseTreeListener):
 
     # Exit a parse tree produced by dbcParser#attributeValueForObject.
     def exitAttributeValueForObject(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#customAttributeValues.
+    def enterCustomAttributeValues(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeValues.
+    def exitCustomAttributeValues(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#customAttributeValueForObject.
+    def enterCustomAttributeValueForObject(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeValueForObject.
+    def exitCustomAttributeValueForObject(self, ctx):
         pass
 
 

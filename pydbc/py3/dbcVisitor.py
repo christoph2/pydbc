@@ -29,6 +29,11 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by dbcParser#signalExtendedValueType.
+    def visitSignalExtendedValueType(self, ctx:dbcParser.SignalExtendedValueTypeContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by dbcParser#messages.
     def visitMessages(self, ctx:dbcParser.MessagesContext):
         return self.visitChildren(ctx)
@@ -164,6 +169,16 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by dbcParser#customAttributeDefinitions.
+    def visitCustomAttributeDefinitions(self, ctx:dbcParser.CustomAttributeDefinitionsContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#customAttributeDefinition.
+    def visitCustomAttributeDefinition(self, ctx:dbcParser.CustomAttributeDefinitionContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by dbcParser#attributeValueType.
     def visitAttributeValueType(self, ctx:dbcParser.AttributeValueTypeContext):
         return self.visitChildren(ctx)
@@ -179,6 +194,16 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by dbcParser#customAttributeDefaults.
+    def visitCustomAttributeDefaults(self, ctx:dbcParser.CustomAttributeDefaultsContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#customAttributeDefault.
+    def visitCustomAttributeDefault(self, ctx:dbcParser.CustomAttributeDefaultContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by dbcParser#attributeValue.
     def visitAttributeValue(self, ctx:dbcParser.AttributeValueContext):
         return self.visitChildren(ctx)
@@ -191,6 +216,16 @@ class dbcVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by dbcParser#attributeValueForObject.
     def visitAttributeValueForObject(self, ctx:dbcParser.AttributeValueForObjectContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#customAttributeValues.
+    def visitCustomAttributeValues(self, ctx:dbcParser.CustomAttributeValuesContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#customAttributeValueForObject.
+    def visitCustomAttributeValueForObject(self, ctx:dbcParser.CustomAttributeValueForObjectContext):
         return self.visitChildren(ctx)
 
 

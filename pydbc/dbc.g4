@@ -37,9 +37,11 @@ dbcfile:
     signalTypes                 // SGTYPE_
     comments                    // CM_
     attributeDefinitions        // BA_DEF_
-                                //
+    customAttributeDefinitions  // BA_DEF_REL_
     attributeDefaults           // BA_DEF_DEF_
+    customAttributeDefaults     // BA_DEF_DEF_REL_
     attributeValues             // BA_
+    customAttributeValues       // BA_REL_
     valueDescriptions           // VAL_
 
     //categoryDefinitions
@@ -60,7 +62,11 @@ messageTransmitter:
     ;
 
 signalExtendedValueTypeList:
-     ('SIG_VALTYPE_' messageID = INT signalName = C_IDENTIFIER valType = INT /*('0' | '1' | '2' | '3')*/ ';')*
+     (items += signalExtendedValueType)*
+    ;
+
+signalExtendedValueType:
+    'SIG_VALTYPE_' messageID = INT signalName = C_IDENTIFIER ':' valType = INT /*('0' | '1' | '2' | '3')*/ ';'
     ;
 
 messages:
@@ -194,6 +200,14 @@ attributeDefinition:
     'BA_DEF_' objectType = ('BU_' | 'BO_' | 'SG_' | 'EV_')?   attrName = STRING  attrValue = attributeValueType ';'
     ;
 
+customAttributeDefinitions:
+    (items += customAttributeDefinition)*
+    ;
+
+customAttributeDefinition:
+    'BA_DEF_REL_' objectType = ('BU_SG_REL_'| 'BU_EV_REL_'| 'BU_BO_REL_')?   attrName = STRING  attrValue = attributeValueType ';'
+    ;
+
 attributeValueType:
       'INT' i00 = INT i01 = INT
     | 'HEX' i10 = INT i11 = INT
@@ -210,6 +224,14 @@ attributeDefault:
     'BA_DEF_DEF_' n = STRING v = attributeValue ';'
     ;
 
+customAttributeDefaults:
+    (items += customAttributeDefault)*
+    ;
+
+customAttributeDefault:
+    'BA_DEF_DEF_REL_' n = STRING v = attributeValue ';'
+    ;
+
 attributeValue:
       number
     | STRING
@@ -221,13 +243,33 @@ attributeValues:
 
 attributeValueForObject:
       'BA_' attributeName = STRING (
-          attributeValue
+          attrValue = attributeValue
         | ('BU_' nodeName = C_IDENTIFIER buValue = attributeValue)
         | ('BO_' mid1 = INT boValue = attributeValue)
         | ('SG_' mid2 = INT signalName = C_IDENTIFIER sgValue = attributeValue)
         | ('EV_' evName = C_IDENTIFIER evValue = attributeValue)
       ) ';'
     ;
+
+///
+customAttributeValues:
+    (items += customAttributeValueForObject)*
+    ;
+
+// BA_ "NWM-Stationsadresse" BU_ Console 26;
+// BA_ "GenMsgAutoGenSnd" BO_ 1540 0;
+
+// BA_REL_ "AttrNodeTx" BU_BO_REL_ Motor 1 "foo";
+
+customAttributeValueForObject:
+      'BA_REL' attributeName = STRING (
+          attributeValue
+        | ('BU_BO_REL_' nodeName = C_IDENTIFIER buValue = attributeValue cmValue = STRING)
+        | ('BU_SG_REL_' mid2 = INT signalName = C_IDENTIFIER sgValue = attributeValue)
+        | ('BU_EV_REL_' evName = C_IDENTIFIER evValue = attributeValue)
+      ) ';'
+    ;
+///
 
 number:
      INT

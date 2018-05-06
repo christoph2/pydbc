@@ -44,6 +44,15 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#signalExtendedValueType.
+    def enterSignalExtendedValueType(self, ctx:dbcParser.SignalExtendedValueTypeContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#signalExtendedValueType.
+    def exitSignalExtendedValueType(self, ctx:dbcParser.SignalExtendedValueTypeContext):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#messages.
     def enterMessages(self, ctx:dbcParser.MessagesContext):
         pass
@@ -287,6 +296,24 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#customAttributeDefinitions.
+    def enterCustomAttributeDefinitions(self, ctx:dbcParser.CustomAttributeDefinitionsContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeDefinitions.
+    def exitCustomAttributeDefinitions(self, ctx:dbcParser.CustomAttributeDefinitionsContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#customAttributeDefinition.
+    def enterCustomAttributeDefinition(self, ctx:dbcParser.CustomAttributeDefinitionContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeDefinition.
+    def exitCustomAttributeDefinition(self, ctx:dbcParser.CustomAttributeDefinitionContext):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#attributeValueType.
     def enterAttributeValueType(self, ctx:dbcParser.AttributeValueTypeContext):
         pass
@@ -314,6 +341,24 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#customAttributeDefaults.
+    def enterCustomAttributeDefaults(self, ctx:dbcParser.CustomAttributeDefaultsContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeDefaults.
+    def exitCustomAttributeDefaults(self, ctx:dbcParser.CustomAttributeDefaultsContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#customAttributeDefault.
+    def enterCustomAttributeDefault(self, ctx:dbcParser.CustomAttributeDefaultContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeDefault.
+    def exitCustomAttributeDefault(self, ctx:dbcParser.CustomAttributeDefaultContext):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#attributeValue.
     def enterAttributeValue(self, ctx:dbcParser.AttributeValueContext):
         pass
@@ -338,6 +383,24 @@ class dbcListener(ParseTreeListener):
 
     # Exit a parse tree produced by dbcParser#attributeValueForObject.
     def exitAttributeValueForObject(self, ctx:dbcParser.AttributeValueForObjectContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#customAttributeValues.
+    def enterCustomAttributeValues(self, ctx:dbcParser.CustomAttributeValuesContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeValues.
+    def exitCustomAttributeValues(self, ctx:dbcParser.CustomAttributeValuesContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#customAttributeValueForObject.
+    def enterCustomAttributeValueForObject(self, ctx:dbcParser.CustomAttributeValueForObjectContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#customAttributeValueForObject.
+    def exitCustomAttributeValueForObject(self, ctx:dbcParser.CustomAttributeValueForObjectContext):
         pass
 
 
