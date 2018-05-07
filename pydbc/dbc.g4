@@ -209,8 +209,8 @@ customAttributeDefinition:
     ;
 
 attributeValueType:
-      'INT' i00 = INT i01 = INT
-    | 'HEX' i10 = INT i11 = INT
+      'INT' i00 = intValue i01 = intValue
+    | 'HEX' i10 = intValue i11 = intValue
     | 'FLOAT' f0 = number  f1 = number
     | s0 = 'STRING'
     | 'ENUM' efirst = STRING (',' eitems += STRING)*
@@ -271,9 +271,17 @@ customAttributeValueForObject:
     ;
 ///
 
+intValue:
+    i = INT
+    ;
+
+floatValue:
+    f = FLOAT
+    ;
+
 number:
-     INT
-   | FLOAT
+     i = intValue
+   | f = floatValue
    ;
 
 //

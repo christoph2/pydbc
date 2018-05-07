@@ -400,6 +400,24 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#intValue.
+    def enterIntValue(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#intValue.
+    def exitIntValue(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#floatValue.
+    def enterFloatValue(self, ctx):
+        pass
+
+    # Exit a parse tree produced by dbcParser#floatValue.
+    def exitFloatValue(self, ctx):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#number.
     def enterNumber(self, ctx):
         pass

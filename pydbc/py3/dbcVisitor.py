@@ -229,6 +229,16 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by dbcParser#intValue.
+    def visitIntValue(self, ctx:dbcParser.IntValueContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#floatValue.
+    def visitFloatValue(self, ctx:dbcParser.FloatValueContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by dbcParser#number.
     def visitNumber(self, ctx:dbcParser.NumberContext):
         return self.visitChildren(ctx)

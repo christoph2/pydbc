@@ -36,6 +36,12 @@ from antlr4 import *
 ##  GenSigStartValue    ==> to set initial value until first message is received.
 ##  GenMsgCycleTime     ==> to set transmission rate
 
+"""
+Before moving on, note that J1939 is a bit special in regards to the CAN DBC file format:
+- The ID is extended 29 bit - in DBC context, this means that the the leading bit of the ID is "flipped" and needs to be re-flipped
+- Secondly, the relevant ID is the PGN, i.e. a sub part of the CAN ID (start bit 9, length 18)
+"""
+
 def validateMultiplexerIndicatior(value):
     if value == "M" or (value[0] == 'm' and value[1 : ].isdigit()):
         return True
@@ -70,7 +76,9 @@ class dbcListener(ParseTreeListener):
             signalTypes = ctx.signalTypes().value,
             comments = ctx.comments().value,
             attributeDefinitions = ctx.attributeDefinitions().value,
+            customAttributeDefinitions = ctx.customAttributeDefinitions().value,
             attributeDefaults = ctx.attributeDefaults().value,
+            customAttributeDefaults = ctx.customAttributeDefaults().value,
             attributeValues =ctx.attributeValues().value,
             valueDescriptions = ctx.valueDescriptions().value,
             signalExtendedValueTypeList = ctx.signalExtendedValueTypeList().value
@@ -80,31 +88,33 @@ class dbcListener(ParseTreeListener):
         ctx.value = [x.value for x in ctx.items]
 
     def exitMessageTransmitter(self, ctx):
-        print("MTX:", self.getInt(ctx.messageID), ctx.transmitter.value)
+        #print("MTX:", self.getInt(ctx.messageID), ctx.transmitter.value)
         ctx.value = OrderedDict(messageID = self.getInt(ctx.messageID), transmitter = ctx.transmitter.value)
 
     def exitSignalExtendedValueTypeList(self, ctx):
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitSignalExtendedValueType(self, ctx):
         messageID = int(ctx.messageID.text) if ctx.messageID else None
-        signalName = ctx.signalName.value if ctx.signalName else None
+        signalName = ctx.signalName.text if ctx.signalName else None
         valType = int(ctx.valType.text) if ctx.valType else None  # TODO: Validate ('0' | '1' | '2' | '3')
-        print("SIG_VALTYPE:", messageID, signalName, valType)
         ctx.value = OrderedDict(messageID = messageID, signalName = signalName, valueType = valType)
 
     def exitMessages(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
     def exitMessage(self, ctx):
-        print("MSG:", self.getInt(ctx.messageID), ctx.messageName.text, self.getInt(ctx.messageSize), ctx.transmt.text, )
+        #print("MSG:", self.getInt(ctx.messageID), ctx.messageName.text, self.getInt(ctx.messageSize), ctx.transmt.text, )
         ctx.value = OrderedDict(messageID = self.getInt(ctx.messageID), name = ctx.messageName.text, dlc = self.getInt(ctx.messageSize),
             transmitter = ctx.transmt.text, signals = [x.value for x in ctx.sgs]
         )
 
     def exitSignal(self, ctx):
-        print("    SIG:", ctx.signalName.text, self.getInt(ctx.startBit), self.getInt(ctx.signalSize), ctx.byteOrder.text, ctx.valueType.text,
-            ctx.factor.value, ctx.offset.value, ctx.minimum.value, ctx.maximum.value, ctx.unit.text, ctx.rcv.value)
+        #print("    SIG:", ctx.signalName.text, self.getInt(ctx.startBit), self.getInt(ctx.signalSize), ctx.byteOrder.text, ctx.valueType.text,
+        #    ctx.factor.value, ctx.offset.value, ctx.minimum.value, ctx.maximum.value, ctx.unit.text, ctx.rcv.value)
 
         ctx.value = OrderedDict(name = ctx.signalName.text, startBit = self.getInt(ctx.startBit), signalSize = self.getInt(ctx.signalSize),
-            byteOrder = ctx.byteOrder.text, valueType = ctx.valueType.text, factor = ctx.factor.value, offset = ctx.offset.value,
+            byteOrder = self.getInt(ctx.byteOrder), valueType = -1 if ctx.valueType.text == '-' else +1, factor = ctx.factor.value, offset = ctx.offset.value,
             minimum = ctx.minimum.value, maximum = ctx.maximum.value, unit = ctx.unit.text, receiver = ctx.rcv.value,
             multiplexerIndicator = ctx.mind.value if ctx.mind else None
         )
@@ -123,7 +133,7 @@ class dbcListener(ParseTreeListener):
              ctx.value = None
 
     def exitValueTables(self, ctx):
-        print("VTs:", [x.value for x in self.getList(ctx.valueTable)])
+        #print("VTs:", [x.value for x in self.getList(ctx.valueTable)])
         ctx.value = [x.value for x in self.getList(ctx.valueTable)]
 
     def exitValueTable(self, ctx):
@@ -153,11 +163,9 @@ class dbcListener(ParseTreeListener):
         ctx.value = OrderedDict(messageID = self.getInt(ctx.messageID), signalName = ctx.signalName.text, valueDescription = [x.value for x in ctx.vds])
 
     def exitValueDescriptionsForEnvVar(self, ctx):
-        ctx.value = OrderedDict(signalName = self.getInt(ctx.signalName), valueDescription = [x.value for x in ctx.vds])
-
+        ctx.value = OrderedDict(signalName = ctx.signalName.text, valueDescription = [x.value for x in ctx.vds])
 
     def exitEnvironmentVariables(self, ctx):
-        print("EVS: ", [x.value for x in ctx.evs])
         ctx.value = [x.value for x in ctx.evs]
 
     def exitEnvironmentVariable(self, ctx):
@@ -176,7 +184,7 @@ class dbcListener(ParseTreeListener):
         ctx.value = (ctx.varname.text, self.getInt(ctx.value))
 
     def exitSignalTypes(self, ctx):
-        print("SIGTYPES:", [x.value for x in ctx.sigTypes])
+        #print("SIGTYPES:", [x.value for x in ctx.sigTypes])
         ctx.value =[x.value for x in ctx.sigTypes]
 
     def exitSignalType(self, ctx):
@@ -186,7 +194,6 @@ class dbcListener(ParseTreeListener):
         )
 
     def exitComments(self, ctx):
-        print("COMMENTS:", [x.value for x in ctx.items])
         ctx.value = [x.value for x in ctx.items]
         pass
 
@@ -204,6 +211,9 @@ class dbcListener(ParseTreeListener):
         elif ctx.c3:
             tp = "EV"
             key = ctx.c3.text
+        else:
+            tp = "GENERAL"
+            key = None
         ctx.value = OrderedDict(type = tp, key = key, comment = comment)
 
     def exitAttributeDefinitions(self, ctx):
@@ -211,20 +221,29 @@ class dbcListener(ParseTreeListener):
 
     def exitAttributeDefinition(self, ctx):
         objectType = ctx.objectType.text if ctx.objectType else None
-        attributeName = ctx.attributeName.text
-        attributeValue = ctx.attributeValue.value
-        ctx.value = OrderedDict(type = objectType, name = attrName, value = attrValue)
+        attributeName = ctx.attrName.text
+        attributeValue = ctx.attrValue.value
+        ctx.value = OrderedDict(type = objectType, name = attributeName, value = attributeValue)
+
+    def exitCustomAttributeDefinitions(self, ctx):
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitCustomAttributeDefinition(self, ctx):
+        objectType = ctx.objectType.text if ctx.objectType else None
+        attributeName = ctx.attrName.text
+        attributeValue = ctx.attrValue.value
+        ctx.value = OrderedDict(type = objectType, name = attributeName, value = attributeValue)
 
     def exitAttributeValueType(self, ctx):
         if ctx.i00:
             tp = "INT"
-            value = (int(ctx.i00.text), int(ctx.i01.text), )
+            value = (ctx.i00.value, ctx.i01.value, )
         elif ctx.i10:
             tp = "INT"
-            value = (int(ctx.i10.text, 16), int(ctx.i11.text, 16), )
+            value = (ctx.i10.value, ctx.i11.value, )
         elif ctx.f0:
             tp = "FLOAT"
-            value = (float(ctx.f0.text), float(ctx.f1.text), )
+            value = (float(ctx.f0.value), float(ctx.f1.value), )
         elif ctx.s0:
             tp = "STRING"
             value = None
@@ -241,16 +260,23 @@ class dbcListener(ParseTreeListener):
     def exitAttributeDefault(self, ctx):
         name = ctx.n.text
         value = ctx.v.value
-        print("DEFAULT:", name, value)
+        ctx.value = OrderedDict(name = name, value = value)
+
+    def exitCustomAttributeDefaults(self, ctx):
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitCustomAttributeDefault(self, ctx):
+        name = ctx.n.text
+        value = ctx.v.value
         ctx.value = OrderedDict(name = name, value = value)
 
     def exitAttributeValue(self, ctx):
         text = ctx.STRING()
         number = ctx.number()
         if text:
-            ctx.value = text
+            ctx.value = text.getText()
         else:
-            ctx.value = number
+            ctx.value = number.value
 
     def exitAttributeValues(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -274,8 +300,20 @@ class dbcListener(ParseTreeListener):
             evName = ctx.evName.text
             evValue = ctx.evValue.value
             di = OrderedDict(type = 'EV', envVarname = evName, value = evValue)
+        else:
+            evValue = ctx.attrValue.value
+            #print("evValue", evValue)
+            evName = None
+            di = OrderedDict(type = "GENERAL", value = evValue)
         ctx.value = OrderedDict(name = attributeName, **di)
 
-    def exitNumber(self, ctx):
-        ctx.value = int(ctx.INT().getText()) if ctx.INT() else  float(ctx.FLOAT().getText())
+    def exitIntValue(self, ctx):
+        ctx.value = int(ctx.i.text) if ctx.i else None
 
+    def exitFloatValue(self, ctx):
+        ctx.value = float(ctx.f.text) if ctx.f else None
+
+    def exitNumber(self, ctx):
+        ctx.value = ctx.i.value if ctx.i else ctx.f.value
+
+        ## dlltool --def sqlite3.def --dllname sqlite3.dll --output-lib sqlite3.lib
