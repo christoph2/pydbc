@@ -133,8 +133,7 @@ class dbcListener(ParseTreeListener):
              ctx.value = None
 
     def exitValueTables(self, ctx):
-        #print("VTs:", [x.value for x in self.getList(ctx.valueTable)])
-        ctx.value = [x.value for x in self.getList(ctx.valueTable)]
+        ctx.value = [x.value for x in ctx.items]
 
     def exitValueTable(self, ctx):
         ctx.value = OrderedDict(name = ctx.name.text, description = [x.value for x in ctx.desc])
@@ -157,7 +156,20 @@ class dbcListener(ParseTreeListener):
         ctx.value = self.getTerminal(ctx.STRING)
 
     def exitValueDescriptions(self, ctx):
-        ctx.value = OrderedDict(signals = [x.value for x in ctx.vds], envVars = [x.value for x in ctx.vde])
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitSpecializedValueDescription(self, ctx):
+        items = [x.value for x in ctx.items]
+        if ctx.messageID:
+            messageID = int(ctx.messageID.text)
+            signalName = ctx.signalName.text
+            di = OrderedDict(messageID = messageID, signalName = signalName)
+            tp = "SG"
+        else:
+            envVarName = ctx.envVarName.text
+            di = OrderedDict(envVarName = envVarName)
+            tp = "EV"
+        ctx.value = OrderedDict(type = tp, description = items, **di)
 
     def exitValueDescriptionForSignal(self, ctx):
         ctx.value = OrderedDict(messageID = self.getInt(ctx.messageID), signalName = ctx.signalName.text, valueDescription = [x.value for x in ctx.vds])
@@ -184,7 +196,6 @@ class dbcListener(ParseTreeListener):
         ctx.value = (ctx.varname.text, self.getInt(ctx.value))
 
     def exitSignalTypes(self, ctx):
-        #print("SIGTYPES:", [x.value for x in ctx.sigTypes])
         ctx.value =[x.value for x in ctx.sigTypes]
 
     def exitSignalType(self, ctx):

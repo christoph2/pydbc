@@ -100,7 +100,7 @@ multiplexerIndicator:
     ;
 
 valueTables:
-    valueTable*
+    (items += valueTable)*
     ;
 
 valueTable:
@@ -134,15 +134,16 @@ version:
     ;
 
 valueDescriptions:
-    (vds += valueDescriptionForSignal | vde += valueDescriptionsForEnvVar ';')*
+    (items += specializedValueDescription)*
     ;
 
-valueDescriptionForSignal:
-    'VAL_' messageID = INT signalName = C_IDENTIFIER (vds += valueDescription)*
-    ;
-
-valueDescriptionsForEnvVar:
-    'VAL_' signalName = C_IDENTIFIER (vds += valueDescription)*
+specializedValueDescription:
+    'VAL_'  (
+      messageID = INT signalName = C_IDENTIFIER (items += valueDescription)*
+    |
+      envVarName = C_IDENTIFIER (items += valueDescription)*
+    )
+    ';'
     ;
 
 environmentVariables:

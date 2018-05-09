@@ -179,21 +179,12 @@ class dbcListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#valueDescriptionForSignal.
-    def enterValueDescriptionForSignal(self, ctx:dbcParser.ValueDescriptionForSignalContext):
+    # Enter a parse tree produced by dbcParser#specializedValueDescription.
+    def enterSpecializedValueDescription(self, ctx:dbcParser.SpecializedValueDescriptionContext):
         pass
 
-    # Exit a parse tree produced by dbcParser#valueDescriptionForSignal.
-    def exitValueDescriptionForSignal(self, ctx:dbcParser.ValueDescriptionForSignalContext):
-        pass
-
-
-    # Enter a parse tree produced by dbcParser#valueDescriptionsForEnvVar.
-    def enterValueDescriptionsForEnvVar(self, ctx:dbcParser.ValueDescriptionsForEnvVarContext):
-        pass
-
-    # Exit a parse tree produced by dbcParser#valueDescriptionsForEnvVar.
-    def exitValueDescriptionsForEnvVar(self, ctx:dbcParser.ValueDescriptionsForEnvVarContext):
+    # Exit a parse tree produced by dbcParser#specializedValueDescription.
+    def exitSpecializedValueDescription(self, ctx:dbcParser.SpecializedValueDescriptionContext):
         pass
 
 

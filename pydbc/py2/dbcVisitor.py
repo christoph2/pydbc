@@ -100,13 +100,8 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by dbcParser#valueDescriptionForSignal.
-    def visitValueDescriptionForSignal(self, ctx):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by dbcParser#valueDescriptionsForEnvVar.
-    def visitValueDescriptionsForEnvVar(self, ctx):
+    # Visit a parse tree produced by dbcParser#specializedValueDescription.
+    def visitSpecializedValueDescription(self, ctx):
         return self.visitChildren(ctx)
 
 
