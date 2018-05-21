@@ -27,15 +27,6 @@ __copyright__ = """
 __author__  = 'Christoph Schueler'
 __version__ = '0.9.0'
 
-# EV_ EnvShowFriction: 1 [0|0] "" 0 6 DUMMY_NODE_VECTOR2 Vector__XXX;   WRITE
-# EV_ EnvShowFriction: 1 [0|0] "" 0 6 DUMMY_NODE_VECTOR0 Vector__XXX;   UNEINGESCHRÄNKT
-# EV_ EnvShowFriction: 1 [0|0] "" 0 6 DUMMY_NODE_VECTOR1 Vector__XXX;   READ
-# EV_ EnvShowFriction: 1 [0|0] "" 0 6 DUMMY_NODE_VECTOR3 Vector__XXX;   R/W
-#
-
-# SG_ Channel : 22|2@1+ (1,0) [0|0] ""  xx
-
-# SYSDBA, masterkey
 
 from collections import namedtuple
 from pprint import pprint
@@ -43,9 +34,73 @@ import sqlite3
 import types
 
 
-SCHEMA = ('''
-    DROP TABLE IF EXISTS Cdb_Node;
+# http://www.webshop-factory.com/shopsysteme
+# https://www.fuer-gruender.de/meine-firma/logo-website/
 
+"""
+    •ConCardis
+    •Sage Pay
+    •PAYONE
+    •Wirecard
+    •mPAY24
+    •Six Card Solutions
+    •Heidelpay
+    •Secupay
+    •Novalnet
+    •BillPay
+"""
+
+INDICES = (
+    "CREATE UNIQUE INDEX Cdb_ECU_DB_ID ON Cdb_ECU(DB_ID );",
+    "CREATE INDEX Cdb_ECU_EnvVar_Cdb_ECU_EnvVarECU ON Cdb_ECU_EnvVar(ECU );",
+    "CREATE INDEX Cdb_ECU_Node_Cdb_ECU_NodeECU ON Cdb_ECU_Node(ECU );",
+    "CREATE UNIQUE INDEX Cdb_Gateway_Signal_DB_ID ON Cdb_Gateway_Signal(DB_ID );",
+    "CREATE INDEX Cdb_Group_Object_Group_DB_ID ON Cdb_Group_Object(Parent_DB_ID );",
+    "CREATE INDEX Cdb_Group_Object_Object_DB_ID ON Cdb_Group_Object(Object_DB_ID );",
+    "CREATE INDEX Cdb_Group_Object_Object_DB_ID_2 ON Cdb_Group_Object(Object_DB_ID_2 );",
+    "CREATE INDEX Cdb_Group_Object_Object_Type ON Cdb_Group_Object(Object_Type );",
+    "CREATE INDEX Cdb_Group_Object_Parent_Type ON Cdb_Group_Object(Parent_Type );",
+    "CREATE UNIQUE INDEX Cdb_Network_DB_ID ON Cdb_Network(DB_ID );",
+    "CREATE INDEX Cdb_Object_Valuetable_Object_DB_ID ON Cdb_Object_Valuetable(Object_DB_ID );",
+    "CREATE INDEX Cdb_Object_Valuetable_Object_Type ON Cdb_Object_Valuetable(Object_Type );",
+    "CREATE UNIQUE INDEX Cdb_Vehicle_DB_ID ON Cdb_Vehicle(DB_ID );",
+)
+
+DROP_TABLES = (
+    "DROP TABLE IF EXISTS Cdb_Message_Signal;",
+    "DROP TABLE IF EXISTS Cdb_ECU_Node;",
+    "DROP TABLE IF EXISTS Cdb_Network_Node;",
+    "DROP TABLE IF EXISTS Cdb_Node_RxSig;",
+    "DROP TABLE IF EXISTS Cdb_Node_RxSignal;",
+    "DROP TABLE IF EXISTS Cdb_Node_TxMessage;",
+    "DROP TABLE IF EXISTS Cdb_Node_TxSig;",
+    "DROP TABLE IF EXISTS Cdb_Node;",
+    "DROP TABLE IF EXISTS Cdb_Message;",
+    "DROP TABLE IF EXISTS Cdb_Signal;",
+    "DROP TABLE IF EXISTS Cdb_Attribute_Value;",
+    "DROP TABLE IF EXISTS Cdb_AttributeRel_Value;",
+    "DROP TABLE IF EXISTS Cdb_Attribute_Definition;",
+    "DROP TABLE IF EXISTS Cdb_DB_Info;",
+    "DROP TABLE IF EXISTS Cdb_ECU_EnvVar;",
+    "DROP TABLE IF EXISTS Cdb_ECU;",
+    "DROP TABLE IF EXISTS Cdb_EnvVar;",
+    "DROP TABLE IF EXISTS Cdb_Gateway_Signal;",
+    "DROP TABLE IF EXISTS Cdb_Group;",
+    "DROP TABLE IF EXISTS Cdb_Group_Object;",
+    "DROP TABLE IF EXISTS Cdb_Network;",
+    "DROP TABLE IF EXISTS Cdb_Object_Valuetable;",
+    "DROP TABLE IF EXISTS Cdb_Value_Description;",
+    "DROP TABLE IF EXISTS Cdb_Valuetable;",
+    "DROP TABLE IF EXISTS Cdb_Vehicle;",
+    "DROP TABLE IF EXISTS Cdb_Vehicle_Network;",
+    "DROP TABLE IF EXISTS Cdb_Vehicle_ECU;",
+    "DROP TABLE IF EXISTS Cdb_Versioninfo;",
+    "DROP VIEW IF EXISTS schema;",
+    "DROP TABLE IF EXISTS comments;",
+    "DROP TABLE IF EXISTS EnvironmentVariablesData;",
+)
+
+SCHEMA = ('''
     CREATE TABLE Cdb_Node (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
@@ -54,8 +109,6 @@ SCHEMA = ('''
         PRIMARY KEY(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Message;
-
     CREATE TABLE Cdb_Message (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
@@ -66,11 +119,11 @@ SCHEMA = ('''
         Cycletime INTEGER DEFAULT 0,
         Sender INTEGER DEFAULT 0,
         "Comment" VARCHAR(255),
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(DB_ID),
+        UNIQUE(Name),
+        UNIQUE(Message_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS  Cdb_Signal;
-
     CREATE TABLE Cdb_Signal (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
@@ -87,8 +140,6 @@ SCHEMA = ('''
         PRIMARY KEY(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Attribute_Definition;
-
     CREATE TABLE Cdb_Attribute_Definition (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
@@ -104,8 +155,6 @@ SCHEMA = ('''
         PRIMARY KEY(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Attribute_Value;
-
     CREATE TABLE Cdb_Attribute_Value (
         Object_ID INTEGER NOT NULL DEFAULT 0,
         Attribute_Definition INTEGER NOT NULL DEFAULT 0,
@@ -115,8 +164,6 @@ SCHEMA = ('''
         FOREIGN KEY(Attribute_Definition) REFERENCES Cdb_Attribute_Definition(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_AttributeRel_Value;
-
     CREATE TABLE Cdb_AttributeRel_Value (
         Object_ID INTEGER NOT NULL DEFAULT 0,
         Attribute_Definition INTEGER NOT NULL DEFAULT 0,
@@ -129,8 +176,6 @@ SCHEMA = ('''
         FOREIGN KEY(Attribute_Definition) REFERENCES Cdb_Attribute_Definition(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_DB_Info;
-
     CREATE TABLE Cdb_DB_Info (
         DB_Schema_Version INTEGER DEFAULT 2,
         Req_DB_Editor_Version INTEGER DEFAULT 1,
@@ -144,18 +189,13 @@ SCHEMA = ('''
         Number_Format_Int_Attributes INTEGER DEFAULT 0
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_ECU;
-
     CREATE TABLE Cdb_ECU (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255),
         "Comment" VARCHAR(255),
         PRIMARY KEY(DB_ID)
     );
-    CREATE UNIQUE INDEX Cdb_ECU_DB_ID ON Cdb_ECU(DB_ID );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_EnvVar;
-
     CREATE TABLE Cdb_EnvVar (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
@@ -170,8 +210,6 @@ SCHEMA = ('''
         PRIMARY KEY(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_ECU_EnvVar;
-
     CREATE TABLE Cdb_ECU_EnvVar (
         ECU INTEGER NOT NULL DEFAULT 0,
         EnvVar INTEGER NOT NULL DEFAULT 0,
@@ -179,11 +217,7 @@ SCHEMA = ('''
         FOREIGN KEY(ECU) REFERENCES Cdb_ECU(DB_ID),
         FOREIGN KEY(EnvVar) REFERENCES Cdb_EnvVar(DB_ID)
     );
-
-    CREATE INDEX Cdb_ECU_EnvVar_Cdb_ECU_EnvVarECU ON Cdb_ECU_EnvVar(ECU );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_ECU_Node;
-
     CREATE TABLE Cdb_ECU_Node (
         ECU INTEGER NOT NULL DEFAULT 0,
         Node INTEGER NOT NULL DEFAULT 0,
@@ -191,11 +225,7 @@ SCHEMA = ('''
         FOREIGN KEY(ECU) REFERENCES Cdb_ECU(DB_ID),
         FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID)
     );
-
-    CREATE INDEX Cdb_ECU_Node_Cdb_ECU_NodeECU ON Cdb_ECU_Node(ECU );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Gateway_Signal;
-
     CREATE TABLE Cdb_Gateway_Signal (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Vehicle_ID INTEGER NOT NULL DEFAULT 0,
@@ -212,11 +242,7 @@ SCHEMA = ('''
         Reserved_ID1 INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(DB_ID)
     );
-
-    CREATE UNIQUE INDEX Cdb_Gateway_Signal_DB_ID ON Cdb_Gateway_Signal(DB_ID );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Group;
-
     CREATE TABLE Cdb_Group (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
@@ -226,8 +252,6 @@ SCHEMA = ('''
         PRIMARY KEY(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Group_Object;
-
     CREATE TABLE Cdb_Group_Object (
         Parent_Type INTEGER NOT NULL DEFAULT 0,
         Parent_DB_ID INTEGER NOT NULL DEFAULT 0,
@@ -239,15 +263,7 @@ SCHEMA = ('''
         Opt_Object_Value INTEGER DEFAULT 0,
         PRIMARY KEY(Parent_Type,Parent_DB_ID,Object_Type,Object_DB_ID,Object_DB_ID_2)
     );
-
-    CREATE INDEX Cdb_Group_Object_Group_DB_ID ON Cdb_Group_Object(Parent_DB_ID );
-    CREATE INDEX Cdb_Group_Object_Object_DB_ID ON Cdb_Group_Object(Object_DB_ID );
-    CREATE INDEX Cdb_Group_Object_Object_DB_ID_2 ON Cdb_Group_Object(Object_DB_ID_2 );
-    CREATE INDEX Cdb_Group_Object_Object_Type ON Cdb_Group_Object(Object_Type );
-    CREATE INDEX Cdb_Group_Object_Parent_Type ON Cdb_Group_Object(Parent_Type );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Message_Signal;
-
     CREATE TABLE Cdb_Message_Signal (
         Message INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
@@ -260,8 +276,6 @@ SCHEMA = ('''
         FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Network;
-
     CREATE TABLE Cdb_Network (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
@@ -270,11 +284,7 @@ SCHEMA = ('''
         Baudrate INTEGER DEFAULT 0,
         PRIMARY KEY(DB_ID)
     );
-
-    CREATE UNIQUE INDEX Cdb_Network_DB_ID ON Cdb_Network(DB_ID );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Network_Node;
-
     CREATE TABLE Cdb_Network_Node (
         Network INTEGER NOT NULL DEFAULT 0,
         Node INTEGER NOT NULL DEFAULT 0,
@@ -283,8 +293,6 @@ SCHEMA = ('''
         FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Node_RxSig;
-
     CREATE TABLE Cdb_Node_RxSig (
         Node INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
@@ -293,8 +301,6 @@ SCHEMA = ('''
         FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Node_RxSignal;
-
     CREATE TABLE Cdb_Node_RxSignal (
         Node INTEGER NOT NULL DEFAULT 0,
         Message INTEGER NOT NULL DEFAULT 0,
@@ -305,8 +311,6 @@ SCHEMA = ('''
         FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Node_TxMessage;
-
     CREATE TABLE Cdb_Node_TxMessage (
         Node INTEGER NOT NULL DEFAULT 0,
         Message INTEGER NOT NULL DEFAULT 0,
@@ -315,8 +319,6 @@ SCHEMA = ('''
         FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Node_TxSig;
-
     CREATE TABLE Cdb_Node_TxSig (
         Node INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
@@ -325,8 +327,6 @@ SCHEMA = ('''
         FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Object_Valuetable;
-
     CREATE TABLE Cdb_Object_Valuetable (
         Object_Type INTEGER NOT NULL DEFAULT 0,
         Object_DB_ID INTEGER NOT NULL DEFAULT 0,
@@ -334,12 +334,7 @@ SCHEMA = ('''
         PRIMARY KEY(Object_Type,Object_DB_ID),
         FOREIGN KEY(Valuetable) REFERENCES Cdb_Valuetable(DB_ID)
     );
-
-    CREATE INDEX Cdb_Object_Valuetable_Object_DB_ID ON Cdb_Object_Valuetable(Object_DB_ID );
-    CREATE INDEX Cdb_Object_Valuetable_Object_Type ON Cdb_Object_Valuetable(Object_Type );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Value_Description;
-
     CREATE TABLE Cdb_Value_Description (
         Valuetable INTEGER NOT NULL DEFAULT 0,
         Value FLOAT8 NOT NULL DEFAULT 0,
@@ -348,8 +343,6 @@ SCHEMA = ('''
         FOREIGN KEY(Valuetable) REFERENCES Cdb_Valuetable(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Valuetable;
-
     CREATE TABLE Cdb_Valuetable (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
@@ -357,19 +350,13 @@ SCHEMA = ('''
         PRIMARY KEY(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Vehicle;
-
     CREATE TABLE Cdb_Vehicle (
         DB_ID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         "Comment" VARCHAR(255),
         PRIMARY KEY(DB_ID)
     );
-
-    CREATE UNIQUE INDEX Cdb_Vehicle_DB_ID ON Cdb_Vehicle(DB_ID );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Vehicle_ECU;
-
     CREATE TABLE Cdb_Vehicle_ECU (
         Vehicle INTEGER NOT NULL DEFAULT 0,
         ECU INTEGER NOT NULL DEFAULT 0,
@@ -378,8 +365,6 @@ SCHEMA = ('''
         FOREIGN KEY(Vehicle) REFERENCES Cdb_Vehicle(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Vehicle_Network;
-
     CREATE TABLE Cdb_Vehicle_Network (
         Vehicle INTEGER NOT NULL DEFAULT 0,
         Network INTEGER NOT NULL DEFAULT 0,
@@ -388,8 +373,6 @@ SCHEMA = ('''
         FOREIGN KEY(Vehicle) REFERENCES Cdb_Vehicle(DB_ID)
     );
 ''', '''
-    DROP TABLE IF EXISTS Cdb_Versioninfo;
-
     CREATE TABLE Cdb_Versioninfo (
         Obj_Type INTEGER NOT NULL DEFAULT 0,
         Obj_DB_ID INTEGER NOT NULL DEFAULT 0,
@@ -398,12 +381,8 @@ SCHEMA = ('''
         PRIMARY KEY(Obj_Type,Obj_DB_ID)
     );
 ''', '''
-    DROP VIEW IF EXISTS schema;
-
     CREATE VIEW schema AS SELECT * FROM sqlite_master;
 ''', '''
-    DROP TABLE IF EXISTS comments;
-
     CREATE TABLE comments(
         id INTEGER NOT NULL DEFAULT 0,
         type CHAR(16),
@@ -412,72 +391,234 @@ SCHEMA = ('''
         comment BLOB,
         PRIMARY KEY(id)
     );
+''', '''
+    CREATE TABLE EnvironmentVariablesData(
+        name CHAR(256) NOT NULL,
+        value INT NOT NULL,
+        PRIMARY KEY(name)
+    );
 ''')
-
-FKS = '''
---
--- ***************************************************************************
--- *                                                                         *
--- *                               FOREIGN-KEYS                              *
--- *                                                                         *
--- ***************************************************************************
---
-ALTER TABLE Cdb_Attribute_Value ADD CONSTRAINT Cdb_Attribute_DefinitionCdb_Attribute_Value FOREIGN KEY(Attribute_Definition) REFERENCES Cdb_Attribute_Definition(DB_ID);
-ALTER TABLE Cdb_AttributeRel_Value ADD CONSTRAINT Cdb_Attribute_DefinitionCdb_AttributeRel_Value FOREIGN KEY(Attribute_Definition) REFERENCES Cdb_Attribute_Definition(DB_ID);
-ALTER TABLE Cdb_ECU_EnvVar ADD CONSTRAINT Cdb_ECUCdb_ECU_EnvVar FOREIGN KEY(ECU) REFERENCES Cdb_ECU(DB_ID);
-ALTER TABLE Cdb_ECU_EnvVar ADD CONSTRAINT Cdb_EnvVarCdb_ECU_EnvVar FOREIGN KEY(EnvVar) REFERENCES Cdb_EnvVar(DB_ID);
-ALTER TABLE Cdb_ECU_Node ADD CONSTRAINT Cdb_ECUCdb_ECU_Node FOREIGN KEY(ECU) REFERENCES Cdb_ECU(DB_ID);
-ALTER TABLE Cdb_ECU_Node ADD CONSTRAINT Cdb_NodeCdb_ECU_Node FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID);
-ALTER TABLE Cdb_Message_Signal ADD CONSTRAINT Cdb_MessageCdb_Message_Signal FOREIGN KEY(Message) REFERENCES Cdb_Message(DB_ID);
-ALTER TABLE Cdb_Message_Signal ADD CONSTRAINT Cdb_SignalCdb_Message_Signal FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID);
-ALTER TABLE Cdb_Network_Node ADD CONSTRAINT Cdb_NetworkCdb_Network_Node FOREIGN KEY(Network) REFERENCES Cdb_Network(DB_ID);
-ALTER TABLE Cdb_Network_Node ADD CONSTRAINT Cdb_NodeCdb_Network_Node FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID);
-ALTER TABLE Cdb_Node_RxSig ADD CONSTRAINT Cdb_NodeCdb_Node_RxSig FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID);
-ALTER TABLE Cdb_Node_RxSig ADD CONSTRAINT Cdb_SignalCdb_Node_RxSig FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID);
-ALTER TABLE Cdb_Node_RxSignal ADD CONSTRAINT Cdb_MessageCdb_Node_RxSignal FOREIGN KEY(Message) REFERENCES Cdb_Message(DB_ID);
-ALTER TABLE Cdb_Node_RxSignal ADD CONSTRAINT Cdb_NodeCdb_Node_RxSignal FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID);
-ALTER TABLE Cdb_Node_RxSignal ADD CONSTRAINT Cdb_SignalCdb_Node_RxSignal FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID);
-ALTER TABLE Cdb_Node_TxMessage ADD CONSTRAINT Cdb_MessageCdb_Node_TxMessage FOREIGN KEY(Message) REFERENCES Cdb_Message(DB_ID);
-ALTER TABLE Cdb_Node_TxMessage ADD CONSTRAINT Cdb_NodeCdb_Node_TxMessage FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID);
-ALTER TABLE Cdb_Node_TxSig ADD CONSTRAINT Cdb_NodeCdb_Node_TxSig FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID);
-ALTER TABLE Cdb_Node_TxSig ADD CONSTRAINT Cdb_SignalCdb_Node_TxSig FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID);
-ALTER TABLE Cdb_Object_Valuetable ADD CONSTRAINT Cdb_ValuetableCdb_Object_Valuetable FOREIGN KEY(Valuetable) REFERENCES Cdb_Valuetable(DB_ID);
-ALTER TABLE Cdb_Value_Description ADD CONSTRAINT Cdb_ValuetableCdb_Value_Description FOREIGN KEY(Valuetable) REFERENCES Cdb_Valuetable(DB_ID);
-ALTER TABLE Cdb_Vehicle_ECU ADD CONSTRAINT Cdb_ECUCdb_Vehicle_ECU FOREIGN KEY(ECU) REFERENCES Cdb_ECU(DB_ID);
-ALTER TABLE Cdb_Vehicle_ECU ADD CONSTRAINT Cdb_VehicleCdb_Vehicle_ECU FOREIGN KEY(Vehicle) REFERENCES Cdb_Vehicle(DB_ID);
-ALTER TABLE Cdb_Vehicle_Network ADD CONSTRAINT Cdb_NetworkCdb_Vehicle_Network FOREIGN KEY(Network) REFERENCES Cdb_Network(DB_ID);
-ALTER TABLE Cdb_Vehicle_Network ADD CONSTRAINT Cdb_VehicleCdb_Vehicle_Network FOREIGN KEY(Vehicle) REFERENCES Cdb_Vehicle(DB_ID);
-'''
 
 class CanDatabase(object):
 
     def __init__(self, filename = ":memory:"):
-        self.conn = sqlite3.connect(filename)
+        self.conn = sqlite3.connect(filename, isolation_level = None)
         self.conn.isolation_level = None
-        self.cur = self.conn.cursor()
         self.filename = filename
+        self.dropTables()
         self.createSchema(filename)
 
     def __del__(self):
-        self.cur.close()
         self.conn.close()
 
-    def createSchema(self, filename = ":memory:"):
-        self.cur.execute("PRAGMA foreign_keys = ON;")
-        for item in SCHEMA:
+    def createIndices(self):
+        cur = self.getCursor()
+        cur.execute("BEGIN TRANSACTION;")
+        for item in INDICES:
             #print(item)
-            res = self.cur.executescript(item)
+            res = cur.execute(item)
         self.conn.commit()
 
-        self.cur.execute("SELECT sql FROM sqlite_master")
-        #cur.execute("pragma table_info(Cdb_Vehicle_Network)")
-        res = self.cur.fetchall()
-        #pprint(res)
+    def getCursor(self):
+        return self.conn.cursor()
 
+    def dropTables(self):
+        cur = self.getCursor()
+        cur.execute("BEGIN TRANSACTION;")
+        for item in DROP_TABLES:
+            #print(item)
+            res = cur.execute(item)
+        self.conn.commit()
+
+    def createSchema(self, filename = ":memory:"):
+        cur = self.getCursor()
+        cur.execute("PRAGMA foreign_keys = ON;")
+
+        cur.execute('PRAGMA synchronous = OFF')
+        cur.execute('PRAGMA LOCKING_MODE = EXCLUSIVE')
+        #self.cur.execute('PRAGMA journal_mode = MEMORY')
+        #self.cur.execute('PRAGMA journal_mode = WAL')
+        cur.execute("BEGIN TRANSACTION;")
+        for item in SCHEMA:
+            #print(item)
+            res = cur.execute(item)
+        self.conn.commit()
+
+    def lastInsertedRowId(self, cur, table):
+        rowid = cur.lastrowid
+        result = cur.execute("SELECT DB_ID FROM {} WHERE rowid = ?".format(table), [rowid]).fetchone()
+        return result[0]
+
+    def fetchComment(self, tp, k0, k1 = None):
+        cur = self.getCursor()
+        if k1:
+            cur.execute("SELECT comment FROM comments WHERE type = ? AND k0 = ? AND k1 = ?;", [tp, k0, k1])
+        else:
+            cur.execute("SELECT comment FROM comments WHERE type = ? AND k0 = ?;", [tp, k0])
+        cmt = cur.fetchall()
+        if cmt:
+            assert len(cmt[0]) <= 1
+            return cmt[0][0]
+        else:
+            return None
+
+    def fetchEnvironmentVariablesData(self, name):
+        cur = self.getCursor()
+        cur.execute("SELECT value FROM EnvironmentVariablesData WHERE name = ?", [name])
+        value = cur.fetchall()
+        if value:
+            return value[0][0]
+        return None
 
     def insertValues(self, tree):
-        """OrderedDict(messageID, name, dlc, transmitter, signals)
+        cur = self.getCursor()
+        cur.execute("BEGIN TRANSACTION;")
 
+        self.insertEnvironmentVariablesData(cur, tree['environmentVariablesData'])
+        self.insertComments(cur, tree['comments'])
+        self.insertValueTables(cur, tree['valueTables'])
+        self.insertNodes(cur, tree['nodes'])
+        self.insertMessages(cur, tree['messages'])
+        self.insertEnvironmentVariables(cur, tree['environmentVariables'])
+
+        self.insertValueDescriptions(cur, tree['valueDescriptions'])
+        self.conn.commit()
+
+    def insertValueTables(self, cur, tables):
+        for table in tables:
+            name = table['name']
+            description = table['description']
+            cur.execute("""INSERT INTO Cdb_Valuetable(Name) VALUES(?)""", [name])
+            res = cur.execute("SELECT DB_ID FROM Cdb_Valuetable WHERE Name = ?", [name]).fetchall()
+            dbid = res[0][0]
+            for desc, value in description:
+                cur.execute("""INSERT INTO Cdb_Value_Description(Valuetable, Value, Value_Description) VALUES(?, ?, ?)""", [dbid, value, desc])
+
+    def insertEnvironmentVariables(self, cur, vars):
+        print("ENV-VARS")
+        for var in vars:
+            print(var)
+            unit = var['unit']
+            initialValue = var['initialValue']
+            accessNodes = var['accessNodes']
+            accessType = var['accessType']
+            minimum = var['minimum']
+            maximum = var['maximum']
+            envId = var['envId']
+            varType = var['varType']
+            name = var['name']
+            cmt = self.fetchComment('EV', name)
+            dataSize = self.fetchEnvironmentVariablesData(name)
+
+            cur.execute("""INSERT INTO Cdb_EnvVar(Name, Type, Unit, Minimum, Maximum, Access, Startup_Value, Comment, Size)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)""", [name, varType, unit, minimum, maximum, accessType, initialValue, cmt, dataSize]
+            )
+        print("-" * 80)
+
+    def insertValueDescriptions(self, cur, descriptions):
+        """
+        CREATE TABLE Cdb_Object_Valuetable (
+            Object_Type INTEGER NOT NULL DEFAULT 0,
+            Object_DB_ID INTEGER NOT NULL DEFAULT 0,
+            Valuetable INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY(Object_Type,Object_DB_ID),
+            FOREIGN KEY(Valuetable) REFERENCES Cdb_Valuetable(DB_ID)
+        );
+        """
+        for item in descriptions:
+            #print(item)
+            tp = item['type']
+            description = item['description']
+            if tp == 'SG':
+                messageID = item['messageID']
+                signalName = item['signalName']
+                dbid = cur.execute("SELECT DB_ID FROM Cdb_Signal WHERE name = ?", [signalName]).fetchall()
+                #print("\tS-DB_ID", dbid)
+            elif tp == 'EV':
+                envVarName = item['envVarName']
+                dbid = cur.execute("SELECT DB_ID FROM Cdb_EnvVar WHERE name = ?", [envVarName]).fetchall()
+                #print("\tE-DB_ID", dbid)
+
+        print("-" * 80)
+
+    def fetchNodeId(self, name):
+        cur = self.getCursor()
+        cur.execute("""SELECT DB_ID FROM Cdb_Node WHERE Name = ?""", [name])
+        result = cur.fetchone()[0]
+        return result
+
+    def fetchSignalReceivers(self, messageId, signalId):
+        cur = self.getCursor()
+        cur.execute("""SELECT name FROM Cdb_Node WHERE db_id IN (SELECT node FROM Cdb_Node_RxSignal where message=? and signal=?)""",
+            [messageId, signalId]
+        )
+        result = [x[0] for x in cur.fetchall()]
+        return result
+
+    def insertNodes(self, cur, nodes):
+        cur.execute("""INSERT INTO Cdb_Node(db_id, Name) VALUES(?, ?)""", [0, "Vector__XXX"])
+        for node in nodes:
+            cmt = self.fetchComment('BO', node)
+            res = cur.execute("""INSERT INTO Cdb_Node(Name, Comment) VALUES(?, ?)""", [node, cmt])
+
+    def createDictFromRow(self, row, description):
+        names = [d[0] for d in description]
+        di = dict(zip(names, row))
+        return di
+
+    @property
+    def nodeNames(self):
+        cur = self.conn.cursor()
+        res = cur.execute("""SELECT Name FROM Cdb_Node WHERE db_id > 0""", []).fetchall()
+        res = [x[0] for x in res]
+        return res
+
+    def nodeName(self, nid):
+        cur = self.conn.cursor()
+        res = cur.execute("""SELECT Name FROM Cdb_Node WHERE DB_ID = ?""", [nid]).fetchall()
+        return res[0][0]
+
+    def signals(self, messageId):
+        """
+         SG_ {'Multiplex_Dependent': None, 'Bitsize': 8, 'Multiplexor_Value': None, 'DB_ID': 4, 'Initialvalue': 0.0,
+         'Maximum': 0.0, 'Minimum': 0.0, 'Name': 'Information', 'Valuetype': -1, 'Formula_Factor': 1.0, 'Byteorder': 1,
+         'Comment': None, 'Signal': 4, 'Unit': '""', 'Offset': 0, 'Message': 5, 'Formula_Offset': 0.0, 'Multiplexor_Signal': None}
+        """
+        cur = self.conn.cursor()
+        res = cur.execute("""select * from cdb_message_signal as t1, cdb_signal as t2 where t1.message = ? and t1.signal = t2.db_id""", [messageId])
+        while True:
+            row = cur.fetchone()
+            if row is None:
+                raise StopIteration
+            else:
+                yield self.createDictFromRow(row, cur.description)
+
+    def fetchFromTable(self, tname, columns = None, where = None, orderBy = None):
+        cur = self.conn.cursor()
+        whereClause = "" if not where else "WHERE {}".format(where)
+        orderByClause = "" if not orderBy else "ORDER BY {}".format(orderBy)
+        result = cur.execute("""SELECT * FROM {} {} {}""".format(tname, whereClause, orderByClause), [])
+        while True:
+            row = cur.fetchone()
+            if row is None:
+                raise StopIteration
+            else:
+                yield self.createDictFromRow(row, cur.description)
+
+    def messages(self):
+        yield from self.fetchFromTable("Cdb_Message")
+
+    def comments(self):
+        yield from self.fetchFromTable("comments")
+
+    def valueTables(self):
+        yield from self.fetchFromTable("Cdb_Valuetable")
+
+    def valueDescription(self, tableId):
+        yield from self.fetchFromTable("Cdb_Value_Description", where = "Valuetable = {}".format(tableId), orderBy = "value desc")
+
+    def insertMessages(self, cur, messages):
+        """
         CREATE TABLE Cdb_Message (
             DB_ID INTEGER NOT NULL DEFAULT 0,
             Name VARCHAR(255) NOT NULL,
@@ -490,11 +631,6 @@ class CanDatabase(object):
             "Comment" VARCHAR(255),
             PRIMARY KEY(DB_ID)
         );
-        ctx.value = OrderedDict(name = ctx.signalName.text, startBit = self.getInt(ctx.startBit), signalSize = self.getInt(ctx.signalSize),
-            byteOrder = ctx.byteOrder.text, valueType = -1 if ctx.valueType.text == '-' else +1, factor = ctx.factor.value, offset = ctx.offset.value,
-            minimum = ctx.minimum.value, maximum = ctx.maximum.value, unit = ctx.unit.text, receiver = ctx.rcv.value,
-            multiplexerIndicator = ctx.mind.value if ctx.mind else None
-        )
         CREATE TABLE Cdb_Signal (
             DB_ID INTEGER NOT NULL DEFAULT 0,
             Name VARCHAR(255) NOT NULL,
@@ -510,9 +646,84 @@ class CanDatabase(object):
             "Comment" VARCHAR(255),
             PRIMARY KEY(DB_ID)
         );
+        CREATE TABLE Cdb_Message_Signal (
+            Message INTEGER NOT NULL DEFAULT 0,
+            Signal INTEGER NOT NULL DEFAULT 0,
+            "Offset" INTEGER NOT NULL DEFAULT 0,
+            Multiplexor_Signal SMALLINT,
+            Multiplex_Dependent SMALLINT,
+            Multiplexor_Value INTEGER,
+            PRIMARY KEY(Message,Signal),
+            FOREIGN KEY(Message) REFERENCES Cdb_Message(DB_ID),
+            FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID)
+        );
         """
-        self.cur.execute("BEGIN TRANSACTION;")
-        for comment in tree['comments']:
+        for msg in messages:
+            name = msg['name']
+            mid = msg['messageID']
+            # 0xCFFFFFFF
+            dlc = msg['dlc']
+            signals = msg['signals']
+            cmt = self.fetchComment('BO', mid)
+
+            transmitter = msg['transmitter']
+            tid = self.fetchNodeId(transmitter)
+
+            res  = cur.execute("INSERT INTO Cdb_Message(Name, Message_ID, DLC, Comment, Sender) VALUES(?, ?, ?, ?, ?)",
+                [name, mid, dlc, cmt, tid]
+            )
+            mdbid = self.lastInsertedRowId(cur, "Cdb_Message")
+            for signal in signals:
+                name = signal['name']
+                startBit = signal['startBit']
+                signalSize = signal['signalSize']
+                byteOrder = signal['byteOrder']
+                valueType = signal['valueType']
+                factor = signal['factor']
+                offset = signal['offset']
+                minimum = signal['minimum']
+                maximum = signal['maximum']
+                unit = signal['unit']
+                receiver = signal['receiver']
+                multiplexerIndicator = signal['multiplexerIndicator']
+                if multiplexerIndicator:
+                    multiplexorSignal = 1 if multiplexerIndicator == 'M' else 0
+                    if multiplexorSignal:
+                        multiplexDependent = 0
+                        multiplexorValue = None
+                    else:
+                        multiplexDependent = 1
+                        multiplexorValue = int(multiplexerIndicator[1 : ])
+                else:
+                    multiplexorSignal = None
+                    multiplexDependent = None
+                    multiplexorValue = None
+                initialValue = 0.0
+                cmt = self.fetchComment('SG', mid, name)
+                res = cur.execute(""" INSERT INTO Cdb_Signal(Name, Bitsize, Byteorder, Valuetype, Initialvalue, Formula_Factor,
+                    Formula_Offset, Minimum, Maximum, Unit, Comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, [name, signalSize, byteOrder, valueType, initialValue, factor, offset, minimum, maximum, unit, cmt])
+                sdbid = self.lastInsertedRowId(cur, "Cdb_Signal")
+
+                # select * from cdb_message_signal where message = (select db_id from cdb_message where message_id = 2566843134);
+                #
+                # select * from cdb_signal where db_id in (select signal from cdb_message_signal where message =
+                # (select db_id from cdb_message where message_id = 2566843134));
+
+                cur.execute(""" INSERT INTO Cdb_Message_Signal(Message, Signal, Offset,
+                    Multiplexor_Signal, Multiplex_Dependent, Multiplexor_Value) VALUES(?, ?, ?, ?, ?, ?)""",
+                    [mdbid, sdbid, startBit, multiplexorSignal, multiplexDependent, multiplexorValue]
+                )
+                self.insertReceivers(cur, mdbid, sdbid, receiver)
+
+    def insertReceivers(self, cur, messageId, signalId, receiver):
+        for rcv in receiver:
+            nodeId = self.fetchNodeId(rcv)
+            cur.execute("INSERT INTO Cdb_Node_RxSignal(Message, Signal, Node) VALUES(?, ?, ?)", [messageId, signalId, nodeId])
+
+
+    def insertComments(self, cur, comments):
+        for comment in comments:
             tp = comment['type']
             text = comment['comment']
             key = comment['key']
@@ -526,38 +737,14 @@ class CanDatabase(object):
                 k1 = key[1]
             elif tp == 'EV':
                 k0 = key
-            #print(comment)
-            res = self.cur.execute("""
+            res = cur.execute("""
                 INSERT INTO comments(type, k0, k1, comment) VALUES(?, ?, ?, ?)
             """, [tp, k0, k1, text])
-        messages = tree['messages']
-        for msg in messages:
 
-            self.cur.execute("SELECT comment FROM comments WHERE type = 'BO' AND k0 = ?;", [msg['messageID']])
-            res = self.cur.fetchall()
-            assert len(res[0]) <= 1
-
-            res  = self.cur.execute("INSERT INTO Cdb_Message(Name, Message_ID, DLC, Comment) VALUES(?, ?, ?, ?)",
-                [msg['name'], msg['messageID'], msg['dlc'], res[0][0]]
-            )
-            for signal in msg['signals']:
-                #pprint(signal)
-                name = signal['name']
-                startBit = signal['startBit']
-                signalSize = signal['signalSize']
-                byteOrder = signal['byteOrder']
-                valueType = signal['valueType']
-                factor = signal['factor']
-                offset = signal['offset']
-                minimum = signal['minimum']
-                maximum = signal['maximum']
-                unit = signal['unit']
-                receiver = signal['receiver']
-                multiplexerIndicator = signal['multiplexerIndicator']
-                initialValue = 0.0
-                res = self.cur.execute(""" INSERT INTO Cdb_Signal(Name, Bitsize, Byteorder, Valuetype, Initialvalue, Formula_Factor,
-                    Formula_Offset, Minimum, Maximum, Unit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, [name, signalSize, byteOrder, valueType, initialValue, factor, offset, minimum, maximum, unit])
-            #print("=" * 80)
-        self.conn.commit()
+    def insertEnvironmentVariablesData(self, cur, data):
+        for item in data:
+            name = item['name']
+            value = item['value']
+            print(name, value)
+            cur.execute("INSERT INTO EnvironmentVariablesData(name, value) VALUES(?, ?)", [name, value])
 
