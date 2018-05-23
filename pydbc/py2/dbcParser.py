@@ -638,6 +638,8 @@ class dbcParser ( Parser ):
             super(dbcParser.MessageTransmitterContext, self).__init__(parent, invokingState)
             self.parser = parser
             self.messageID = None # IntValueContext
+            self._transmitter = None # TransmitterContext
+            self.transmitters = list() # of TransmitterContexts
 
         def intValue(self):
             return self.getTypedRuleContext(dbcParser.IntValueContext,0)
@@ -688,7 +690,8 @@ class dbcParser ( Parser ):
             _la = self._input.LA(1)
             while _la==dbcParser.C_IDENTIFIER:
                 self.state = 121
-                self.transmitter()
+                localctx._transmitter = self.transmitter()
+                localctx.transmitters.append(localctx._transmitter)
                 self.state = 126
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
@@ -1664,7 +1667,7 @@ class dbcParser ( Parser ):
             self.s40 = None # Token
             self.s41 = None # Token
             self.s42 = None # Token
-            self._tset532 = None # Token
+            self._tset538 = None # Token
 
 
         def getRuleIndex(self):
@@ -1703,14 +1706,14 @@ class dbcParser ( Parser ):
             _la = self._input.LA(1)
             while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << dbcParser.T__0) | (1 << dbcParser.T__3) | (1 << dbcParser.T__13) | (1 << dbcParser.T__17) | (1 << dbcParser.T__18) | (1 << dbcParser.T__19) | (1 << dbcParser.T__20) | (1 << dbcParser.T__21) | (1 << dbcParser.T__22) | (1 << dbcParser.T__23) | (1 << dbcParser.T__24) | (1 << dbcParser.T__25) | (1 << dbcParser.T__26) | (1 << dbcParser.T__27) | (1 << dbcParser.T__28) | (1 << dbcParser.T__29) | (1 << dbcParser.T__30) | (1 << dbcParser.T__31) | (1 << dbcParser.T__32) | (1 << dbcParser.T__33) | (1 << dbcParser.T__34) | (1 << dbcParser.T__35) | (1 << dbcParser.T__36) | (1 << dbcParser.T__37) | (1 << dbcParser.T__38) | (1 << dbcParser.T__39) | (1 << dbcParser.T__40) | (1 << dbcParser.T__41))) != 0):
                 self.state = 242
-                localctx._tset532 = self._input.LT(1)
+                localctx._tset538 = self._input.LT(1)
                 _la = self._input.LA(1)
                 if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << dbcParser.T__0) | (1 << dbcParser.T__3) | (1 << dbcParser.T__13) | (1 << dbcParser.T__17) | (1 << dbcParser.T__18) | (1 << dbcParser.T__19) | (1 << dbcParser.T__20) | (1 << dbcParser.T__21) | (1 << dbcParser.T__22) | (1 << dbcParser.T__23) | (1 << dbcParser.T__24) | (1 << dbcParser.T__25) | (1 << dbcParser.T__26) | (1 << dbcParser.T__27) | (1 << dbcParser.T__28) | (1 << dbcParser.T__29) | (1 << dbcParser.T__30) | (1 << dbcParser.T__31) | (1 << dbcParser.T__32) | (1 << dbcParser.T__33) | (1 << dbcParser.T__34) | (1 << dbcParser.T__35) | (1 << dbcParser.T__36) | (1 << dbcParser.T__37) | (1 << dbcParser.T__38) | (1 << dbcParser.T__39) | (1 << dbcParser.T__40) | (1 << dbcParser.T__41))) != 0)):
-                    localctx._tset532 = self._errHandler.recoverInline(self)
+                    localctx._tset538 = self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
                     self.consume()
-                localctx.ids.append(localctx._tset532)
+                localctx.ids.append(localctx._tset538)
                 self.state = 247
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)

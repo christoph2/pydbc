@@ -58,7 +58,7 @@ messageTransmitters:
     ;
 
 messageTransmitter:
-    'BO_TX_BU_' messageID = intValue ':' transmitter* ';'
+    'BO_TX_BU_' messageID = intValue ':' (transmitters += transmitter)* ';'
     ;
 
 signalExtendedValueTypeList:

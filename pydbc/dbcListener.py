@@ -95,7 +95,9 @@ class dbcListener(ParseTreeListener):
         ctx.value = [x.value for x in ctx.items]
 
     def exitMessageTransmitter(self, ctx):
-        ctx.value = OrderedDict(messageID = ctx.messageID.value, transmitter = ctx.transmitter.value)
+        transmitters = [x.value for x in ctx.transmitters][0]
+        #print("TX", ctx.messageID.value, transmitters[0])
+        ctx.value = OrderedDict(messageID = ctx.messageID.value, transmitters = transmitters)
 
     def exitSignalExtendedValueTypeList(self, ctx):
         ctx.value = [x.value for x in ctx.items]
