@@ -46,9 +46,10 @@ ${int(desc['Value'])} ${desc['Value_Description']} \
 %for msg in db.messages():
 BO_ ${msg['Message_ID']} ${msg['Name']}: ${msg['DLC']} ${db.nodeName(msg['Sender'])}
 %for signal in db.signals(msg['DB_ID']):
- SG_ ${signal['Name']} : ${signal['Offset']}|${signal['Bitsize']}@${signal['Byteorder']}${"-" if signal['Valuetype'] == -1 else "+"} \
-(${"{:.12G}".format(signal['Formula_Factor'])},${"{:.12G}".format(signal['Formula_Offset'])}) [${"{:.12G}".format(signal['Minimum'])}|\
-${"{:.12G}".format(signal['Maximum'])}] ${signal['Unit']} ${' '.join(db.fetchSignalReceivers(msg['DB_ID'], signal['DB_ID']))}
+ SG_ ${signal['Name']} ${db.multiplexIndicator(signal)}: ${signal['Offset']}|${signal['Bitsize']}@${signal['Byteorder']}\
+${"-" if signal['Valuetype'] == -1 else "+"} \
+(${"{:.14G}".format(signal['Formula_Factor'])},${"{:.14G}".format(signal['Formula_Offset'])}) [${"{:.14G}".format(signal['Minimum'])}|\
+${"{:.14G}".format(signal['Maximum'])}] ${signal['Unit']} ${','.join(db.fetchSignalReceivers(msg['DB_ID'], signal['DB_ID']))}
 %endfor
 
 %endfor
@@ -60,6 +61,10 @@ CM_ \
 BO_ ${comment['k0']} ${comment['comment']};
 %elif comment['type'] == 'SG':
 SG_ ${comment['k0']} ${comment['k1']} ${comment['comment']};
+%elif comment['type'] == 'BU':
+BU_ ${comment['k0']} ${comment['comment']};
+%elif comment['type'] == 'EV':
+EV_ ${comment['k0']} ${comment['comment']};
 %endif
 %endfor
 
