@@ -95,8 +95,7 @@ class dbcListener(ParseTreeListener):
         ctx.value = [x.value for x in ctx.items]
 
     def exitMessageTransmitter(self, ctx):
-        transmitters = [x.value for x in ctx.transmitters][0]
-        #print("TX", ctx.messageID.value, transmitters[0])
+        transmitters = ctx.tx.value
         ctx.value = OrderedDict(messageID = ctx.messageID.value, transmitters = transmitters)
 
     def exitSignalExtendedValueTypeList(self, ctx):
@@ -127,7 +126,7 @@ class dbcListener(ParseTreeListener):
         ctx.value = [ctx.fid.text] + [x.text for x in ctx.ids]
 
     def exitTransmitter(self, ctx):
-        ctx.value = [ctx.fid.text] + [x.text for x in ctx.ids]
+        ctx.value = [x.text for x in ctx.ids]
 
     def exitMultiplexerIndicator(self, ctx):
         mind = ctx.mind.text
@@ -188,7 +187,7 @@ class dbcListener(ParseTreeListener):
         )
 
     def exitAccessNodes(self, ctx):
-        ctx.value = OrderedDict(id = ctx.id_.text if ctx.id_ else None, ids = ctx.ids)
+        ctx.value = OrderedDict(id = ctx.id_.text if ctx.id_ else None, ids = [x.text for x in ctx.ids])
 
     def exitEnvironmentVariablesData(self, ctx):
         ctx.value = [x.value for x in ctx.evars]

@@ -58,7 +58,7 @@ messageTransmitters:
     ;
 
 messageTransmitter:
-    'BO_TX_BU_' messageID = intValue ':' (transmitters += transmitter)* ';'
+    'BO_TX_BU_' messageID = intValue ':' tx = transmitter ';'
     ;
 
 signalExtendedValueTypeList:
@@ -91,7 +91,7 @@ receiver:
     ;
 
 transmitter:
-    (fid = C_IDENTIFIER) (',' ids += C_IDENTIFIER)*
+    ids += C_IDENTIFIER (',' ids += C_IDENTIFIER)*
     ;
 
 multiplexerIndicator:
