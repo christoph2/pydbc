@@ -29,52 +29,53 @@ __version__ = '0.1.0'
 
 
 INDICES = (
-    "CREATE UNIQUE INDEX Cdb_ECU_DB_ID ON Cdb_ECU(DB_ID );",
-    "CREATE INDEX Cdb_ECU_EnvVar_Cdb_ECU_EnvVarECU ON Cdb_ECU_EnvVar(ECU );",
-    "CREATE INDEX Cdb_ECU_Node_Cdb_ECU_NodeECU ON Cdb_ECU_Node(ECU );",
-    "CREATE UNIQUE INDEX Cdb_Gateway_Signal_DB_ID ON Cdb_Gateway_Signal(DB_ID );",
-    "CREATE INDEX Cdb_Group_Object_Group_DB_ID ON Cdb_Group_Object(Parent_DB_ID );",
-    "CREATE INDEX Cdb_Group_Object_Object_DB_ID ON Cdb_Group_Object(Object_DB_ID );",
-    "CREATE INDEX Cdb_Group_Object_Object_DB_ID_2 ON Cdb_Group_Object(Object_DB_ID_2 );",
-    "CREATE INDEX Cdb_Group_Object_Object_Type ON Cdb_Group_Object(Object_Type );",
-    "CREATE INDEX Cdb_Group_Object_Parent_Type ON Cdb_Group_Object(Parent_Type );",
-    "CREATE UNIQUE INDEX Cdb_Network_DB_ID ON Cdb_Network(DB_ID );",
-    "CREATE INDEX Cdb_Object_Valuetable_Object_DB_ID ON Cdb_Object_Valuetable(Object_DB_ID );",
-    "CREATE INDEX Cdb_Object_Valuetable_Object_Type ON Cdb_Object_Valuetable(Object_Type );",
-    "CREATE UNIQUE INDEX Cdb_Vehicle_DB_ID ON Cdb_Vehicle(DB_ID );",
+    "CREATE UNIQUE INDEX ECU_RID ON ECU(RID );",
+    "CREATE INDEX ECU_EnvVar_ECU_EnvVarECU ON ECU_EnvVar(ECU );",
+    "CREATE INDEX ECU_Node_ECU_NodeECU ON ECU_Node(ECU );",
+    "CREATE UNIQUE INDEX Gateway_Signal_RID ON Gateway_Signal(RID );",
+    "CREATE INDEX Node_Group_Object_Node_Group_RID ON Node_Group_Object(Parent_RID );",
+    "CREATE INDEX Node_Group_Object_Object_RID ON Node_Group_Object(Object_RID );",
+    "CREATE INDEX Node_Group_Object_Object_RID_2 ON Node_Group_Object(Object_RID_2 );",
+    "CREATE INDEX Node_Group_Object_Object_Type ON Node_Group_Object(Object_Type );",
+    "CREATE INDEX Node_Group_Object_Parent_Type ON Node_Group_Object(Parent_Type );",
+    "CREATE UNIQUE INDEX Network_RID ON Network(RID );",
+    "CREATE INDEX Object_Valuetable_Object_RID ON Object_Valuetable(Object_RID );",
+    "CREATE INDEX Object_Valuetable_Object_Type ON Object_Valuetable(Object_Type );",
+    "CREATE UNIQUE INDEX Vehicle_RID ON Vehicle(RID );",
 
-    "CREATE INDEX Cdb_Signal_Name ON Cdb_Signal(Name)",
+    "CREATE INDEX Signal_Name ON Signal(Name)",
 )
 
 TABLES = (
-    "Cdb_Message_Signal",
-    "Cdb_ECU_Node",
-    "Cdb_Network_Node",
-    "Cdb_Node_RxSig",
-    "Cdb_Node_RxSignal",
-    "Cdb_Node_TxMessage",
-    "Cdb_Node_TxSig",
-    "Cdb_Node",
-    "Cdb_Message",
-    "Cdb_Signal",
-    "Cdb_Attribute_Value",
-    "Cdb_AttributeRel_Value",
-    "Cdb_Attribute_Definition",
-    "Cdb_DB_Info",
-    "Cdb_ECU_EnvVar",
-    "Cdb_ECU",
-    "Cdb_EnvVar",
-    "Cdb_Gateway_Signal",
-    "Cdb_Group",
-    "Cdb_Group_Object",
-    "Cdb_Network",
-    "Cdb_Object_Valuetable",
-    "Cdb_Value_Description",
-    "Cdb_Valuetable",
-    "Cdb_Vehicle",
-    "Cdb_Vehicle_Network",
-    "Cdb_Vehicle_ECU",
-    "Cdb_Versioninfo",
+    "Message_Signal",
+    "ECU_Node",
+    "Network_Node",
+    "Node_RxSig",
+    "Node_RxSignal",
+    "Node_TxMessage",
+    "Node_TxSig",
+    "Node",
+    "Message",
+    "Signal",
+    "Attribute_Value",
+    "AttributeRel_Value",
+    "Attribute_Definition",
+    "DB_Info",
+    "EnvVar_AccessNode",
+    "ECU_EnvVar",
+    "ECU",
+    "EnvVar",
+    "Gateway_Signal",
+    "Node_Group",
+    "Node_Group_Object",
+    "Network",
+    "Object_Valuetable",
+    "Value_Description",
+    "Valuetable",
+    "Vehicle",
+    "Vehicle_Network",
+    "Vehicle_ECU",
+    "Versioninfo",
     "comments",
     "EnvironmentVariablesData",
 )
@@ -84,16 +85,16 @@ VIEWS = (
 )
 
 SCHEMA = ('''
-    CREATE TABLE Cdb_Node (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE Node (
+        RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Node_ID INTEGER DEFAULT 0,
         "Comment" VARCHAR(255),
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Message (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE Message (
+        RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Message_ID INTEGER NOT NULL DEFAULT 0,
         Message_Format INTEGER NOT NULL DEFAULT 0,
@@ -102,13 +103,13 @@ SCHEMA = ('''
         Cycletime INTEGER DEFAULT 0,
         Sender INTEGER DEFAULT 0,
         "Comment" VARCHAR(255),
-        PRIMARY KEY(DB_ID),
+        PRIMARY KEY(RID),
         UNIQUE(Name),
         UNIQUE(Message_ID)
     );
 ''', '''
-    CREATE TABLE Cdb_Signal (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE Signal (
+        RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Bitsize INTEGER DEFAULT 0,
         Byteorder INTEGER DEFAULT 0,
@@ -120,11 +121,11 @@ SCHEMA = ('''
         Maximum FLOAT8 DEFAULT 0,
         Unit VARCHAR(255),
         "Comment" VARCHAR(255),
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Attribute_Definition (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE Attribute_Definition (
+        RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Objecttype INTEGER NOT NULL DEFAULT 0,
         Valuetype INTEGER NOT NULL DEFAULT 0,
@@ -135,19 +136,19 @@ SCHEMA = ('''
         Default_String VARCHAR(255),
         Column_Index INTEGER NOT NULL DEFAULT 0,
         "Comment" TEXT,
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Attribute_Value (
+    CREATE TABLE Attribute_Value (
         Object_ID INTEGER NOT NULL DEFAULT 0,
         Attribute_Definition INTEGER NOT NULL DEFAULT 0,
         Num_Value FLOAT8 DEFAULT 0,
         String_Value TEXT,
         PRIMARY KEY(Object_ID,Attribute_Definition),
-        FOREIGN KEY(Attribute_Definition) REFERENCES Cdb_Attribute_Definition(DB_ID)
+        FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_AttributeRel_Value (
+    CREATE TABLE AttributeRel_Value (
         Object_ID INTEGER NOT NULL DEFAULT 0,
         Attribute_Definition INTEGER NOT NULL DEFAULT 0,
         Num_Value FLOAT8 DEFAULT 0,
@@ -156,10 +157,10 @@ SCHEMA = ('''
         Opt_Object_ID_2 INTEGER DEFAULT 0,
         BLOB_Value BLOB,
         PRIMARY KEY(Object_ID,Attribute_Definition,Opt_Object_ID_1,Opt_Object_ID_2),
-        FOREIGN KEY(Attribute_Definition) REFERENCES Cdb_Attribute_Definition(DB_ID)
+        FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_DB_Info (
+    CREATE TABLE DB_Info (
         DB_Schema_Version INTEGER DEFAULT 2,
         Req_DB_Editor_Version INTEGER DEFAULT 1,
         Report_DB_Filename VARCHAR(255),
@@ -172,15 +173,15 @@ SCHEMA = ('''
         Number_Format_Int_Attributes INTEGER DEFAULT 0
     );
 ''', '''
-    CREATE TABLE Cdb_ECU (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE ECU (
+        RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255),
         "Comment" VARCHAR(255),
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_EnvVar (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE EnvVar (
+        RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Type INTEGER NOT NULL DEFAULT 0,
         Unit VARCHAR(255),
@@ -190,27 +191,27 @@ SCHEMA = ('''
         Size INTEGER DEFAULT 0,
         "Access" INTEGER DEFAULT 0,
         "Comment" VARCHAR(255),
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_ECU_EnvVar (
+    CREATE TABLE ECU_EnvVar (
         ECU INTEGER NOT NULL DEFAULT 0,
         EnvVar INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(ECU,EnvVar),
-        FOREIGN KEY(ECU) REFERENCES Cdb_ECU(DB_ID),
-        FOREIGN KEY(EnvVar) REFERENCES Cdb_EnvVar(DB_ID)
+        FOREIGN KEY(ECU) REFERENCES ECU(RID),
+        FOREIGN KEY(EnvVar) REFERENCES EnvVar(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_ECU_Node (
+    CREATE TABLE ECU_Node (
         ECU INTEGER NOT NULL DEFAULT 0,
         Node INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(ECU,Node),
-        FOREIGN KEY(ECU) REFERENCES Cdb_ECU(DB_ID),
-        FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID)
+        FOREIGN KEY(ECU) REFERENCES ECU(RID),
+        FOREIGN KEY(Node) REFERENCES Node(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Gateway_Signal (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE Gateway_Signal (
+        RID INTEGER NOT NULL DEFAULT 0,
         Vehicle_ID INTEGER NOT NULL DEFAULT 0,
         Dest_Signal INTEGER NOT NULL DEFAULT 0,
         Dest_Network INTEGER NOT NULL DEFAULT 0,
@@ -223,31 +224,31 @@ SCHEMA = ('''
         Source_Receiver INTEGER NOT NULL DEFAULT 0,
         "Comment" VARCHAR(255),
         Reserved_ID1 INTEGER NOT NULL DEFAULT 0,
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Group (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE Node_Group (
+        RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
-        Object_Type INTEGER NOT NULL DEFAULT 0,
-        Group_Type INTEGER NOT NULL DEFAULT 0,
+        Node_Object_Type INTEGER NOT NULL DEFAULT 0,
+        Node_Group_Type INTEGER NOT NULL DEFAULT 0,
         "Comment" VARCHAR(255),
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Group_Object (
+    CREATE TABLE Node_Group_Object (
         Parent_Type INTEGER NOT NULL DEFAULT 0,
-        Parent_DB_ID INTEGER NOT NULL DEFAULT 0,
+        Parent_RID INTEGER NOT NULL DEFAULT 0,
         Object_Type INTEGER NOT NULL DEFAULT 0,
-        Object_DB_ID INTEGER NOT NULL DEFAULT 0,
-        Object_DB_ID_2 INTEGER NOT NULL DEFAULT 0,
+        Object_RID INTEGER NOT NULL DEFAULT 0,
+        Object_RID_2 INTEGER NOT NULL DEFAULT 0,
         Opt_Object_Ref_1 INTEGER DEFAULT 0,
         Opt_Object_Ref_2 INTEGER DEFAULT 0,
         Opt_Object_Value INTEGER DEFAULT 0,
-        PRIMARY KEY(Parent_Type,Parent_DB_ID,Object_Type,Object_DB_ID,Object_DB_ID_2)
+        PRIMARY KEY(Parent_Type,Parent_RID,Object_Type,Object_RID,Object_RID_2)
     );
 ''', '''
-    CREATE TABLE Cdb_Message_Signal (
+    CREATE TABLE Message_Signal (
         Message INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
         "Offset" INTEGER NOT NULL DEFAULT 0,
@@ -255,113 +256,113 @@ SCHEMA = ('''
         Multiplex_Dependent SMALLINT,
         Multiplexor_Value INTEGER,
         PRIMARY KEY(Message,Signal),
-        FOREIGN KEY(Message) REFERENCES Cdb_Message(DB_ID),
-        FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID)
+        FOREIGN KEY(Message) REFERENCES Message(RID),
+        FOREIGN KEY(Signal) REFERENCES Signal(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Network (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE Network (
+        RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         "Comment" VARCHAR(255),
         Protocol INTEGER NOT NULL DEFAULT 0,
         Baudrate INTEGER DEFAULT 0,
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Network_Node (
+    CREATE TABLE Network_Node (
         Network INTEGER NOT NULL DEFAULT 0,
         Node INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Network,Node),
-        FOREIGN KEY(Network) REFERENCES Cdb_Network(DB_ID),
-        FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID)
+        FOREIGN KEY(Network) REFERENCES Network(RID),
+        FOREIGN KEY(Node) REFERENCES Node(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Node_RxSig (
+    CREATE TABLE Node_RxSig (
         Node INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Signal),
-        FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID),
-        FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID)
+        FOREIGN KEY(Node) REFERENCES Node(RID),
+        FOREIGN KEY(Signal) REFERENCES Signal(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Node_RxSignal (
+    CREATE TABLE Node_RxSignal (
         Node INTEGER NOT NULL DEFAULT 0,
         Message INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Message,Signal),
-        FOREIGN KEY(Message) REFERENCES Cdb_Message(DB_ID),
-        FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID),
-        FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID)
+        FOREIGN KEY(Message) REFERENCES Message(RID),
+        FOREIGN KEY(Node) REFERENCES Node(RID),
+        FOREIGN KEY(Signal) REFERENCES Signal(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Node_TxMessage (
+    CREATE TABLE Node_TxMessage (
         Node INTEGER NOT NULL DEFAULT 0,
         Message INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Message),
-        FOREIGN KEY(Message) REFERENCES Cdb_Message(DB_ID),
-        FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID)
+        FOREIGN KEY(Message) REFERENCES Message(RID),
+        FOREIGN KEY(Node) REFERENCES Node(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Node_TxSig (
+    CREATE TABLE Node_TxSig (
         Node INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Signal),
-        FOREIGN KEY(Node) REFERENCES Cdb_Node(DB_ID),
-        FOREIGN KEY(Signal) REFERENCES Cdb_Signal(DB_ID)
+        FOREIGN KEY(Node) REFERENCES Node(RID),
+        FOREIGN KEY(Signal) REFERENCES Signal(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Object_Valuetable (
+    CREATE TABLE Object_Valuetable (
         Object_Type INTEGER NOT NULL DEFAULT 0,
-        Object_DB_ID INTEGER NOT NULL DEFAULT 0,
+        Object_RID INTEGER NOT NULL DEFAULT 0,
         Valuetable INTEGER NOT NULL DEFAULT 0,
-        PRIMARY KEY(Object_Type,Object_DB_ID),
-        FOREIGN KEY(Valuetable) REFERENCES Cdb_Valuetable(DB_ID)
+        PRIMARY KEY(Object_Type,Object_RID),
+        FOREIGN KEY(Valuetable) REFERENCES Valuetable(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Value_Description (
+    CREATE TABLE Value_Description (
         Valuetable INTEGER NOT NULL DEFAULT 0,
         Value FLOAT8 NOT NULL DEFAULT 0,
         Value_Description VARCHAR(255) NOT NULL,
         PRIMARY KEY(Valuetable,Value),
-        FOREIGN KEY(Valuetable) REFERENCES Cdb_Valuetable(DB_ID)
+        FOREIGN KEY(Valuetable) REFERENCES Valuetable(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Valuetable (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE Valuetable (
+        RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         "Comment" VARCHAR(255),
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Vehicle (
-        DB_ID INTEGER NOT NULL DEFAULT 0,
+    CREATE TABLE Vehicle (
+        RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         "Comment" VARCHAR(255),
-        PRIMARY KEY(DB_ID)
+        PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Vehicle_ECU (
+    CREATE TABLE Vehicle_ECU (
         Vehicle INTEGER NOT NULL DEFAULT 0,
         ECU INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Vehicle,ECU),
-        FOREIGN KEY(ECU) REFERENCES Cdb_ECU(DB_ID),
-        FOREIGN KEY(Vehicle) REFERENCES Cdb_Vehicle(DB_ID)
+        FOREIGN KEY(ECU) REFERENCES ECU(RID),
+        FOREIGN KEY(Vehicle) REFERENCES Vehicle(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Vehicle_Network (
+    CREATE TABLE Vehicle_Network (
         Vehicle INTEGER NOT NULL DEFAULT 0,
         Network INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Vehicle,Network),
-        FOREIGN KEY(Network) REFERENCES Cdb_Network(DB_ID),
-        FOREIGN KEY(Vehicle) REFERENCES Cdb_Vehicle(DB_ID)
+        FOREIGN KEY(Network) REFERENCES Network(RID),
+        FOREIGN KEY(Vehicle) REFERENCES Vehicle(RID)
     );
 ''', '''
-    CREATE TABLE Cdb_Versioninfo (
+    CREATE TABLE Versioninfo (
         Obj_Type INTEGER NOT NULL DEFAULT 0,
-        Obj_DB_ID INTEGER NOT NULL DEFAULT 0,
+        Obj_RID INTEGER NOT NULL DEFAULT 0,
         Version_Number INTEGER NOT NULL DEFAULT 0,
         Is_Modified BOOLEAN NOT NULL,
-        PRIMARY KEY(Obj_Type,Obj_DB_ID)
+        PRIMARY KEY(Obj_Type,Obj_RID)
     );
 ''', '''
     CREATE VIEW schema AS SELECT * FROM sqlite_master;
@@ -375,14 +376,23 @@ SCHEMA = ('''
         PRIMARY KEY(id)
     );
 ''', '''
-    CREATE TABLE EnvironmentVariablesData(
+    CREATE TEMPORARY TABLE EnvironmentVariablesData(
         name CHAR(256) NOT NULL,
         value INT NOT NULL,
         PRIMARY KEY(name)
     );
-''')
+''','''
+    CREATE TABLE EnvVar_AccessNode (
+        EnvVar INTEGER NOT NULL DEFAULT 0,
+        Node INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY(EnvVar, Node),
+        FOREIGN KEY(EnvVar) REFERENCES EnvVar(RID),
+        FOREIGN KEY(Node) REFERENCES Node(RID)
+    );
+''', )
 
 TRIGGER = (
 """
 """,
 )
+
