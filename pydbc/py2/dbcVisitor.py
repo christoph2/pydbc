@@ -235,3 +235,13 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by dbcParser#stringValue.
+    def visitStringValue(self, ctx):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#identifierValue.
+    def visitIdentifierValue(self, ctx):
+        return self.visitChildren(ctx)
+
+

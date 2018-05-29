@@ -422,3 +422,21 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#stringValue.
+    def enterStringValue(self, ctx:dbcParser.StringValueContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#stringValue.
+    def exitStringValue(self, ctx:dbcParser.StringValueContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#identifierValue.
+    def enterIdentifierValue(self, ctx:dbcParser.IdentifierValueContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#identifierValue.
+    def exitIdentifierValue(self, ctx:dbcParser.IdentifierValueContext):
+        pass
+
+

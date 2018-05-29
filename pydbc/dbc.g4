@@ -66,7 +66,7 @@ signalExtendedValueTypeList:
     ;
 
 signalExtendedValueType:
-    'SIG_VALTYPE_' messageID = intValue signalName = C_IDENTIFIER ':' valType = intValue /*('0' | '1' | '2' | '3')*/ ';'
+    'SIG_VALTYPE_' messageID = intValue signalName = identifierValue ':' valType = intValue /*('0' | '1' | '2' | '3')*/ ';'
     ;
 
 messages:
@@ -74,28 +74,28 @@ messages:
     ;
 
 message :
-    ma = 'BO_' messageID = intValue messageName = C_IDENTIFIER ':' messageSize = intValue
+    ma = 'BO_' messageID = intValue messageName = identifierValue ':' messageSize = intValue
     transmt = (C_IDENTIFIER | VECTOR_XXX) (sgs += signal)*
     ;
 
 signal:
-    ma = 'SG_' signalName = C_IDENTIFIER mind = multiplexerIndicator? ':' startBit = intValue '|' signalSize = intValue '@'
+    ma = 'SG_' signalName = identifierValue mind = multiplexerIndicator? ':' startBit = intValue '|' signalSize = intValue '@'
     byteOrder = intValue /*('0' | '1')*/ valueType = SIGN
     '(' factor = number ',' offset = number ')'
     '[' minimum = number '|' maximum = number ']'
-    unit = STRING rcv = receiver
+    unit = stringValue rcv = receiver
     ;
 
 receiver:
-    fid = (C_IDENTIFIER | VECTOR_XXX) (',' ids += C_IDENTIFIER)*
+    fid = (C_IDENTIFIER | VECTOR_XXX) (',' ids += identifierValue)*
     ;
 
 transmitter:
-    ids += C_IDENTIFIER (',' ids += C_IDENTIFIER)*
+    ids += identifierValue (',' ids += identifierValue)*
     ;
 
 multiplexerIndicator:
-    mind = C_IDENTIFIER
+    mind = identifierValue
     //('M' | ('m' intValue))
     ;
 
@@ -104,15 +104,15 @@ valueTables:
     ;
 
 valueTable:
-    'VAL_TABLE_' name = C_IDENTIFIER (desc += valueDescription)* ';'
+    'VAL_TABLE_' name = identifierValue (desc += valueDescription)* ';'
     ;
 
 valueDescription:
-    val = number name = STRING
+    val = number name = stringValue
     ;
 
 nodes:
-    'BU_' ':' (ids += C_IDENTIFIER)*
+    'BU_' ':' (ids += identifierValue)*
     ;
 
 bitTiming:
@@ -130,7 +130,7 @@ newSymbols:
     ;
 
 version:
-    'VERSION' STRING
+    'VERSION' vs = stringValue
     ;
 
 valueDescriptions:
@@ -139,9 +139,9 @@ valueDescriptions:
 
 specializedValueDescription:
     'VAL_'  (
-      messageID = intValue signalName = C_IDENTIFIER (items += valueDescription)*
+      messageID = intValue signalName = identifierValue (items += valueDescription)*
     |
-      envVarName = C_IDENTIFIER (items += valueDescription)*
+      envVarName = identifierValue (items += valueDescription)*
     )
     ';'
     ;
@@ -151,14 +151,14 @@ environmentVariables:
     ;
 
 environmentVariable:
-    'EV_' name = C_IDENTIFIER ':' varType = intValue/*('0' | '1' | '2')*/ '[' minimum  = number '|' maximum = number ']'
-    unit = STRING initialValue = number envId = intValue DUMMY_NODE_VECTOR
+    'EV_' name = identifierValue ':' varType = intValue/*('0' | '1' | '2')*/ '[' minimum  = number '|' maximum = number ']'
+    unit = stringValue initialValue = number envId = intValue DUMMY_NODE_VECTOR
     accNodes = accessNodes ';'
     ;
 
 accessNodes:
       id_ = VECTOR_XXX
-    | ids += C_IDENTIFIER (',' ids += C_IDENTIFIER)*
+    | ids += identifierValue (',' ids += identifierValue)*
     ;
 
 environmentVariablesData:
@@ -166,7 +166,7 @@ environmentVariablesData:
     ;
 
 environmentVariableData:
-    'ENVVAR_DATA_' varname = C_IDENTIFIER ':' value = intValue ';'
+    'ENVVAR_DATA_' varname = identifierValue ':' value = intValue ';'
     ;
 
 signalTypes:
@@ -174,9 +174,9 @@ signalTypes:
     ;
 
 signalType:
-    'SGTYPE_' signalTypeName = C_IDENTIFIER ':' signalSize = number '@' byteOrder = intValue valueType = SIGN
+    'SGTYPE_' signalTypeName = identifierValue ':' signalSize = number '@' byteOrder = intValue valueType = SIGN
     '(' factor = number ',' offset = number ')' '[' minimum = number '|' maximum = number ']'
-    unit = STRING defaultValue = number ',' valTable = C_IDENTIFIER ';'
+    unit = stringValue defaultValue = number ',' valTable = identifierValue ';'
     ;
 
 comments:
@@ -186,11 +186,11 @@ comments:
 comment:
     'CM_'
     (
-          ( 'BU_' c0 = C_IDENTIFIER)
+          ( 'BU_' c0 = identifierValue)
         | ('BO_' i1 = intValue)
-        | ('SG_' i2 = intValue c2= C_IDENTIFIER)
-        | ('EV_' c3 = C_IDENTIFIER)
-    )? s = STRING ';'
+        | ('SG_' i2 = intValue c2= identifierValue)
+        | ('EV_' c3 = identifierValue)
+    )? s = stringValue ';'
     ;
 
 attributeDefinitions:
@@ -198,7 +198,7 @@ attributeDefinitions:
     ;
 
 attributeDefinition:
-    'BA_DEF_' objectType = ('BU_' | 'BO_' | 'SG_' | 'EV_')?   attrName = STRING  attrValue = attributeValueType ';'
+    'BA_DEF_' objectType = ('BU_' | 'BO_' | 'SG_' | 'EV_')?   attrName = stringValue  attrValue = attributeValueType ';'
     ;
 
 customAttributeDefinitions:
@@ -206,7 +206,7 @@ customAttributeDefinitions:
     ;
 
 customAttributeDefinition:
-    'BA_DEF_REL_' objectType = ('BU_SG_REL_'| 'BU_EV_REL_'| 'BU_BO_REL_')?   attrName = STRING  attrValue = attributeValueType ';'
+    'BA_DEF_REL_' objectType = ('BU_SG_REL_'| 'BU_EV_REL_'| 'BU_BO_REL_')?   attrName = stringValue  attrValue = attributeValueType ';'
     ;
 
 attributeValueType:
@@ -214,7 +214,7 @@ attributeValueType:
     | 'HEX' i10 = intValue i11 = intValue
     | 'FLOAT' f0 = number  f1 = number
     | s0 = 'STRING'
-    | 'ENUM' efirst = STRING (',' eitems += STRING)*
+    | 'ENUM' efirst = stringValue (',' eitems += stringValue)*
     ;
 
 attributeDefaults:
@@ -222,7 +222,7 @@ attributeDefaults:
     ;
 
 attributeDefault:
-    'BA_DEF_DEF_' n = STRING v = attributeValue ';'
+    'BA_DEF_DEF_' n = stringValue v = attributeValue ';'
     ;
 
 customAttributeDefaults:
@@ -230,12 +230,12 @@ customAttributeDefaults:
     ;
 
 customAttributeDefault:
-    'BA_DEF_DEF_REL_' n = STRING v = attributeValue ';'
+    'BA_DEF_DEF_REL_' n = stringValue v = attributeValue ';'
     ;
 
 attributeValue:
-      number
-    | STRING
+      n = number
+    | s = stringValue
     ;
 
 attributeValues:
@@ -243,12 +243,12 @@ attributeValues:
     ;
 
 attributeValueForObject:
-      'BA_' attributeName = STRING (
+      'BA_' attributeName = stringValue (
           attrValue = attributeValue
-        | ('BU_' nodeName = C_IDENTIFIER buValue = attributeValue)
+        | ('BU_' nodeName = identifierValue buValue = attributeValue)
         | ('BO_' mid1 = intValue boValue = attributeValue)
-        | ('SG_' mid2 = intValue signalName = C_IDENTIFIER sgValue = attributeValue)
-        | ('EV_' evName = C_IDENTIFIER evValue = attributeValue)
+        | ('SG_' mid2 = intValue signalName = identifierValue sgValue = attributeValue)
+        | ('EV_' evName = identifierValue evValue = attributeValue)
       ) ';'
     ;
 
@@ -263,11 +263,11 @@ customAttributeValues:
 // BA_REL_ "AttrNodeTx" BU_BO_REL_ Motor 1 "foo";
 
 customAttributeValueForObject:
-      'BA_REL' attributeName = STRING (
+      'BA_REL' attributeName = stringValue (
           attributeValue
-        | ('BU_BO_REL_' nodeName = C_IDENTIFIER buValue = attributeValue cmValue = STRING)
-        | ('BU_SG_REL_' mid2 = intValue signalName = C_IDENTIFIER sgValue = attributeValue)
-        | ('BU_EV_REL_' evName = C_IDENTIFIER evValue = attributeValue)
+        | ('BU_BO_REL_' nodeName = identifierValue buValue = attributeValue cmValue = stringValue)
+        | ('BU_SG_REL_' mid2 = intValue signalName = identifierValue sgValue = attributeValue)
+        | ('BU_EV_REL_' evName = identifierValue evValue = attributeValue)
       ) ';'
     ;
 ///
@@ -284,6 +284,15 @@ number:
      i = intValue
    | f = floatValue
    ;
+
+stringValue:
+    s = STRING
+    ;
+
+identifierValue:
+    i = C_IDENTIFIER
+    ;
+
 
 //
 //      Lexer.
