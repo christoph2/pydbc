@@ -36,8 +36,7 @@ class Logger(object):
     LOGGER_BASE_NAME = 'pydbc'
     FORMAT = "[%(levelname)s (%(name)s)]: %(message)s"
 
-    def __init__(self, parent, name, level = logging.WARN):
-        self.parent = parent
+    def __init__(self, name, level = logging.WARN):
         self.logger = logging.getLogger("{0}.{1}".format(self.LOGGER_BASE_NAME, name))
         self.logger.setLevel(level)
         handler = logging.StreamHandler()
@@ -56,9 +55,7 @@ class Logger(object):
     def log(self, message, level):
         self.lastSeverity = level
         self.lastMessage = message
-        self.logger.log(level, "{0}:{1}: {2}".format(
-            os.path.split(self.parent.filename)[1], self.parent.lineNo,  message)
-        )
+        self.logger.log(level, message)
 
     def info(self, message):
         self.log(message, logging.INFO)
