@@ -1,7 +1,7 @@
 VERSION ""
 
 
-NS_ : 
+NS_ :
 	NS_DESC_
 	CM_
 	BA_DEF_
@@ -33,11 +33,15 @@ NS_ :
 
 BS_:
 
+%if db.nodeNames:
 BU_: ${' '.join(db.nodeNames)}
-%for vt in db.valueTables():
+%else:
+BU_:
+%endif
+%for vt in db.valueTablesGlobal():
 VAL_TABLE_ ${vt['Name']} \
-%for desc in db.valueDescription(vt['DB_ID']):
-${int(desc['Value'])} ${desc['Value_Description']} \
+%for desc in db.valueDescription(vt['RID']):
+${int(desc['Value'])} "${desc['Value_Description']}" \
 %endfor
 ;
 %endfor
@@ -45,26 +49,81 @@ ${int(desc['Value'])} ${desc['Value_Description']} \
 
 %for msg in db.messages():
 BO_ ${msg['Message_ID']} ${msg['Name']}: ${msg['DLC']} ${db.nodeName(msg['Sender'])}
-%for signal in db.signals(msg['DB_ID']):
+%for signal in db.signals(msg['RID']):
+<% receivers = db.fetchSignalReceivers(msg['RID'], signal['RID']) %>\
  SG_ ${signal['Name']} ${db.multiplexIndicator(signal)}: ${signal['Offset']}|${signal['Bitsize']}@${signal['Byteorder']}\
 ${"-" if signal['Valuetype'] == -1 else "+"} \
 (${"{:.14G}".format(signal['Formula_Factor'])},${"{:.14G}".format(signal['Formula_Offset'])}) [${"{:.14G}".format(signal['Minimum'])}|\
-${"{:.14G}".format(signal['Maximum'])}] ${signal['Unit']} ${','.join(db.fetchSignalReceivers(msg['DB_ID'], signal['DB_ID']))}
+${"{:.14G}".format(signal['Maximum'])}] "${signal['Unit']}" ${db.spaceBeforeNodes(receivers)}${','.join(receivers)}
 %endfor
 
 %endfor
+%for mid, senders in db.multipleTransmitters():
+BO_TX_BU_ ${mid} : ${','.join(senders)};
+%endfor
 
 
+%for idx, var in enumerate(db.environmentVariables(), 1):
+<% nodes = list(db.envVarAccessNodes(var['RID'])) %>\
+EV_ ${var['Name']}: ${var['Type']} [${"{:.14G}".format(var['Minimum'])}|${"{:.14G}".format(var['Maximum'])}] "${var['Unit']}" \
+${"{:.14G}".format(var['Startup_Value'])} ${idx} DUMMY_NODE_VECTOR${var['Access']} ${db.spaceBeforeNodes(nodes)}\
+${','.join(nodes)};
+
+%endfor
 %for comment in db.comments():
 CM_ \
 %if comment['type'] == 'BO':
-BO_ ${comment['k0']} ${comment['comment']};
+BO_ ${comment['k0']} "${comment['comment']}";
 %elif comment['type'] == 'SG':
-SG_ ${comment['k0']} ${comment['k1']} ${comment['comment']};
+SG_ ${comment['k0']} ${comment['k1']} "${comment['comment']}";
 %elif comment['type'] == 'BU':
-BU_ ${comment['k0']} ${comment['comment']};
+BU_ ${comment['k0']} "${comment['comment']}";
 %elif comment['type'] == 'EV':
-EV_ ${comment['k0']} ${comment['comment']};
+EV_ ${comment['k0']} "${comment['comment']}";
 %endif
+%endfor
+%for attr in db.attributeDefinitions():
+BA_DEF_ \
+%if attr['Objecttype'] == 0:
+BU_ \
+%elif attr['Objecttype'] == 1:
+BO_ \
+%elif attr['Objecttype'] == 2:
+SG_ \
+%elif attr['Objecttype'] == 3:
+EV \
+%endif
+ "${attr['Name']}" \
+%if attr['Valuetype'] == 0:
+INT ${"{:.14G}".format(attr['Minimum'])} ${"{:.14G}".format(attr['Maximum'])}\
+%elif attr['Valuetype'] == 1:
+HEX ${"{:.14G}".format(attr['Minimum'])} ${"{:.14G}".format(attr['Maximum'])}\
+%elif attr['Valuetype'] == 2:
+FLOAT ${"{:.14G}".format(attr['Minimum'])} ${"{:.14G}".format(attr['Maximum'])}\
+%elif attr['Valuetype'] == 3:
+STRING \
+%elif attr['Valuetype'] == 4:
+ENUM  ${','.join(['"{}"'.format(n) for n in attr['Enumvalues'].split(";")])}\
+%endif
+;
+%endfor
+%for attr in db.attributeDefinitions():
+%if attr['Default_Number'] is not None:
+BA_DEF_DEF_  "${attr['Name']}" ${"{:.14G}".format(attr['Default_Number'])};
+%elif attr['Default_String'] is not None:
+BA_DEF_DEF_  "${attr['Name']}" "${attr['Default_String']}";
+%endif
+%endfor
+%for vt in db.valueTablesLocal():
+VAL_ \
+%if vt['Object_Type'] == 0:
+${vt['Message_ID']} ${vt['Name']} \
+%else:
+${vt['Name']} \
+%endif
+%for desc in db.valueDescription(vt['RID'], srt = False):
+${int(desc['Value'])} "${desc['Value_Description']}" \
+%endfor
+;
 %endfor
 
