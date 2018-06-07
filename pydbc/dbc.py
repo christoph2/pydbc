@@ -91,8 +91,8 @@ class ParserWrapper(object):
         return self.parse(antlr4.InputStream(buffer), trace)
 
     @staticmethod
-    def stringStream(fname):
-        return antlr4.InputStream(codecs.open(fname, encoding = 'latin-1').read())
+    def stringStream(fname, encoding = 'latin-1'):
+        return antlr4.InputStream(codecs.open(fname, encoding = encoding).read())
 
     def _getNumberOfSyntaxErrors(self):
         return self._syntaxErrors
