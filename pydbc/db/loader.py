@@ -40,18 +40,17 @@ class Loader(object):
     def insertValues(self, tree):
         cur = self.db.getCursor()
         self.db.beginTransaction()
-
         self.insertEnvironmentVariablesData(cur, tree['environmentVariablesData'])
         self.insertComments(cur, tree['comments'])
         self.insertValueTables(cur, tree['valueTables'])
         self.insertNodes(cur, tree['nodes'])
         self.insertMessages(cur, tree['messages'])
         self.insertEnvironmentVariables(cur, tree['environmentVariables'])
-
+        self.insertMessageTransmitters(cur, tree['messageTransmitters'])
         self.insertValueDescriptions(cur, tree['valueDescriptions'])
-
         defaults = tree['attributeDefaults']
         self.insertAttributeDefinitions(cur, tree['attributeDefinitions'], defaults)
+        self.insertAttributes(cur, tree['attributeValues'])
         self.db.commitTransaction()
 
     def insertValueTables(self, cur, tables):
@@ -88,6 +87,11 @@ class Loader(object):
                 nid = self.db.fetchNodeId(node)
                 self.db.insertStatement(cur, "EnvVar_AccessNode", "EnvVar,Node", evid, nid)
 
+    def getSignalByName(self, cur, messageID, name):
+        return cur.execute("""SELECT t1.RID FROM signal AS t1, Message_Signal AS t2 where
+            t1.RID = t2.signal AND t1.name = ? AND t2.message = (SELECT RID FROM message
+            WHERE message_id = ?)""", [name, messageID]
+        ).fetchone()[0]
 
     def insertValueDescriptions(self, cur, descriptions):
         for item in descriptions:
@@ -97,22 +101,21 @@ class Loader(object):
                 messageID = item['messageID']
                 name = item['signalName']
                 otype = 0
-                rid = cur.execute("""SELECT t1.RID FROM signal AS t1, Message_Signal AS t2 where
-                    t1.RID = t2.signal AND t1.name = ? AND t2.message = (SELECT RID FROM message
-                    WHERE message_id = ?)""", [name, messageID]
-                ).fetchone()[0]
+                rid = self.getSignalByName(cur, messageID, name)
+                #  rid = cur.execute("""SELECT t1.RID FROM signal AS t1, Message_Signal AS t2 where
+                #      t1.RID = t2.signal AND t1.name = ? AND t2.message = (SELECT RID FROM message
+                #      WHERE message_id = ?)""", [name, messageID]
+                #  ).fetchone()[0]
                 #print("\tS-RID", messageID, rid, item, flush = True)
             elif tp == 'EV':
                 name = item['envVarName']
                 otype = 1
                 rid = cur.execute("SELECT RID FROM EnvVar WHERE name = ?", [name]).fetchone()[0]
-                print("\tE-RID", rid, item, flush = True)
+                #print("\tE-RID", rid, item, flush = True)
             self.db.insertStatement(cur, "Valuetable", "Name", name)
             vtid = self.db.lastInsertedRowId(cur, "Valuetable")
             self.db.insertStatement(cur, "Object_Valuetable", "Object_Type, Object_RID, Valuetable", otype, rid, vtid)
             self.insertValueDescription(cur, vtid, description)
-        print("-" * 80)
-
 
     def insertReceivers(self, cur, messageId, signalId, receiver):
         for rcv in receiver:
@@ -193,6 +196,17 @@ class Loader(object):
                 Default_Number, Default_String""", name, objType, valueType, minimum, maximum, enumvalues, defaultNumber, defaultString
             )
 
+    def getAttributeType(self, value):
+        ATS = {
+            "GENERAL": AttributeType.GENERAL,
+            "BU": AttributeType.NODE,
+            "BO": AttributeType.MESSAGE,
+            "SG": AttributeType.SIGNAL,
+            "EV": AttributeType.ENV_VAR
+        }
+        return ATS.get(value)
+
+    def insertAttributes(self, cur, attrs):
         '''
         ''', '''
             CREATE TABLE Attribute_Value (
@@ -216,12 +230,46 @@ class Loader(object):
                 FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID)
             );
         '''
+        for attr in attrs:
+            stringValue = None
+            numValue = None
+            value = attr['value']
+            if isinstance(value, str):
+                stringValue = value
+            else:
+                numValue = value
+            aid = self.db.fetchAttributeId(attr['name'])
+            attrType = self.getAttributeType(attr['type'])
+            if attrType == AttributeType.MESSAGE:
+                rid = self.db.fetchMessageIdById(attr['messageID'])
+            elif attrType == AttributeType.SIGNAL:
+               rid = self.getSignalByName(cur, attr['messageID'], attr['signalName'])
+            elif attrType == AttributeType.NODE:
+                rid = self.db.fetchNodeId(attr['nodeName'])
+            elif attrType == AttributeType.ENV_VAR:
+                rid = self.db.fetchEnvVarId(attr['envVarname'])
+            elif attrType == AttributeType.GENERAL:
+                rid = 0
+            else:
+                #print("\t???", attrType)
+                pass
+            #print("\tATT:", rid, aid, attrType, attr)
+            self.db.insertStatement(cur, "Attribute_Value", "Object_ID, Attribute_Definition, Num_Value, String_Value",
+                rid, aid, numValue, stringValue
+            )
 
     def insertNodes(self, cur, nodes):
         self.db.insertStatement(cur, "Node", "RID, Name", 0, "Vector__XXX")
         for node in nodes:
             cmt = self.db.fetchComment('BU', node)
             self.db.insertStatement(cur, "Node", "Name, Comment", node, cmt)
+
+    def insertMessageTransmitters(self, cur, transmitters):
+        for transmitter in transmitters:
+            mid = self.db.fetchMessageIdById(transmitter['messageID'])
+            for name in transmitter['transmitters']:
+                nid = self.db.fetchNodeId(name)
+                self.db.replaceStatement(cur, "Node_TxMessage", "Node, Message", nid, mid)
 
     def insertMessages(self, cur, messages):
         for msg in messages:
@@ -237,6 +285,7 @@ class Loader(object):
 
             self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment, Sender", name, mid, dlc, cmt, tid)
             mrid = self.db.lastInsertedRowId(cur, "Message")
+            self.db.insertStatement(cur, "Node_TxMessage", "Node, Message", tid, mrid)
             for signal in signals:
                 name = signal['name']
                 startBit = signal['startBit']
