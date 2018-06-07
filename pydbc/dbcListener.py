@@ -88,6 +88,8 @@ class dbcListener(ParseTreeListener):
             customAttributeDefaults = ctx.customAttributeDefaults().value,
             attributeValues =ctx.attributeValues().value,
             valueDescriptions = ctx.valueDescriptions().value,
+            categoryDefinitions = ctx.categoryDefinitions().value,
+            categories = ctx.categories().value,
             signalExtendedValueTypeList = ctx.signalExtendedValueTypeList().value
         )
 
@@ -187,11 +189,9 @@ class dbcListener(ParseTreeListener):
         )
 
     def exitAccessNodes(self, ctx):
-        if ctx.id_:
-            nodes = [ctx.id_.text]
-        else:
-            nodes = [x.value for x in ctx.ids]
+        nodes = [x.value for x in ctx.items]
         ctx.value = nodes
+        print("\tAN:", nodes)
 
     def exitEnvironmentVariablesData(self, ctx):
         ctx.value = [x.value for x in ctx.evars]
@@ -327,6 +327,34 @@ class dbcListener(ParseTreeListener):
             evName = None
             di = OrderedDict(type = "GENERAL", value = evValue)
         ctx.value = OrderedDict(name = attributeName, **di)
+
+    def exitCategoryDefinitions(self, ctx):
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitCategoryDefinition(self, ctx):
+        ctx.value = OrderedDict(name = ctx.name.value, category = ctx.cat.value, value = ctx.num.value)
+
+    def exitCategories(self, ctx):
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitCategory(self, ctx):
+        category = ctx.cat.value
+        if ctx.nodeName:
+            nodeName = ctx.nodeName.value
+            di = OrderedDict(type = 'BU', nodeName = nodeName)
+        elif ctx.mid1:
+            mid1 = ctx.mid1.value
+            di = OrderedDict(type = 'BO', messageID = mid1)
+        elif ctx.mid2:
+            mid2 = ctx.mid2.value
+            signalName = ctx.signalName.value
+            di = OrderedDict(type = 'SG', messageID = mid2, signalName = signalName)
+        elif ctx.evName:
+            evName = ctx.evName.value
+            di = OrderedDict(type = 'EV', envVarname = evName)
+        ctx.value = OrderedDict(category = category, **di)
+
+
 
     def exitIntValue(self, ctx):
         ctx.value = int(ctx.i.text) if ctx.i else None

@@ -395,6 +395,42 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#categoryDefinitions.
+    def enterCategoryDefinitions(self, ctx:dbcParser.CategoryDefinitionsContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#categoryDefinitions.
+    def exitCategoryDefinitions(self, ctx:dbcParser.CategoryDefinitionsContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#categoryDefinition.
+    def enterCategoryDefinition(self, ctx:dbcParser.CategoryDefinitionContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#categoryDefinition.
+    def exitCategoryDefinition(self, ctx:dbcParser.CategoryDefinitionContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#categories.
+    def enterCategories(self, ctx:dbcParser.CategoriesContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#categories.
+    def exitCategories(self, ctx:dbcParser.CategoriesContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#category.
+    def enterCategory(self, ctx:dbcParser.CategoryContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#category.
+    def exitCategory(self, ctx:dbcParser.CategoryContext):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#intValue.
     def enterIntValue(self, ctx:dbcParser.IntValueContext):
         pass

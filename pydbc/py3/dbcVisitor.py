@@ -224,6 +224,26 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by dbcParser#categoryDefinitions.
+    def visitCategoryDefinitions(self, ctx:dbcParser.CategoryDefinitionsContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#categoryDefinition.
+    def visitCategoryDefinition(self, ctx:dbcParser.CategoryDefinitionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#categories.
+    def visitCategories(self, ctx:dbcParser.CategoriesContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#category.
+    def visitCategory(self, ctx:dbcParser.CategoryContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by dbcParser#intValue.
     def visitIntValue(self, ctx:dbcParser.IntValueContext):
         return self.visitChildren(ctx)

@@ -44,8 +44,8 @@ dbcfile:
     customAttributeValues       // BA_REL_
     valueDescriptions           // VAL_
 
-    //categoryDefinitions
-    //categories
+    categoryDefinitions         // CAT_DEF_
+    categories                  // CAT_
     //filter
     //signalTypeRefs
     //signalGroups
@@ -75,7 +75,7 @@ messages:
 
 message :
     ma = 'BO_' messageID = intValue messageName = identifierValue ':' messageSize = intValue
-    transmt = (C_IDENTIFIER | VECTOR_XXX) (sgs += signal)*
+    transmt = C_IDENTIFIER (sgs += signal)*
     ;
 
 signal:
@@ -87,7 +87,7 @@ signal:
     ;
 
 receiver:
-    fid = (C_IDENTIFIER | VECTOR_XXX) (',' ids += identifierValue)*
+    fid = C_IDENTIFIER  (',' ids += identifierValue)*
     ;
 
 transmitter:
@@ -157,8 +157,7 @@ environmentVariable:
     ;
 
 accessNodes:
-      id_ = VECTOR_XXX
-    | ids += identifierValue (',' ids += identifierValue)*
+    items += identifierValue (',' items += identifierValue)*
     ;
 
 environmentVariablesData:
@@ -270,7 +269,28 @@ customAttributeValueForObject:
         | ('BU_EV_REL_' evName = identifierValue evValue = attributeValue)
       ) ';'
     ;
-///
+
+categoryDefinitions:
+    (items += categoryDefinition)*
+    ;
+
+categoryDefinition:
+    'CAT_DEF_' cat = intValue  name = identifierValue num = intValue
+    ';'
+    ;
+
+categories:
+    (items += category)*
+    ;
+
+category:
+    'CAT_'  (('BU_' nodeName = identifierValue)
+        | ('BO_' mid1 = intValue )
+        | ('SG_' mid2 = intValue signalName = identifierValue)
+        | ('EV_' evName = identifierValue))
+       cat = intValue
+    ';'
+    ;
 
 intValue:
     i = INT
@@ -297,9 +317,9 @@ identifierValue:
 //
 //      Lexer.
 //
-VECTOR_XXX:
-    'Vector__XXX'
-    ;
+//VECTOR_XXX:
+//    'Vector__XXX'
+//    ;
 
 DUMMY_NODE_VECTOR:
     'DUMMY_NODE_VECTOR'
