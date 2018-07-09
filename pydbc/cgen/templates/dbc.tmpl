@@ -1,7 +1,7 @@
 VERSION ""
 
 
-NS_ :
+NS_ : 
 	NS_DESC_
 	CM_
 	BA_DEF_
@@ -113,6 +113,34 @@ BA_DEF_DEF_  "${attr['Name']}" ${"{:.14G}".format(attr['Default_Number'])};
 %elif attr['Default_String'] is not None:
 BA_DEF_DEF_  "${attr['Name']}" "${attr['Default_String']}";
 %endif
+%endfor
+%for attr in db.attributeValues():
+<% attrDef = list(db.attributeDefintion(attr['Attribute_Definition']))[0] %>\
+BA_ "${attrDef['Name']}" \
+%if attrDef['Objecttype'] == 0:
+BU_ ${db.fetchNodenameByRid(attr['Object_ID'])} \
+%elif attrDef['Objecttype'] == 1:
+BO_ ${db.fetchMessageIdByRid(attr['Object_ID'])} \
+%elif attrDef['Objecttype'] == 2:
+<% ms = db.fetchMessageSignalByRid(attr['Object_ID']) %>\
+SG_ ${ms['Message_ID']} ${ms['Name']} \
+%elif attrDef['Objecttype'] == 3:
+EV_ ${db.fetchEnvvarNameByRid(attr['Object_ID'])} \
+%elif attrDef['Objecttype'] == 4:
+\
+%endif
+%if attrDef['Valuetype'] == 0:
+${int(attr['Num_Value'])}\
+%elif attrDef['Valuetype'] == 1:
+${int(attr['Num_Value'])}\
+%elif attrDef['Valuetype'] == 2:
+${"{:.14G}".format(attr['Num_Value'])}\
+%elif attrDef['Valuetype'] == 3:
+"${attr['String_Value']}"\
+%elif attrDef['Valuetype'] == 4:
+${int(attr['Num_Value'])}\
+%endif
+;
 %endfor
 %for vt in db.valueTablesLocal():
 VAL_ \
