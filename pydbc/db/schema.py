@@ -29,21 +29,22 @@ __version__ = '0.1.0'
 
 
 INDICES = (
-    "CREATE UNIQUE INDEX ECU_RID ON ECU(RID );",
-    "CREATE INDEX ECU_EnvVar_ECU_EnvVarECU ON ECU_EnvVar(ECU );",
-    "CREATE INDEX ECU_Node_ECU_NodeECU ON ECU_Node(ECU );",
-    "CREATE UNIQUE INDEX Gateway_Signal_RID ON Gateway_Signal(RID );",
-    "CREATE INDEX Node_Group_Object_Node_Group_RID ON Node_Group_Object(Parent_RID );",
-    "CREATE INDEX Node_Group_Object_Object_RID ON Node_Group_Object(Object_RID );",
-    "CREATE INDEX Node_Group_Object_Object_RID_2 ON Node_Group_Object(Object_RID_2 );",
-    "CREATE INDEX Node_Group_Object_Object_Type ON Node_Group_Object(Object_Type );",
-    "CREATE INDEX Node_Group_Object_Parent_Type ON Node_Group_Object(Parent_Type );",
-    "CREATE UNIQUE INDEX Network_RID ON Network(RID );",
-    "CREATE INDEX Object_Valuetable_Object_RID ON Object_Valuetable(Object_RID );",
-    "CREATE INDEX Object_Valuetable_Object_Type ON Object_Valuetable(Object_Type );",
-    "CREATE UNIQUE INDEX Vehicle_RID ON Vehicle(RID );",
+    "CREATE UNIQUE INDEX IF NOT EXISTS ECU_RID ON ECU(RID );",
+    "CREATE INDEX IF NOT EXISTS ECU_EnvVar_ECU_EnvVarECU ON ECU_EnvVar(ECU );",
+    "CREATE INDEX IF NOT EXISTS ECU_Node_ECU_NodeECU ON ECU_Node(ECU );",
+    "CREATE UNIQUE INDEX IF NOT EXISTS Gateway_Signal_RID ON Gateway_Signal(RID );",
+    "CREATE INDEX IF NOT EXISTS Node_Group_Object_Node_Group_RID ON Node_Group_Object(Parent_RID );",
+    "CREATE INDEX IF NOT EXISTS Node_Group_Object_Object_RID ON Node_Group_Object(Object_RID );",
+    "CREATE INDEX IF NOT EXISTS Node_Group_Object_Object_RID_2 ON Node_Group_Object(Object_RID_2 );",
+    "CREATE INDEX IF NOT EXISTS Node_Group_Object_Object_Type ON Node_Group_Object(Object_Type );",
+    "CREATE INDEX IF NOT EXISTS Node_Group_Object_Parent_Type ON Node_Group_Object(Parent_Type );",
+    "CREATE UNIQUE INDEX IF NOT EXISTS Network_RID ON Network(RID );",
+    "CREATE INDEX IF NOT EXISTS Object_Valuetable_Object_RID ON Object_Valuetable(Object_RID );",
+    "CREATE INDEX IF NOT EXISTS Object_Valuetable_Object_Type ON Object_Valuetable(Object_Type );",
+    "CREATE UNIQUE INDEX IF NOT EXISTS Vehicle_RID ON Vehicle(RID );",
 
-    "CREATE INDEX Signal_Name ON Signal(Name)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS Node_Name ON Node(Name)",
+    "CREATE INDEX IF NOT EXISTS Signal_Name ON Signal(Name)",
 )
 
 TABLES = (
@@ -85,7 +86,7 @@ VIEWS = (
 )
 
 SCHEMA = ('''
-    CREATE TABLE Node (
+    CREATE TABLE IF NOT EXISTS Node (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Node_ID INTEGER DEFAULT 0,
@@ -93,7 +94,7 @@ SCHEMA = ('''
         PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Message (
+    CREATE TABLE IF NOT EXISTS Message (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Message_ID INTEGER NOT NULL DEFAULT 0,
@@ -108,7 +109,7 @@ SCHEMA = ('''
         UNIQUE(Message_ID)
     );
 ''', '''
-    CREATE TABLE Signal (
+    CREATE TABLE IF NOT EXISTS Signal (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Bitsize INTEGER DEFAULT 0,
@@ -124,7 +125,7 @@ SCHEMA = ('''
         PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Attribute_Definition (
+    CREATE TABLE IF NOT EXISTS Attribute_Definition (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Objecttype INTEGER NOT NULL DEFAULT 0,
@@ -139,7 +140,7 @@ SCHEMA = ('''
         PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Attribute_Value (
+    CREATE TABLE IF NOT EXISTS Attribute_Value (
         Object_ID INTEGER NOT NULL DEFAULT 0,
         Attribute_Definition INTEGER NOT NULL DEFAULT 0,
         Num_Value FLOAT8 DEFAULT 0,
@@ -148,7 +149,7 @@ SCHEMA = ('''
         FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID)
     );
 ''', '''
-    CREATE TABLE AttributeRel_Value (
+    CREATE TABLE IF NOT EXISTS AttributeRel_Value (
         Object_ID INTEGER NOT NULL DEFAULT 0,
         Attribute_Definition INTEGER NOT NULL DEFAULT 0,
         Num_Value FLOAT8 DEFAULT 0,
@@ -160,7 +161,7 @@ SCHEMA = ('''
         FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID)
     );
 ''', '''
-    CREATE TABLE DB_Info (
+    CREATE TABLE IF NOT EXISTS DB_Info (
         DB_Schema_Version INTEGER DEFAULT 2,
         Req_DB_Editor_Version INTEGER DEFAULT 1,
         Report_DB_Filename VARCHAR(255),
@@ -173,14 +174,14 @@ SCHEMA = ('''
         Number_Format_Int_Attributes INTEGER DEFAULT 0
     );
 ''', '''
-    CREATE TABLE ECU (
+    CREATE TABLE IF NOT EXISTS ECU (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255),
         "Comment" VARCHAR(255),
         PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE EnvVar (
+    CREATE TABLE IF NOT EXISTS EnvVar (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Type INTEGER NOT NULL DEFAULT 0,
@@ -194,7 +195,7 @@ SCHEMA = ('''
         PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE ECU_EnvVar (
+    CREATE TABLE IF NOT EXISTS ECU_EnvVar (
         ECU INTEGER NOT NULL DEFAULT 0,
         EnvVar INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(ECU,EnvVar),
@@ -202,7 +203,7 @@ SCHEMA = ('''
         FOREIGN KEY(EnvVar) REFERENCES EnvVar(RID)
     );
 ''', '''
-    CREATE TABLE ECU_Node (
+    CREATE TABLE IF NOT EXISTS ECU_Node (
         ECU INTEGER NOT NULL DEFAULT 0,
         Node INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(ECU,Node),
@@ -210,7 +211,7 @@ SCHEMA = ('''
         FOREIGN KEY(Node) REFERENCES Node(RID)
     );
 ''', '''
-    CREATE TABLE Gateway_Signal (
+    CREATE TABLE IF NOT EXISTS Gateway_Signal (
         RID INTEGER NOT NULL DEFAULT 0,
         Vehicle_ID INTEGER NOT NULL DEFAULT 0,
         Dest_Signal INTEGER NOT NULL DEFAULT 0,
@@ -227,7 +228,7 @@ SCHEMA = ('''
         PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Node_Group (
+    CREATE TABLE IF NOT EXISTS Node_Group (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         Node_Object_Type INTEGER NOT NULL DEFAULT 0,
@@ -236,7 +237,7 @@ SCHEMA = ('''
         PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Node_Group_Object (
+    CREATE TABLE IF NOT EXISTS Node_Group_Object (
         Parent_Type INTEGER NOT NULL DEFAULT 0,
         Parent_RID INTEGER NOT NULL DEFAULT 0,
         Object_Type INTEGER NOT NULL DEFAULT 0,
@@ -248,7 +249,7 @@ SCHEMA = ('''
         PRIMARY KEY(Parent_Type,Parent_RID,Object_Type,Object_RID,Object_RID_2)
     );
 ''', '''
-    CREATE TABLE Message_Signal (
+    CREATE TABLE IF NOT EXISTS Message_Signal (
         Message INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
         "Offset" INTEGER NOT NULL DEFAULT 0,
@@ -260,7 +261,7 @@ SCHEMA = ('''
         FOREIGN KEY(Signal) REFERENCES Signal(RID)
     );
 ''', '''
-    CREATE TABLE Network (
+    CREATE TABLE IF NOT EXISTS Network (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         "Comment" VARCHAR(255),
@@ -269,7 +270,7 @@ SCHEMA = ('''
         PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Network_Node (
+    CREATE TABLE IF NOT EXISTS Network_Node (
         Network INTEGER NOT NULL DEFAULT 0,
         Node INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Network,Node),
@@ -277,7 +278,7 @@ SCHEMA = ('''
         FOREIGN KEY(Node) REFERENCES Node(RID)
     );
 ''', '''
-    CREATE TABLE Node_RxSig (
+    CREATE TABLE IF NOT EXISTS Node_RxSig (
         Node INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Signal),
@@ -285,7 +286,7 @@ SCHEMA = ('''
         FOREIGN KEY(Signal) REFERENCES Signal(RID)
     );
 ''', '''
-    CREATE TABLE Node_RxSignal (
+    CREATE TABLE IF NOT EXISTS Node_RxSignal (
         Node INTEGER NOT NULL DEFAULT 0,
         Message INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
@@ -295,7 +296,7 @@ SCHEMA = ('''
         FOREIGN KEY(Signal) REFERENCES Signal(RID)
     );
 ''', '''
-    CREATE TABLE Node_TxMessage (
+    CREATE TABLE IF NOT EXISTS Node_TxMessage (
         Node INTEGER NOT NULL DEFAULT 0,
         Message INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Message),
@@ -303,7 +304,7 @@ SCHEMA = ('''
         FOREIGN KEY(Node) REFERENCES Node(RID)
     );
 ''', '''
-    CREATE TABLE Node_TxSig (
+    CREATE TABLE IF NOT EXISTS Node_TxSig (
         Node INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Signal),
@@ -311,7 +312,7 @@ SCHEMA = ('''
         FOREIGN KEY(Signal) REFERENCES Signal(RID)
     );
 ''', '''
-    CREATE TABLE Object_Valuetable (
+    CREATE TABLE IF NOT EXISTS Object_Valuetable (
         Object_Type INTEGER NOT NULL DEFAULT 0,
         Object_RID INTEGER NOT NULL DEFAULT 0,
         Valuetable INTEGER NOT NULL DEFAULT 0,
@@ -319,7 +320,7 @@ SCHEMA = ('''
         FOREIGN KEY(Valuetable) REFERENCES Valuetable(RID)
     );
 ''', '''
-    CREATE TABLE Value_Description (
+    CREATE TABLE IF NOT EXISTS Value_Description (
         Valuetable INTEGER NOT NULL DEFAULT 0,
         Value FLOAT8 NOT NULL DEFAULT 0,
         Value_Description VARCHAR(255) NOT NULL,
@@ -327,21 +328,21 @@ SCHEMA = ('''
         FOREIGN KEY(Valuetable) REFERENCES Valuetable(RID)
     );
 ''', '''
-    CREATE TABLE Valuetable (
+    CREATE TABLE IF NOT EXISTS Valuetable (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         "Comment" VARCHAR(255),
         PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Vehicle (
+    CREATE TABLE IF NOT EXISTS Vehicle (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255) NOT NULL,
         "Comment" VARCHAR(255),
         PRIMARY KEY(RID)
     );
 ''', '''
-    CREATE TABLE Vehicle_ECU (
+    CREATE TABLE IF NOT EXISTS Vehicle_ECU (
         Vehicle INTEGER NOT NULL DEFAULT 0,
         ECU INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Vehicle,ECU),
@@ -349,7 +350,7 @@ SCHEMA = ('''
         FOREIGN KEY(Vehicle) REFERENCES Vehicle(RID)
     );
 ''', '''
-    CREATE TABLE Vehicle_Network (
+    CREATE TABLE IF NOT EXISTS Vehicle_Network (
         Vehicle INTEGER NOT NULL DEFAULT 0,
         Network INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Vehicle,Network),
@@ -357,7 +358,7 @@ SCHEMA = ('''
         FOREIGN KEY(Vehicle) REFERENCES Vehicle(RID)
     );
 ''', '''
-    CREATE TABLE Versioninfo (
+    CREATE TABLE IF NOT EXISTS Versioninfo (
         Obj_Type INTEGER NOT NULL DEFAULT 0,
         Obj_RID INTEGER NOT NULL DEFAULT 0,
         Version_Number INTEGER NOT NULL DEFAULT 0,
@@ -365,9 +366,9 @@ SCHEMA = ('''
         PRIMARY KEY(Obj_Type,Obj_RID)
     );
 ''', '''
-    CREATE VIEW schema AS SELECT * FROM sqlite_master;
+    CREATE VIEW IF NOT EXISTS schema AS SELECT * FROM sqlite_master;
 ''', '''
-    CREATE TABLE comments(
+    CREATE TABLE IF NOT EXISTS comments(
         id INTEGER NOT NULL DEFAULT 0,
         type CHAR(16),
         k0 CHAR(32),
@@ -376,13 +377,13 @@ SCHEMA = ('''
         PRIMARY KEY(id)
     );
 ''', '''
-    CREATE TEMPORARY TABLE EnvironmentVariablesData(
+    CREATE TEMPORARY TABLE IF NOT EXISTS EnvironmentVariablesData(
         name CHAR(256) NOT NULL,
         value INT NOT NULL,
         PRIMARY KEY(name)
     );
 ''','''
-    CREATE TABLE EnvVar_AccessNode (
+    CREATE TABLE IF NOT EXISTS EnvVar_AccessNode (
         EnvVar INTEGER NOT NULL DEFAULT 0,
         Node INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(EnvVar, Node),
@@ -390,6 +391,10 @@ SCHEMA = ('''
         FOREIGN KEY(Node) REFERENCES Node(RID)
     );
 ''', )
+
+DEFAULTS = (
+    "INSERT OR REPLACE INTO Node(RID, Name, Comment) VALUES(0, 'Vector__XXX', 'Dummy node for non-existent senders/receivers.')",
+)
 
 TRIGGER = (
 """

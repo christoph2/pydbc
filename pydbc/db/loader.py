@@ -259,9 +259,10 @@ class Loader(object):
             )
 
     def insertNodes(self, cur, nodes):
-        self.db.insertStatement(cur, "Node", "RID, Name", 0, "Vector__XXX")
+        #self.db.insertStatement(cur, "Node", "RID, Name", 0, "Vector__XXX")
         for node in nodes:
             cmt = self.db.fetchComment('BU', node)
+            print("\tNODE COMMENT:", cmt)
             self.db.insertStatement(cur, "Node", "Name, Comment", node, cmt)
 
     def insertMessageTransmitters(self, cur, transmitters):
