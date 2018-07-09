@@ -30,6 +30,7 @@ __version__ = '0.1.0'
 import logging
 import os
 
+#logging.basicConfig()
 
 class Logger(object):
 
@@ -39,11 +40,11 @@ class Logger(object):
     def __init__(self, name, level = logging.WARN):
         self.logger = logging.getLogger("{0}.{1}".format(self.LOGGER_BASE_NAME, name))
         self.logger.setLevel(level)
-        handler = logging.StreamHandler()
-        handler.setLevel(level)
-        formatter = logging.Formatter(self.FORMAT)
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
+        self.handler = logging.StreamHandler()
+        self.handler.setLevel(level)
+        self.formatter = logging.Formatter(self.FORMAT)
+        self.handler.setFormatter(self.formatter)
+        self.logger.addHandler(self.handler)
         self.lastMessage = None
         self.lastSeverity = None
 
