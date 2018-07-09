@@ -16,7 +16,7 @@ setup(
     author_email = 'cpu12.gems@googlemail.com',
     url = 'https://www.github.com/Christoph2/pydbc',
     packages = ['pydbc'],
-    install_requires = [ANTLR_RT, 'enum34', 'mock', 'mako', 'six'],
+    install_requires = [ANTLR_RT, 'enum34', 'mock', 'mako', 'wxPython'],
     #entry_points = {
     #    'console_scripts': [
     #            'vd_exporter = pyA2L.catalogue.vd_exporter:main'
