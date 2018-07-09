@@ -86,7 +86,7 @@ class dbcListener(ParseTreeListener):
             customAttributeDefinitions = ctx.customAttributeDefinitions().value,
             attributeDefaults = ctx.attributeDefaults().value,
             customAttributeDefaults = ctx.customAttributeDefaults().value,
-            attributeValues =ctx.attributeValues().value,
+            attributeValues = ctx.attributeValues().value,
             valueDescriptions = ctx.valueDescriptions().value,
             categoryDefinitions = ctx.categoryDefinitions().value,
             categories = ctx.categories().value,
@@ -191,7 +191,6 @@ class dbcListener(ParseTreeListener):
     def exitAccessNodes(self, ctx):
         nodes = [x.value for x in ctx.items]
         ctx.value = nodes
-        print("\tAN:", nodes)
 
     def exitEnvironmentVariablesData(self, ctx):
         ctx.value = [x.value for x in ctx.evars]
