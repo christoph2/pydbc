@@ -28,7 +28,7 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 
-from pydbc.db.schema import TABLES, VIEWS, SCHEMA, INDICES, TRIGGER
+from pydbc.db.schema import TABLES, VIEWS, SCHEMA, INDICES, TRIGGER, DEFAULTS
 
 from pydbc.logger import Logger
 
@@ -37,10 +37,6 @@ class Creator(object):
     def __init__(self, db):
         self.db = db
         self.logger = Logger('db.creator')
-
-    def run(self):
-        self.dropTables()
-        self.createSchema()
 
     def dropTables(self):
         cur = self.db.getCursor()
@@ -55,6 +51,7 @@ class Creator(object):
 
     def createSchema(self):
         cur = self.db.getCursor()
+        self.db.beginTransaction()
         cur.execute("PRAGMA foreign_keys = ON")
         cur.execute('PRAGMA synchronous = OFF')
         cur.execute('PRAGMA LOCKING_MODE = EXCLUSIVE')
@@ -64,7 +61,12 @@ class Creator(object):
         for item in SCHEMA:
             #print(item)
             res = cur.execute(item)
+        self.insertDefaults()
         self.db.commitTransaction()
+
+    def insertDefaults(self):
+        for item in DEFAULTS:
+            res = cur.execute(item)
 
     def createIndices(self):
         cur = self.db.getCursor()
