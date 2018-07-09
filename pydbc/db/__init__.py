@@ -34,26 +34,30 @@ from collections import namedtuple
 import itertools
 import logging
 from pprint import pprint
+import re
 import sqlite3
 import types
 
 from pydbc.logger import Logger
 
+#logging.basicConfig()
 
-from profilehooks import profile
+def regexer(expr, value):
+    return re.search(expr, value, re.UNICODE) is not None
 
-logging.basicConfig()
-
-#@profile(immediate = True)
 class CanDatabase(object):
 
-    def __init__(self, filename = ":memory:"):
+    def __init__(self, filename = ":memory:", logLevel = 'INFO'):
         self.conn = sqlite3.connect(filename, isolation_level = None)
+        self.conn.create_function("REGEXP", 2, regexer)
         self.conn.isolation_level = None
         self.filename = filename
-        self.logger = Logger('db')
+        self.logger = Logger('db', level = logLevel)
 
     def __del__(self):
+        self.conn.close()
+
+    def close(self):
         self.conn.close()
 
     def getCursor(self):
@@ -100,6 +104,24 @@ class CanDatabase(object):
         result = cur.fetchone()[0]
         return result
 
+    def fetchNodenameByRid(self, rid):
+        cur = self.getCursor()
+        cur.execute("""SELECT Name FROM Node WHERE RID = ?""", [rid])
+        result = cur.fetchone()[0]
+        return result
+
+    def fetchEnvvarNameByRid(self, rid):
+        cur = self.getCursor()
+        cur.execute("""SELECT Name FROM EnvVar WHERE RID = ?""", [rid])
+        result = cur.fetchone()[0]
+        return result
+
+    def fetchMessageIdByRid(self, rid):
+        cur = self.getCursor()
+        cur.execute("""SELECT Message_ID FROM Message WHERE RID = ?""", [rid])
+        result = cur.fetchone()[0]
+        return result
+
     def fetchMessageIdById(self, messageId):
         cur = self.getCursor()
         cur.execute("""SELECT RID FROM Message WHERE Message_ID = ?""", [messageId])
@@ -123,6 +145,19 @@ class CanDatabase(object):
         cur.execute("""SELECT RID FROM Message WHERE Name = ?""", [name])
         result = cur.fetchone()[0]
         return result
+
+    def fetchSignalByRid(self, rid):
+        cur = self.getCursor()
+        cur.execute("""SELECT * FROM Signal WHERE RID = ?""", [rid])
+        result = cur.fetchone()
+        return self.createDictFromRow(result, cur.description)
+
+    def fetchMessageSignalByRid(self, rid):
+        cur = self.getCursor()
+        cur.execute("""select t2.name as Name, (select message_id from message where rid = message) as Message_ID from message_signal as t1,
+            signal as t2 where t1.signal=t2.rid and signal = ?""", [rid])
+        result = cur.fetchone()
+        return self.createDictFromRow(result, cur.description)
 
     def fetchSignalReceivers(self, messageId, signalId):
         cur = self.getCursor()
@@ -159,15 +194,25 @@ class CanDatabase(object):
         while True:
             row = cur.fetchone()
             if row is None:
-                raise StopIteration
+                return
             else:
                 yield self.createDictFromRow(row, cur.description)
 
+    def fetchSingleRow(self, tname, column, where):
+        cur = self.getCursor()
+        cur.execute("""SELECT {} FROM {} WHERE {}""".format(column, tname, where))
+        row = cur.fetchone()
+        if row is None:
+            return []
+        return self.createDictFromRow(row, cur.description)
+
     def fetchSingleValue(self, tname, column, where):
         cur = self.getCursor()
-        cur.execute("""SELECT {} FROM {} WHERE {} = ?""".format(column, tname), [where])
-        result = cur.fetchone()[0]
-        return result
+        cur.execute("""SELECT {} FROM {} WHERE {}""".format(column, tname, where))
+        result = cur.fetchone()
+        if result is None:
+            return []
+        return result[0]
 
     def queryStatement(self, tname, columns = None, where = None, orderBy = None):
         pass
@@ -181,31 +226,15 @@ class CanDatabase(object):
         except sqlite3.DatabaseError as e:
             msg = "{} - Data: {}".format(str(e), values)
             self.logger.error(msg)
-            return False
+            return None
         else:
-            return True
+            return self.lastInsertedRowId(cur, tname)
 
     def insertStatement(self, cur, tname, columns, *values):
         return self.insertOrReplaceStatement(True, cur, tname, columns, *values)
 
     def replaceStatement(self, cur, tname, columns, *values):
         return self.insertOrReplaceStatement(False, cur, tname, columns, *values)
-        #try:
-        #    placeholder = ','.join("?" * len(values))
-        #    stmt = "INSERT OR FAIL INTO {}({}) VALUES({})".format(tname, columns, placeholder)
-        #    cur.execute(stmt, [*values])
-        #except sqlite3.DatabaseError as e:
-        #    msg = "{} - Data: {}".format(str(e), values)
-        #    self.logger.error(msg)
-        #    return False
-        #else:
-        #    return True
-
-    def fetchSignalValue(self):
-        pass
-
-    def fetchSignalValues(self):
-        pass
 
     def fetchFromTable(self, tname, columns = None, where = None, orderBy = None):
         cur = self.getCursor()
@@ -215,9 +244,15 @@ class CanDatabase(object):
         while True:
             row = cur.fetchone()
             if row is None:
-                raise StopIteration
+                return
             else:
                 yield self.createDictFromRow(row, cur.description)
+
+    def fetchSignalValue(self):
+        pass
+
+    def fetchSignalValues(self):
+        pass
 
     def multiplexIndicator(self, value):
         if value['Multiplexor_Signal']:
@@ -238,6 +273,9 @@ class CanDatabase(object):
 
     def attributeDefinitions(self):
         yield from self.fetchFromTable("Attribute_Definition")
+
+    def attributeValues(self):
+        yield from self.fetchFromTable("Attribute_Value")
 
     def environmentVariables(self):
         yield from self.fetchFromTable("EnvVar")
@@ -273,6 +311,9 @@ class CanDatabase(object):
             else:
                 yield row[0]
 
+    def attributeDefintion(self, attributeId):
+        yield from self.fetchFromTable("Attribute_Definition", where = "RID = {}".format(attributeId))
+
     def valueDescription(self, tableId, srt = True):
         orderBy = "value desc" if srt else None
         yield from self.fetchFromTable("Value_Description", where = "Valuetable = {}".format(tableId), orderBy = orderBy)
@@ -297,3 +338,4 @@ class CanDatabase(object):
                 yield((messages[kr], (senders)))
         else:
             return []
+
