@@ -369,12 +369,12 @@ SCHEMA = ('''
     CREATE VIEW IF NOT EXISTS schema AS SELECT * FROM sqlite_master;
 ''', '''
     CREATE TABLE IF NOT EXISTS comments(
-        id INTEGER NOT NULL DEFAULT 0,
+        rid INTEGER NOT NULL DEFAULT 0,
         type CHAR(16),
         k0 CHAR(32),
         k1 CHAR(32),
         comment BLOB,
-        PRIMARY KEY(id)
+        PRIMARY KEY(rid)
     );
 ''', '''
     CREATE TEMPORARY TABLE IF NOT EXISTS EnvironmentVariablesData(
