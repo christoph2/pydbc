@@ -6,11 +6,10 @@ import sys
 from setuptools import find_packages
 from glob import glob
 
-ANTLR_VERSION = '=4.7.1'
-ANTLR_RT = "{}".format("antlr4-python3-runtime" if sys.version_info.major == 3 
-    else "antlr4-python2-runtime", ANTLR_VERSION)
+ANTLR_VERSION = '4.7.1'
+#ANTLR_RT = "{}".format("antlr4-python3-runtime" if sys.version_info.major == 3 
+#    else "antlr4-python2-runtime", ANTLR_VERSION)
 
-print(ANTLR_RT)
 
 setup(
     name = 'pydbc',
@@ -20,10 +19,12 @@ setup(
     author_email = 'cpu12.gems@googlemail.com',
     url = 'https://www.github.com/Christoph2/pydbc',
     packages = ['pydbc'],
-    install_requires = [ANTLR_RT, 'enum34', 'mock', 'mako', 'wxPython>=4.0.0'],
+    install_requires = ["antlr4-python3-runtime={}".format(ANTLR_VERSION), 
+        'enum34', 'mock', 'mako', 'wxPython>=4.0.0'
+    ],
     #entry_points = {
     #    'console_scripts': [
-    #            'vd_exporter = pyA2L.catalogue.vd_exporter:main'
+    #            'dbc_import = pydbc.scripts.dbc_import:main'
     #    ],
     #},
     #data_files = [
