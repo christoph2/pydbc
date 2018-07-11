@@ -51,6 +51,7 @@ class CanDatabase(object):
         self.conn = sqlite3.connect(filename, isolation_level = None)
         self.conn.create_function("REGEXP", 2, regexer)
         self.conn.isolation_level = None
+        self.setPragmas()
         self.filename = filename
         self.logger = Logger('db', level = logLevel)
 
@@ -63,6 +64,22 @@ class CanDatabase(object):
     def getCursor(self):
         return self.conn.cursor()
 
+    def setPragma(self, cur, key, value):
+        cur.execute("PRAGMA {} = {}".format(key, value))
+
+    def setPragmas(self):
+        cur = self.getCursor()
+        self.setPragma(cur, "FOREIGN_KEYS", "ON")
+        self.setPragma(cur, "CACHE_SIZE", "-4000")
+        self.setPragma(cur, "SYNCHRONOUS", "OFF")   # FULL
+        self.setPragma(cur, "LOCKING_MODE", "EXCLUSIVE")    # NORMAL
+        self.setPragma(cur, "TEMP_STORE", "MEMORY")
+        """
+
+        #self.cur.execute('PRAGMA journal_mode = MEMORY')   # TRUNCATE
+        #self.cur.execute('PRAGMA journal_mode = WAL')
+        """
+
     def beginTransaction(self):
         self.conn.execute("BEGIN TRANSACTION")
 
@@ -74,8 +91,10 @@ class CanDatabase(object):
 
     def lastInsertedRowId(self, cur, table):
         rowid = cur.lastrowid
-        result = cur.execute("SELECT RID FROM {} WHERE rowid = ?".format(table), [rowid]).fetchone()
-        return result[0]
+        #result = cur.execute("SELECT RID FROM {} WHERE rowid = ?".format(table), [rowid]).fetchone()
+        #print("lastInsertedRowId [{}] ==> {}, {}".format(table, rowid, result))
+        #return result[0]
+        return rowid
 
     def fetchComment(self, tp, k0, k1 = None):
         cur = self.getCursor()

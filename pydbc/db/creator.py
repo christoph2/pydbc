@@ -36,7 +36,7 @@ class Creator(object):
 
     def __init__(self, db):
         self.db = db
-        self.logger = Logger('db.creator')
+        self.logger = Logger(__name__)
 
     def dropTables(self):
         cur = self.db.getCursor()
@@ -52,19 +52,21 @@ class Creator(object):
     def createSchema(self):
         cur = self.db.getCursor()
         self.db.beginTransaction()
-        cur.execute("PRAGMA foreign_keys = ON")
-        cur.execute('PRAGMA synchronous = OFF')
-        cur.execute('PRAGMA LOCKING_MODE = EXCLUSIVE')
+
+        #cur.execute("PRAGMA foreign_keys = ON")
+        #cur.execute('PRAGMA synchronous = OFF')
+        #cur.execute('PRAGMA LOCKING_MODE = EXCLUSIVE')
         #self.cur.execute('PRAGMA journal_mode = MEMORY')
         #self.cur.execute('PRAGMA journal_mode = WAL')
-        self.db.beginTransaction()
+
         for item in SCHEMA:
-            #print(item)
+            self.logger.info("Executing SQL statement: {}".format(item))
+            #print("Executing SQL statement: {}".format(item))
             res = cur.execute(item)
-        self.insertDefaults()
+        self.insertDefaults(cur)
         self.db.commitTransaction()
 
-    def insertDefaults(self):
+    def insertDefaults(self, cur):
         for item in DEFAULTS:
             res = cur.execute(item)
 
