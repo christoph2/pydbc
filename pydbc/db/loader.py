@@ -284,8 +284,7 @@ class Loader(object):
             transmitter = msg['transmitter']
             tid = self.db.fetchNodeId(transmitter)
 
-            self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment, Sender", name, mid, dlc, cmt, tid)
-            mrid = self.db.lastInsertedRowId(cur, "Message")
+            mrid = self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment, Sender", name, mid, dlc, cmt, tid)
             self.db.insertStatement(cur, "Node_TxMessage", "Node, Message", tid, mrid)
             for signal in signals:
                 name = signal['name']
