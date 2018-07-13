@@ -27,6 +27,7 @@ __copyright__ = """
 __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
+import itertools
 
 from pydbc.logger import Logger
 from pydbc.types import AttributeType, ValueType
@@ -35,7 +36,7 @@ class Loader(object):
 
     def __init__(self, db):
         self.db = db
-        self.logger = Logger('db.loader')
+        self.logger = Logger(__name__)
 
     def insertValues(self, tree):
         cur = self.db.getCursor()
@@ -44,7 +45,8 @@ class Loader(object):
         self.insertComments(cur, tree['comments'])
         self.insertValueTables(cur, tree['valueTables'])
         self.insertNodes(cur, tree['nodes'])
-        self.insertMessages(cur, tree['messages'])
+        valueTypes = self.processExtendedSignalValueTypes(cur, tree['signalExtendedValueTypeList'])
+        self.insertMessages(cur, tree['messages'], valueTypes)
         self.insertEnvironmentVariables(cur, tree['environmentVariables'])
         self.insertMessageTransmitters(cur, tree['messageTransmitters'])
         self.insertValueDescriptions(cur, tree['valueDescriptions'])
@@ -52,6 +54,17 @@ class Loader(object):
         self.insertAttributeDefinitions(cur, tree['attributeDefinitions'], defaults)
         self.insertAttributes(cur, tree['attributeValues'])
         self.db.commitTransaction()
+
+    def processExtendedSignalValueTypes(self, cur, valueTypes):
+        keyFunc = lambda k: k['messageID']
+        result = dict()
+        valueTypes = sorted(valueTypes, key = keyFunc)
+        for group in itertools.groupby(valueTypes, keyFunc):
+            key, grouper = group
+            result[key] = {}
+            for item in grouper:
+                result[key][item['signalName']] = item['valueType']
+        return result
 
     def insertValueTables(self, cur, tables):
         for table in tables:
@@ -102,16 +115,10 @@ class Loader(object):
                 name = item['signalName']
                 otype = 0
                 rid = self.getSignalByName(cur, messageID, name)
-                #  rid = cur.execute("""SELECT t1.RID FROM signal AS t1, Message_Signal AS t2 where
-                #      t1.RID = t2.signal AND t1.name = ? AND t2.message = (SELECT RID FROM message
-                #      WHERE message_id = ?)""", [name, messageID]
-                #  ).fetchone()[0]
-                #print("\tS-RID", messageID, rid, item, flush = True)
             elif tp == 'EV':
                 name = item['envVarName']
                 otype = 1
                 rid = cur.execute("SELECT RID FROM EnvVar WHERE name = ?", [name]).fetchone()[0]
-                #print("\tE-RID", rid, item, flush = True)
             self.db.insertStatement(cur, "Valuetable", "Name", name)
             vtid = self.db.lastInsertedRowId(cur, "Valuetable")
             self.db.insertStatement(cur, "Object_Valuetable", "Object_Type, Object_RID, Valuetable", otype, rid, vtid)
@@ -128,7 +135,7 @@ class Loader(object):
             text = comment['comment']
             key = comment['key']
             k0 = k1 = None
-            if tp == 'BU':
+            if tp == 'BU':  # TODO: dict
                 k0 = key
             elif tp == 'BO':
                 k0 = key
@@ -251,18 +258,14 @@ class Loader(object):
             elif attrType == AttributeType.GENERAL:
                 rid = 0
             else:
-                #print("\t???", attrType)
                 pass
-            #print("\tATT:", rid, aid, attrType, attr)
             self.db.insertStatement(cur, "Attribute_Value", "Object_ID, Attribute_Definition, Num_Value, String_Value",
                 rid, aid, numValue, stringValue
             )
 
     def insertNodes(self, cur, nodes):
-        #self.db.insertStatement(cur, "Node", "RID, Name", 0, "Vector__XXX")
         for node in nodes:
             cmt = self.db.fetchComment('BU', node)
-            print("\tNODE COMMENT:", cmt)
             self.db.insertStatement(cur, "Node", "Name, Comment", node, cmt)
 
     def insertMessageTransmitters(self, cur, transmitters):
@@ -272,18 +275,17 @@ class Loader(object):
                 nid = self.db.fetchNodeId(name)
                 self.db.replaceStatement(cur, "Node_TxMessage", "Node, Message", nid, mid)
 
-    def insertMessages(self, cur, messages):
+    def insertMessages(self, cur, messages, valueTypes):
         for msg in messages:
             name = msg['name']
             mid = msg['messageID']
-            # 0xCFFFFFFF
             dlc = msg['dlc']
             signals = msg['signals']
             cmt = self.db.fetchComment('BO', mid)
 
             transmitter = msg['transmitter']
             tid = self.db.fetchNodeId(transmitter)
-
+            valueTypesForMessage = valueTypes.get(mid, {})
             mrid = self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment, Sender", name, mid, dlc, cmt, tid)
             self.db.insertStatement(cur, "Node_TxMessage", "Node, Message", tid, mrid)
             for signal in signals:
@@ -291,13 +293,15 @@ class Loader(object):
                 startBit = signal['startBit']
                 signalSize = signal['signalSize']
                 byteOrder = signal['byteOrder']
-                valueType = signal['valueType']
+                sign = signal['sign']
                 factor = signal['factor']
                 offset = signal['offset']
                 minimum = signal['minimum']
                 maximum = signal['maximum']
                 unit = signal['unit']
                 receiver = signal['receiver']
+                valueTypeForSignal = valueTypesForMessage.get(name, None)
+                valueType = valueTypeForSignal if valueTypeForSignal is not None else 0
                 multiplexerIndicator = signal['multiplexerIndicator']
                 if multiplexerIndicator:
                     multiplexorSignal = 1 if multiplexerIndicator == 'M' else 0
@@ -313,9 +317,9 @@ class Loader(object):
                     multiplexorValue = None
                 initialValue = 0.0
                 cmt = self.db.fetchComment('SG', mid, name)
-                self.db.insertStatement(cur, "Signal", """Name, Bitsize, Byteorder, Valuetype, Initialvalue, Formula_Factor, Formula_Offset,
+                self.db.insertStatement(cur, "Signal", """Name, Bitsize, Byteorder, Sign, Valuetype, Initialvalue, Formula_Factor, Formula_Offset,
                     Minimum, Maximum, Unit, Comment""",
-                    name, signalSize, byteOrder, valueType, initialValue, factor, offset, minimum, maximum, unit, cmt
+                    name, signalSize, byteOrder, sign, valueType, initialValue, factor, offset, minimum, maximum, unit, cmt
                 )
                 srid = self.db.lastInsertedRowId(cur, "Signal")
                 self.db.insertStatement(cur, "Message_Signal", "Message, Signal, Offset, Multiplexor_Signal, Multiplex_Dependent, Multiplexor_Value",

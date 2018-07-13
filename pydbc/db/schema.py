@@ -114,6 +114,7 @@ SCHEMA = ('''
         Name VARCHAR(255) NOT NULL,
         Bitsize INTEGER DEFAULT 0,
         Byteorder INTEGER DEFAULT 0,
+        Sign INTEGER DEFAULT 1,
         Valuetype INTEGER DEFAULT 0,
         Initialvalue FLOAT8 DEFAULT 0,
         Formula_Factor FLOAT8 DEFAULT 1,

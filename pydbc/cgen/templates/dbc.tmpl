@@ -52,7 +52,7 @@ BO_ ${msg['Message_ID']} ${msg['Name']}: ${msg['DLC']} ${db.nodeName(msg['Sender
 %for signal in db.signals(msg['RID']):
 <% receivers = db.fetchSignalReceivers(msg['RID'], signal['RID']) %>\
  SG_ ${signal['Name']} ${db.multiplexIndicator(signal)}: ${signal['Offset']}|${signal['Bitsize']}@${signal['Byteorder']}\
-${"-" if signal['Valuetype'] == -1 else "+"} \
+${"-" if signal['Sign'] == -1 else "+"} \
 (${"{:.14G}".format(signal['Formula_Factor'])},${"{:.14G}".format(signal['Formula_Offset'])}) [${"{:.14G}".format(signal['Minimum'])}|\
 ${"{:.14G}".format(signal['Maximum'])}] "${signal['Unit']}" ${db.spaceBeforeNodes(receivers)}${','.join(receivers)}
 %endfor

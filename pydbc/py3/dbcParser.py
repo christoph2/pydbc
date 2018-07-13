@@ -1018,7 +1018,7 @@ class dbcParser ( Parser ):
             self.startBit = None # IntValueContext
             self.signalSize = None # IntValueContext
             self.byteOrder = None # IntValueContext
-            self.valueType = None # Token
+            self.sign = None # Token
             self.factor = None # NumberContext
             self.offset = None # NumberContext
             self.minimum = None # NumberContext
@@ -1111,7 +1111,7 @@ class dbcParser ( Parser ):
             self.state = 179
             localctx.byteOrder = self.intValue()
             self.state = 180
-            localctx.valueType = self.match(dbcParser.SIGN)
+            localctx.sign = self.match(dbcParser.SIGN)
             self.state = 181
             self.match(dbcParser.T__8)
             self.state = 182

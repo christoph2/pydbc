@@ -119,7 +119,7 @@ class dbcListener(ParseTreeListener):
 
     def exitSignal(self, ctx):
         ctx.value = OrderedDict(name = ctx.signalName.value, startBit = ctx.startBit.value, signalSize = ctx.signalSize.value,
-            byteOrder = ctx.byteOrder.value, valueType = -1 if ctx.valueType.text == '-' else +1, factor = ctx.factor.value, offset = ctx.offset.value,
+            byteOrder = ctx.byteOrder.value, sign = -1 if ctx.sign.text == '-' else +1, factor = ctx.factor.value, offset = ctx.offset.value,
             minimum = ctx.minimum.value, maximum = ctx.maximum.value, unit = ctx.unit.value, receiver = ctx.rcv.value,
             multiplexerIndicator = ctx.mind.value if ctx.mind else None
         )

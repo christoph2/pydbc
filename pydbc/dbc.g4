@@ -80,7 +80,7 @@ message :
 
 signal:
     ma = 'SG_' signalName = identifierValue mind = multiplexerIndicator? ':' startBit = intValue '|' signalSize = intValue '@'
-    byteOrder = intValue /*('0' | '1')*/ valueType = SIGN
+    byteOrder = intValue /*('0' | '1')*/ sign = SIGN
     '(' factor = number ',' offset = number ')'
     '[' minimum = number '|' maximum = number ']'
     unit = stringValue rcv = receiver
