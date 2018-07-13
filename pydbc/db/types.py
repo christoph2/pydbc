@@ -46,9 +46,16 @@ class ValueType(enum.IntEnum):
     ENUM = 4
 
 
+class SignalType(enum.IntEnum):
+    INT = 0
+    FLOAT32 = 1
+    FLOAT64 = 2
+
+
 class IdentifierType(enum.IntEnum):
     STANDARD = 0
     EXTENDED = 1
+
 
 EXTENDED_ID_MASK = 0x80000000
 
