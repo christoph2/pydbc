@@ -55,7 +55,6 @@ TABLES = (
     "Node_RxSignal",
     "Node_TxMessage",
     "Node_TxSig",
-    "Node",
     "Message",
     "Signal",
     "Attribute_Value",
@@ -79,6 +78,8 @@ TABLES = (
     "Versioninfo",
     "comments",
     "EnvironmentVariablesData",
+
+    "Node",
 )
 
 VIEWS = (
