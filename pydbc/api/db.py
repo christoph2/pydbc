@@ -35,6 +35,7 @@ from pydbc.types import AttributeType, ValueType
 from pydbc.db.types import CANAddress
 from pydbc.db.creator import Creator
 from pydbc.db import CanDatabase
+from pydbc.api.attribute import AttributeDefinition, Value, AttributeValue
 from pydbc.logger import Logger
 
 
@@ -43,63 +44,6 @@ DB_EXTENSION = "vndb"
 
 
 class DuplicateRecordError(Exception): pass
-
-
-class Value:
-    """
-    """
-
-    __slots__ = ['attr', '_value', 'default']
-
-    def __init__(self, attr, value, default):
-        if attr.valueType in (ValueType.HEX, ValueType.INT):
-            self._value = int(value)
-        elif attr.valueType == ValueType.FLOAT:
-            self._value = float(value)
-        elif attr.valueType == ValueType.STRING:
-            self._value = str(value)
-        elif attr.valueType == ValueType.ENUM:
-            self._value = str(value)
-        else:
-            self._value = value
-        self.attr = attr
-        self.default = default
-
-    def _typeCheck(self, value):
-        vt = self.attr.valueType
-        if vt in (ValueType.INT, ValueType.HEX):
-            if not isinstance(value, int):
-                raise TypeError("Value must be of type 'int'")
-        elif vt == ValueType.FLOAT:
-            if not isinstance(value, float):
-                raise TypeError("Value must be of type 'float'")
-        elif vt == ValueType.STRING:
-            if not isinstance(value, str):
-                raise TypeError("Value must be of type 'str'")
-        elif vt == ValueType.ENUM:
-            if not isinstance(value, str):
-                raise TypeError("Value must be of type 'str'")
-        self._value = value
-
-    def _rangeCheck(self, value):
-        #if :
-        pass
-
-    def _setValue(self, value):
-        print("Setting value", value)
-        self._typeCheck(value)
-        self._rangeCheck(value)
-
-    def _getValue(self):
-        return self._value
-
-    value = property(_getValue, _setValue)
-
-    def __str__(self):
-        value = "'{}'".format(self._value) if self.attr.valueType in (ValueType.STRING, ValueType.ENUM) else self.value
-        return "Value({1}: {0} [default = {2}])".format(value, self.attr.valueType.name, self.default)
-
-    __repr__ = __str__
 
 
 class BaseObject:
@@ -174,7 +118,7 @@ class BaseObject:
             #    value = attr.defaultNumber
             #elif valueType in (ValueType.STRING, ValueType.ENUM):
             #    value = attr.defaultString
-        return Value(attr, value, default)
+        return Value(oid, attr, value, default)
 
     @property
     def attributes(self):
@@ -182,12 +126,14 @@ class BaseObject:
         """
         for item in self.applicableAttributes():
             attr = AttributeDefinition(item)
+
             valueType = attr.valueType
             name = attr.name
             comment = attr.comment
             objectType = attr.objectType
             rid = attr.rid
             limits = attr.limits
+
             value = self._attributeValue(self.getKey(), attr, valueType)
             yield AttributeValue(objectType, rid, name, value, comment)
 
@@ -213,93 +159,6 @@ class BaseObject:
         Reload after rollback.
         """
         pass
-
-
-class AttributeDefinition:
-
-    def __init__(self, attr):
-        self.valueType = ValueType(attr['Valuetype'])
-        self.name = attr['Name']
-        self.comment = attr['Comment']
-        self.objectType = AttributeType(attr['Objecttype'])
-        self.rid = attr['RID']
-        self.limits = Limits(attr['Minimum'], attr['Maximum'])
-        self.enumValues = [ev for ev in attr['Enumvalues'].split(";")] if attr['Enumvalues'] else []
-
-        if self.valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
-            self.default = attr['Default_Number']
-        elif self.valueType in (ValueType.STRING, ValueType.ENUM):
-            self.default = attr['Default_String']
-
-        self.defaultNumber = attr['Default_Number']
-        self.defaultString = attr['Default_String']
-
-    def __str__(self):
-        comment = '' if self.comment is None else self.comment
-        return "{}(name = '{}', objectType = {}, valueType = {}, limits = {}, default = {}, values = {}, comment = '{}')".format(
-            self.__class__.__name__, self.name, self.objectType.name, self.valueType.name, self.limits, self.default,
-            self.enumValues, comment
-        )
-
-    __repr__ = __str__
-
-class AttributeValue:
-
-    def __init__(self, objectType, rid, name, value, comment):
-        self.objectType = objectType
-        self.rid = rid
-        self.name = name
-        self._value = value
-
-    def update(self):
-        pass
-
-    def reset(self):
-        """Reset attribute value to default.
-        """
-        pass
-
-    def _setValue(self, value):
-        self._value.value = value
-
-    def _getValue(self):
-        return self._value.value
-
-    value = property(_getValue, _setValue)
-
-    def __str__(self):
-        return "{}('{}', {})".format(self.__class__.__name__, self.name, self._value)
-
-    __repr__ = __str__
-
-
-class Limits:
-
-    def __init__(self, min, max):
-        self._min = min
-        self._max = max
-
-    def getMin(self):
-        return self._min
-
-    def setMin(self, value):
-        self._min = value
-
-    def getMax(self):
-        return self._max
-
-    def setMax(self, value):
-        self._max = value
-
-    min = property(getMin, setMin)
-    max = property(getMax, setMax)
-
-    def __str__(self):
-        minimum = "N/A" if self.min is None else self.min
-        maximum = "N/A" if self.max is None else self.max
-        return "{}(min = {}, max = {})".format(self.__class__.__name__, minimum, maximum)
-
-    __repr__ = __str__
 
 
 class Node(BaseObject):
