@@ -77,6 +77,7 @@ def main():
 
     # "-k" help = "keep directory -- otherwise create db in current directory"
     # "-l" loglevel default = "warn"
+    # "-d" debuglevel
     
 
     args = parser.parse_args()
@@ -94,9 +95,8 @@ def main():
 
     pa = dbc.ParserWrapper('dbc', 'dbcfile')
 
-    fname = sys.argv[1]
-    print(fname)
-    tree = pa.parseFromFile(fname, trace = False)
+#    print("NAMES:", sys.argv[1], args.dbcfile, fname)
+    tree = pa.parseFromFile(args.dbcfile, trace = False)
 
     print("Finished ANTLR parsing.")
 

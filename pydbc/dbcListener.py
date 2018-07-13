@@ -353,8 +353,6 @@ class dbcListener(ParseTreeListener):
             di = OrderedDict(type = 'EV', envVarname = evName)
         ctx.value = OrderedDict(category = category, **di)
 
-
-
     def exitIntValue(self, ctx):
         ctx.value = int(ctx.i.text) if ctx.i else None
 
