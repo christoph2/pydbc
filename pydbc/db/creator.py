@@ -27,9 +27,9 @@ __copyright__ = """
 __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
+import sqlite3
 
 from pydbc.db.schema import TABLES, VIEWS, SCHEMA, INDICES, TRIGGER, DEFAULTS
-
 from pydbc.logger import Logger
 
 class Creator(object):
@@ -42,11 +42,19 @@ class Creator(object):
         cur = self.db.getCursor()
         self.db.beginTransaction()
         for item in TABLES:
-            #print(item)
-            res = cur.execute("DROP TABLE IF EXISTS {}".format(item))
+            self.logger.debug("Dropping table '{}'.".format(item))
+            try:
+                cur.execute("DROP TABLE IF EXISTS {}".format(item))
+            except sqlite3.DatabaseError as e:
+                self.logger.error("Deletion of table '{}' failed : '{}'".format(item, str(e)))
+                raise
         for item in VIEWS:
-            #print(item)
-            res = cur.execute("DROP VIEW IF EXISTS {}".format(item))
+            self.logger.debug("Dropping view '{}'.".format(item))
+            try:
+                cur.execute("DROP VIEW IF EXISTS {}".format(item))
+            except sqlite3.DatabaseError as e:
+                self.logger.error("Deletion of view '{}' failed : '{}'".format(item, str(e)))
+                raise
         self.db.commitTransaction()
 
     def createSchema(self):
