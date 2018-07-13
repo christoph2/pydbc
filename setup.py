@@ -7,9 +7,6 @@ from setuptools import find_packages
 from glob import glob
 
 ANTLR_VERSION = '4.7.1'
-#ANTLR_RT = "{}".format("antlr4-python3-runtime" if sys.version_info.major == 3 
-#    else "antlr4-python2-runtime", ANTLR_VERSION)
-
 
 setup(
     name = 'pydbc',
@@ -19,18 +16,17 @@ setup(
     author_email = 'cpu12.gems@googlemail.com',
     url = 'https://www.github.com/Christoph2/pydbc',
     packages = ['pydbc'],
-    install_requires = ["antlr4-python3-runtime={}".format(ANTLR_VERSION), 
+    install_requires = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 
         'enum34', 'mock', 'mako', 'wxPython>=4.0.0'
     ],
-    #entry_points = {
-    #    'console_scripts': [
-    #            'dbc_import = pydbc.scripts.dbc_import:main'
-    #    ],
-    #},
-    #data_files = [
-    #        ('pya2l/config', glob('pya2l/config/*.*')),
-    #        ('pya2l/imagez', glob('pya2l/imagez/*.bin')),
-    #],
+    entry_points = {
+        'console_scripts': [
+                'dbc_importer = pydbc.scripts.dbc_importer:main'
+        ],
+    },
+    data_files = [
+        ('cgen/templates/', glob('cgen/templates/*.tmpl')),
+    ],
     test_suite="pydbc.tests"
 )
 
