@@ -114,22 +114,22 @@ class Value:
     """
     """
 
-    __slots__ = ['attr', 'objectID', '_value', 'default']
+    __slots__ = ['parent', '_value', 'default']
 
-    def __init__(self, objectID, attr, value, default):
-        if attr.valueType in (ValueType.HEX, ValueType.INT):
-            self._value = int(value)
-        elif attr.valueType == ValueType.FLOAT:
-            self._value = float(value)
-        elif attr.valueType == ValueType.STRING:
-            self._value = str(value)
-        elif attr.valueType == ValueType.ENUM:
-            self._value = str(value)
-        else:
-            self._value = value
-        self.objectID = objectID
-        self.attr = attr
+    def __init__(self, value, default):
+        self._value = value
         self.default = default
+
+    def _convertValue(self):
+        valueType = self.attr.valueType
+        if valueType in (ValueType.HEX, ValueType.INT):
+            self._value = int(self._value)
+        elif valueType == ValueType.FLOAT:
+            self._value = float(self._value)
+        elif valueType == ValueType.STRING:
+            self._value = str(self._value)
+        elif valueType == ValueType.ENUM:
+            self._value = str(self._value)
 
     def _typeCheck(self, value):
         vt = self.attr.valueType
@@ -165,7 +165,28 @@ class Value:
     def _getValue(self):
         return self._value
 
+    def update(self):
+        value = self.fetchValue()
+        print("UPDATE:", self.objectID, self.attr.rid, value)
+
+    def fetchValue(self):
+        return self.db.fetchSingleRow("Attribute_Value", column = "*", where = "Object_ID = {} AND Attribute_Definition = {}".format(
+            self.objectID, self.attr.rid)
+        )
+
     value = property(_getValue, _setValue)
+
+    @property
+    def db(self):
+        return self.parent.db
+
+    @property
+    def attr(self):
+        return self.parent.attr
+
+    @property
+    def objectID(self):
+        return self.parent.objectID
 
     def __str__(self):
         value = "'{}'".format(self._value) if self.attr.valueType in (ValueType.STRING, ValueType.ENUM) else self.value
@@ -178,14 +199,18 @@ class AttributeValue:
     """
     """
 
-    __slots__ = ['_value', 'attr']
+    __slots__ = ['db', '_value', 'attr', 'objectID']
 
-    def __init__(self, attr, value):
+    def __init__(self, db, objectID, attr, value):
+        self.db = db
         self.attr = attr
         self._value = value
+        self._value.parent = self
+        self._value._convertValue()
+        self.objectID = objectID
 
     def update(self):
-        pass
+        self._value.update()
 
     def reset(self):
         """Reset attribute value to default.

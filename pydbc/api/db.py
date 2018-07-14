@@ -116,7 +116,7 @@ class BaseObject:
         else:
             default = True
             value = attr.default
-        return Value(oid, attr, value, default)
+        return Value(value, default)
 
     @property
     def attributes(self):
@@ -125,7 +125,7 @@ class BaseObject:
         for item in self.applicableAttributes():
             attr = AttributeDefinition(item)
             value = self._attributeValue(self.key, attr)
-            yield AttributeValue(attr, value)
+            yield AttributeValue(self.database.db, self.key, attr, value)
 
     def __str__(self):
         result = []
