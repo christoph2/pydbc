@@ -28,6 +28,7 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 import enum
+from functools import lru_cache
 import sys
 import os
 
@@ -87,10 +88,10 @@ class BaseObject:
         else:
             return None
 
-    #@Cached
-    def getKey(self):
-        key = getattr(self, self.KEY)
-        return key
+    @property
+    @lru_cache(maxsize = 1)
+    def key(self):
+        return getattr(self, self.KEY)
 
     def attribute(self, name):
         """
@@ -99,8 +100,9 @@ class BaseObject:
         value = Value(self, value, default)
         return AttributeValue(objectType, rid, name, value, comment)
 
-    def _attributeValue(self, oid, attr, valueType):
+    def _attributeValue(self, oid, attr):   # TODO: factory.
         attrValue = self.database.attributeValue(oid, attr.rid)
+        valueType = attr.valueType
         if attrValue:
             default = False
             if valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
@@ -114,10 +116,6 @@ class BaseObject:
         else:
             default = True
             value = attr.default
-            #if valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
-            #    value = attr.defaultNumber
-            #elif valueType in (ValueType.STRING, ValueType.ENUM):
-            #    value = attr.defaultString
         return Value(oid, attr, value, default)
 
     @property
@@ -126,19 +124,8 @@ class BaseObject:
         """
         for item in self.applicableAttributes():
             attr = AttributeDefinition(item)
-
-            valueType = attr.valueType
-            name = attr.name
-            comment = attr.comment
-            objectType = attr.objectType
-            rid = attr.rid
-            limits = attr.limits
-
-            value = self._attributeValue(self.getKey(), attr, valueType)
-            yield AttributeValue(objectType, rid, name, value, comment)
-
-    def lastInsertedRowId(self, cur):
-        return self.database.db.lastInsertedRowId(cur)
+            value = self._attributeValue(self.key, attr)
+            yield AttributeValue(attr, value)
 
     def __str__(self):
         result = []
