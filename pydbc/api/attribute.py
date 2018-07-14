@@ -41,6 +41,10 @@ from pydbc.logger import Logger
 class Limits:
 
     def __init__(self, min, max):
+        self.typeCheck(min)
+        self.typeCheck(max)
+        if not (min is None and max is None) and max < min:
+            raise ValueError("max is smaller than min.")
         self._min = min
         self._max = max
 
@@ -48,13 +52,23 @@ class Limits:
         return self._min
 
     def setMin(self, value):
+        self.typeCheck(value)
+        if not (value is None and self.max is None) and self.max < value:
+            raise ValueError("min is larger than max.")
         self._min = value
 
     def getMax(self):
         return self._max
 
     def setMax(self, value):
+        self.typeCheck(value)
+        if not (self.min is None and value is None) and value < self.min:
+            raise ValueError("max is smaller than min.")
         self._max = value
+
+    def typeCheck(self, value):
+        if not (isinstance(value, (int, float)) or value is None):
+            raise TypeError("Value needs to be int, float, or None.")
 
     min = property(getMin, setMin)
     max = property(getMax, setMax)
@@ -161,11 +175,13 @@ class Value:
 
 
 class AttributeValue:
+    """
+    """
 
-    def __init__(self, objectType, rid, name, value, comment):
-        self.objectType = objectType
-        self.rid = rid
-        self.name = name
+    __slots__ = ['_value', 'attr']
+
+    def __init__(self, attr, value):
+        self.attr = attr
         self._value = value
 
     def update(self):
@@ -182,10 +198,34 @@ class AttributeValue:
     def _getValue(self):
         return self._value.value
 
+    @property
+    def name(self):
+        return self.attr.name
+
+    @property
+    def valueType(self):
+        return self.attr.valueType
+
+    @property
+    def comment(self):
+        return self.attr.comment
+
+    @property
+    def objectType(self):
+        return self.attr.objectType
+
+    @property
+    def rid(self):
+        return self.attr.rid
+
+    @property
+    def limits(self):
+        return self.attr.limits
+
     value = property(_getValue, _setValue)
 
     def __str__(self):
-        return "{}('{}', {})".format(self.__class__.__name__, self.name, self._value)
+        return "{}('{}', {})".format(self.__class__.__name__, self.attr.name, self._value)
 
     __repr__ = __str__
 
