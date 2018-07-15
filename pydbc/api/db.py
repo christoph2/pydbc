@@ -93,13 +93,6 @@ class BaseObject:
     def key(self):
         return getattr(self, self.KEY)
 
-    def attribute(self, name):
-        """
-        """
-
-        value = Value(self, value, default)
-        return AttributeValue(objectType, rid, name, value, comment)
-
     def _attributeValue(self, oid, attr):   # TODO: factory.
         attrValue = self.database.attributeValue(oid, attr.rid)
         valueType = attr.valueType
@@ -115,8 +108,19 @@ class BaseObject:
                 value = enumValues[idx]
         else:
             default = True
-            value = attr.default
+            value = attr.defaultValue
         return Value(value, default)
+
+    def attribute(self, name):
+        """
+        """
+        tmp = self.database.singleAttribute(self.OBJECT_TYPE, name)
+        if tmp:
+            attr = AttributeDefinition(tmp)
+            value = self._attributeValue(self.key, attr)
+            return AttributeValue(self.database.db, self.key, attr, value)
+        else:
+            return None # TODO: execption!
 
     @property
     def attributes(self):
@@ -378,6 +382,15 @@ class Database:
             self.logger.error("applicableAttributes(): invalid objecttype '{}'.".format(objectType))
             return None
         yield from self.db.fetchFromTable("Attribute_Definition", where = "objecttype = {}".format(objectType))
+
+
+    def singleAttribute(self, objectType, name):
+        """
+        """
+        if not objectType in AttributeType.__members__.values():
+            self.logger.error("applicableAttributes(): invalid objecttype '{}'.".format(objectType))
+            return None
+        return self.db.fetchSingleRow("Attribute_Definition", column = "*", where = "objecttype = {} AND Name = '{}'".format(objectType, name))
 
     def attributeValue(self, oid, attrDef):
         return self.db.fetchSingleRow("Attribute_Value", column = "*", where = "Object_ID = {} AND Attribute_Definition = {}".format(oid, attrDef))
