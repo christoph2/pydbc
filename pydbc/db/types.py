@@ -57,6 +57,20 @@ class IdentifierType(enum.IntEnum):
     EXTENDED = 1
 
 
+class EnvVarType(enum.IntEnum):
+    INT = 0
+    FLOAT = 1
+    STRING = 2
+    DATA = 3
+
+
+class EnvVarAccessType(enum.IntEnum):
+    UNRESTRICTED = 0
+    READ = 1
+    WRITE = 2
+    READ_WRITE = 3
+
+
 EXTENDED_ID_MASK = 0x80000000
 
 
