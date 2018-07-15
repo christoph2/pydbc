@@ -33,7 +33,7 @@ import sys
 import os
 
 from pydbc.types import AttributeType, ValueType
-from pydbc.db.types import CANAddress
+from pydbc.db.types import CANAddress, EnvVarType, EnvVarAccessType
 from pydbc.db.creator import Creator
 from pydbc.db import CanDatabase
 from pydbc.api.attribute import AttributeDefinition, Value, AttributeValue
@@ -169,6 +169,40 @@ class Node(BaseObject):
         super(Node, self).__init__(database)
         self.rid = rid
         self.name = name
+        self.comment = comment
+
+
+class EnvVar(BaseObject):
+    """
+    """
+    # {'Type': 0, 'Unit': '', 'Comment': 'Enable the ECU', 'Size': None, 'Name': 'EnvTPMS_ILEnable',
+    # 'Startup_Value': 1.0, 'RID': 72, 'Access': 0, 'Maximum': 1.0, 'Minimum': 0.0}
+
+    OBJECT_TYPE = AttributeType.ENV_VAR
+    TABLE_NAME = "EnvVar"
+
+    KEY = 'rid'
+    COLUMNS = (
+        ('name', 'Name'),
+        ('_type', 'Type'),
+        ('access', 'Access'),
+        ('size', 'Size'),
+        ('initialValue', 'Startup_Value'),
+        ('min', 'Minimum'),
+        ('max', 'Maximum'),
+        ('comment', 'Comment'),
+    )
+
+    def __init__(self, database, rid, name, _type, access, size, initialValue, min, max, comment):
+        super(EnvVar, self).__init__(database)
+        self.rid = rid
+        self.name = name
+        self._type = _type
+        self.access = access
+        self.size = size
+        self.initialValue = initialValue
+        self.min = min
+        self.max = max
         self.comment = comment
 
 
@@ -374,6 +408,20 @@ class Database:
         """
         for item in self._searchTableForName("Message", glob, regex):
             yield Message(self, item['RID'], item['Name'], CANAddress(item['Message_ID']), item['DLC'], item['Sender'], item['Comment'])
+
+
+    def envVar(self, name):
+        """
+        """
+
+    def envVars(self, glob = None, regex = None):
+        """
+        """
+        for item in self._searchTableForName("EnvVar", glob, regex):
+            #def __init__(self, database, rid, name, _type, access, size, initialValue, min, max, comment):
+            yield EnvVar(self, item['RID'], item['Name'], EnvVarType(item['Type']), (item['Access']), item['Size'],
+                item['Startup_Value'], item['Minimum'], item['Maximum'], item['Comment']
+            )
 
     def applicableAttributes(self, objectType):
         """
