@@ -73,7 +73,7 @@ class CanDatabase(object):
         self.setPragma(cur, "CACHE_SIZE", "-4000")
         self.setPragma(cur, "SYNCHRONOUS", "OFF")   # FULL
         self.setPragma(cur, "LOCKING_MODE", "EXCLUSIVE")    # NORMAL
-        self.setPragma(cur, "TEMP_STORE", "MEMORY")
+        self.setPragma(cur, "TEMP_STORE", "MEMORY") # FILE
         """
 
         #self.cur.execute('PRAGMA journal_mode = MEMORY')   # TRUNCATE
@@ -183,6 +183,19 @@ class CanDatabase(object):
         cur.execute("SELECT (SELECT name FROM Node WHERE RID=node) FROM Node_RxSignal WHERE message=? and signal=?", [messageId, signalId])
         result = [x[0] for x in cur.fetchall()]
         return result
+
+    def fetchExtendedSignalValueTypes(self):
+        cur = self.getCursor()
+        cur.execute("""SELECT t2.name AS Name, (SELECT message_id FROM message WHERE rid = message) AS Message_ID,
+                    valuetype FROM message_signal AS t1,signal AS t2 WHERE t1.signal=t2.rid and valuetype != 0"""
+        )
+        while True:
+            row = cur.fetchone()
+            if row is None:
+                return
+            else:
+                yield self.createDictFromRow(row, cur.description)
+
 
     def spaceBeforeNodes(self, nodes):
         if len(nodes) == 1 and nodes[0] == 'Vector__XXX':

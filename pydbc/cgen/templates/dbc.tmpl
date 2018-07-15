@@ -154,4 +154,6 @@ ${int(desc['Value'])} "${desc['Value_Description']}" \
 %endfor
 ;
 %endfor
-
+%for item in db.fetchExtendedSignalValueTypes():
+SIG_VALTYPE_ ${item['Message_ID']} ${item['Name']} : ${item['Valuetype']};
+%endfor
