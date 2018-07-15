@@ -93,17 +93,17 @@ class AttributeDefinition:
         self.enumValues = [ev for ev in attr['Enumvalues'].split(";")] if attr['Enumvalues'] else []
 
         if self.valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
-            self.default = attr['Default_Number']
+            self.defaultValue = attr['Default_Number']
         elif self.valueType in (ValueType.STRING, ValueType.ENUM):
-            self.default = attr['Default_String']
+            self.defaultValue = attr['Default_String']
 
-        self.defaultNumber = attr['Default_Number']
-        self.defaultString = attr['Default_String']
+        #self.defaultNumber = attr['Default_Number']
+        #self.defaultString = attr['Default_String']
 
     def __str__(self):
         comment = '' if self.comment is None else self.comment
         return "{}(name = '{}', objectType = {}, valueType = {}, limits = {}, default = {}, values = {}, comment = '{}')".format(
-            self.__class__.__name__, self.name, self.objectType.name, self.valueType.name, self.limits, self.default,
+            self.__class__.__name__, self.name, self.objectType.name, self.valueType.name, self.limits, self.defaultValue,
             self.enumValues, comment
         )
 
@@ -114,11 +114,11 @@ class Value:
     """
     """
 
-    __slots__ = ['parent', '_value', 'default']
+    __slots__ = ['parent', '_value', '_default']
 
     def __init__(self, value, default):
         self._value = value
-        self.default = default
+        self._default = default
 
     def _convertValue(self):
         valueType = self.attr.valueType
@@ -145,29 +145,51 @@ class Value:
         elif vt == ValueType.ENUM:
             if not isinstance(value, str):
                 raise TypeError("Value must be of type 'str'")
-        self._value = value
 
     def _rangeCheck(self, value):
         vt = self.attr.valueType
         if vt in (ValueType.INT, ValueType.HEX, ValueType.FLOAT):
-            pass    # check limits.
+            if self.limits.min is not None:
+                if value < self.limits.min:
+                    raise ValueError("Value lesser than minimum")
+            if self.limits.max is not None:
+                if value > self.limits.min:
+                    raise ValueError("Value greater than maximum")
         elif vt == ValueType.ENUM:
             enumValues = self.attr.enumValues
             if not value in self.attr.enumValues:
                 raise ValueError("Invalid enumerator '{}'".format(value))
-            index = enumValues.index(value)
 
     def _setValue(self, value):
         print("Setting value", value)
         self._typeCheck(value)
         self._rangeCheck(value)
+        self._value = value
+        self._default = False
 
     def _getValue(self):
         return self._value
 
     def update(self):
         value = self.fetchValue()
-        print("UPDATE:", self.objectID, self.attr.rid, value)
+        valueType = self.attr.valueType
+        cur = self.db.getCursor()
+        print("UPDATE:", self.objectID, self.attr.rid, value, self.attr.defaultValue, self.attr.valueType.name)
+        if valueType == ValueType.STRING:
+            self.db.replaceStatement(cur, "Attribute_Value", "Object_ID, Attribute_Definition, String_Value", self.objectID, self.attr.rid, self.value)
+        elif valueType == ValueType.ENUM:
+            idx = enumValues.index(self.value)
+            self.db.replaceStatement(cur, "Attribute_Value", "Object_ID, Attribute_Definition, Num_Value", self.objectID, self.attr.rid, idx)
+        else:
+            self.db.replaceStatement(cur, "Attribute_Value", "Object_ID, Attribute_Definition, Num_Value", self.objectID, self.attr.rid, self.value)
+
+    def reset(self):
+        """
+        """
+        cur = self.db.getCursor()
+        cur.excute("DELETE FROM attribute_value WHERE object_id = ? AND Attribute_Definition = ?", [self.objectID, self.attr.rid])
+        self._value = self.defaultValue
+        self._default = True
 
     def fetchValue(self):
         return self.db.fetchSingleRow("Attribute_Value", column = "*", where = "Object_ID = {} AND Attribute_Definition = {}".format(
@@ -188,6 +210,18 @@ class Value:
     def objectID(self):
         return self.parent.objectID
 
+    @property
+    def defaultValue(self):
+        return self.parent.defaultValue
+
+    @property
+    def limits(self):
+        return self.parent.limits
+
+    @property
+    def default(self):
+        return self._default
+
     def __str__(self):
         value = "'{}'".format(self._value) if self.attr.valueType in (ValueType.STRING, ValueType.ENUM) else self.value
         return "Value({1}: {0} [default = {2}])".format(value, self.attr.valueType.name, self.default)
@@ -199,7 +233,7 @@ class AttributeValue:
     """
     """
 
-    __slots__ = ['db', '_value', 'attr', 'objectID']
+    __slots__ = ['db', '_value', 'attr', '_objectID']
 
     def __init__(self, db, objectID, attr, value):
         self.db = db
@@ -207,7 +241,7 @@ class AttributeValue:
         self._value = value
         self._value.parent = self
         self._value._convertValue()
-        self.objectID = objectID
+        self._objectID = objectID
 
     def update(self):
         self._value.update()
@@ -215,13 +249,17 @@ class AttributeValue:
     def reset(self):
         """Reset attribute value to default.
         """
-        pass
+        self._value.reset()
 
     def _setValue(self, value):
         self._value.value = value
 
     def _getValue(self):
         return self._value.value
+
+    @property
+    def objectID(self):
+        return self._objectID
 
     @property
     def name(self):
