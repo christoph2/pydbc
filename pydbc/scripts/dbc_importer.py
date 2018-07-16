@@ -29,92 +29,117 @@ __version__ = '0.1.0'
 
 import argparse
 
-import importlib
-
-import antlr4
-
 import io
 import os
 from pprint import pprint
 import pkgutil
 import sqlite3
 import sys
-from pydbc import dbc
 
+import antlr4
+import colorama
+
+from pydbc import dbc
 from pydbc.db import CanDatabase
 from pydbc.db.creator import Creator
 from pydbc.db.loader import Loader
 from pydbc.template import renderTemplateFromText
 
-##
-## Complementary tool: vndb_exporter
-##
-
 template = pkgutil.get_data("pydbc", "cgen/templates/dbc.tmpl")
+
+# TODO: Rename 'vndb_importer'
+
+def coloredText(color, msg):
+    return "{}{}".format(color, msg)
+
+def errorText(msg):
+    return coloredText(colorama.Fore.RED, msg)
+
+def successText(msg):
+    return coloredText(colorama.Fore.GREEN, msg)
+
+def progressText(msg):
+    return coloredText(colorama.Fore.BLUE, msg)
+
+def resetColorStyle():
+    print(colorama.Style.RESET_ALL, end = "", flush = True)
 
 def execute(fun, name, *args):
     try:
         fun(*args)
     except Exception as e:
-        msg = "  Terminating dbc-importer due to exception while {}".format(name)
+        msg = errorText("   Exiting import function due to exception while {}".format(name))
         if not isinstance(e, sqlite3.DatabaseError):
             msg += ": {}".format(str(e))
-        print("\n", msg)            
-        sys.exit(1)
+        print(msg, flush = True)
+        resetColorStyle()
+        #sys.exit(1)
+        return False
+    else:
+        return True
 
-def main():
-    footer = "CAVEAT: In this version dbc_importer is DESTRUCTIVE, i.e. no merging happens!"
-    parser = argparse.ArgumentParser(description = 'Import .dbc file into Vehicle Network Database.', epilog = footer)
-    
-    #parser.add_argument('dbcfile', metavar='infile', type=str, nargs='1',
-    #                    help='.dbc file to import.')
-    
-    parser.add_argument("dbcfile", help = ".dbc file to import")
-    
-    #parser.add_argument('--sum', dest='accumulate', action='store_const',
-    #                    const=sum, default=max,
-    #                    help='sum the integers (default: find the max)')
-
-    # "-k" help = "keep directory -- otherwise create db in current directory"
-    # "-l" loglevel default = "warn"
-    # "-d" debuglevel
-    
-
-    args = parser.parse_args()
-    print(args)
-    #print(args.accumulate(args.integers))
-    pth, fname = os.path.split(args.dbcfile)
+def importFile(name):
+    pth, fname = os.path.split(name)
     fnbase, fnext = os.path.splitext(fname)
     db = CanDatabase(r"{}.vndb".format(fnbase))
-    
+
+    print("FN", name, pth, fname, flush = True)
+
     cr = Creator(db)
-    execute(cr.dropTables, "dropping tables")
-    execute(cr.createSchema, "creating schema")
-    
-    print("DBName: ", db.filename)
+    if not execute(cr.dropTables, "dropping tables"):
+        return
+    if not execute(cr.createSchema, "creating schema"):
+        return
+
+    print("DBName: ", db.filename, flush = True)
 
     pa = dbc.ParserWrapper('dbc', 'dbcfile')
 
-#    print("NAMES:", sys.argv[1], args.dbcfile, fname)
-    tree = pa.parseFromFile(args.dbcfile, trace = False)
+    try:
+        tree = pa.parseFromFile("{}".format(name), trace = False)
+    except Exception as e:
+        print(errorText("   Exiting import function due to exception while parsing: {}\n".format(str(e))), flush = True)
+        resetColorStyle()
+        return
 
-    print("Finished ANTLR parsing.")
+    print("Finished ANTLR parsing.", flush = True)
 
     loader = Loader(db)
-        
-    execute(loader.insertValues, "inserting values", tree)
-    execute(cr.createIndices, "creating indices")
-    
+
+    if not execute(loader.insertValues, "inserting values", tree):
+        return
+    if not execute(cr.createIndices, "creating indices"):
+        return
+
     #pprint(tree, indent = 4)
 
     namespace = dict(db = db)
-    print("Rending template...")
+    print("Rending template...", flush = True)
     res = renderTemplateFromText(template, namespace)
     #print(res)
     with io.open("{}.render".format(fnbase), "w", encoding = "latin-1", newline = "\n") as outf:
         outf.write(res)
-    print("Finished.")
-    print("-" * 80)
+    print(successText("Finished."), flush = True)
+    resetColorStyle()
+    print("-" * 80, flush = True)
+
+def main():
+    colorama.init(convert = False, strip = False)
+
+    footer = "CAVEAT: In this version dbc_importer is DESTRUCTIVE, i.e. no merging happens!"
+    parser = argparse.ArgumentParser(description = 'Import .dbc file into Vehicle Network Database.', epilog = footer)
+
+    parser.add_argument("dbcfile", help = ".dbc file(s) to import", nargs = "*")
+
+    parser.add_argument("-k", dest = 'keepDirectory', action = "store_true", default = False,
+        help = "keep directory; otherwise create db in current directory"
+    )
+    parser.add_argument("-l", help = "loglevel [warn | info | error | debug]", dest = "loglevel", type = str, default = "warn")
+
+    args = parser.parse_args()
+    print(args)
+    for name in args.dbcfile:
+        importFile(name)
 
 if __name__ == '__main__':
     main()
