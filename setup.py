@@ -16,8 +16,8 @@ setup(
     author_email = 'cpu12.gems@googlemail.com',
     url = 'https://www.github.com/Christoph2/pydbc',
     packages = ['pydbc'],
-    install_requires = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 
-        'enum34', 'mock', 'mako', 'wxPython>=4.0.0'
+    install_requires = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION),
+        'enum34', 'mock', 'mako', 'wxPython>=4.0.0', 'colorama'
     ],
     entry_points = {
         'console_scripts': [
