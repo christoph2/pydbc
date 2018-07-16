@@ -82,7 +82,11 @@ class Creator(object):
         cur = self.db.getCursor()
         self.db.beginTransaction()
         for item in INDICES:
-            #print(item)
-            res = cur.execute(item)
+            self.logger.debug("Creating index '{}'.".format(item))
+            try:
+                res = cur.execute(item)
+            except sqlite3.DatabaseError as e:
+                self.logger.error("Creation of index '{}' failed : '{}'".format(item, str(e)))
+                #raise
         self.db.commitTransaction()
 
