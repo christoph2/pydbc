@@ -125,9 +125,12 @@ class Loader(object):
             self.insertValueDescription(cur, vtid, description)
 
     def insertReceivers(self, cur, messageId, signalId, receiver):
+        SignalReceivers = set()
         for rcv in receiver:
             nodeId = self.db.fetchNodeId(rcv)
-            self.db.insertStatement(cur, "Node_RxSignal", "Message, Signal, Node", messageId, signalId, nodeId)
+            if not (messageId, signalId, nodeId) in SignalReceivers:
+                self.db.insertStatement(cur, "Node_RxSignal", "Message, Signal, Node", messageId, signalId, nodeId)
+            SignalReceivers.add((messageId, signalId, nodeId))
 
     def insertComments(self, cur, comments):
         for comment in comments:
@@ -214,29 +217,6 @@ class Loader(object):
         return ATS.get(value)
 
     def insertAttributes(self, cur, attrs):
-        '''
-        ''', '''
-            CREATE TABLE Attribute_Value (
-                Object_ID INTEGER NOT NULL DEFAULT 0,
-                Attribute_Definition INTEGER NOT NULL DEFAULT 0,
-                Num_Value FLOAT8 DEFAULT 0,
-                String_Value TEXT,
-                PRIMARY KEY(Object_ID,Attribute_Definition),
-                FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID)
-            );
-        ''', '''
-            CREATE TABLE AttributeRel_Value (
-                Object_ID INTEGER NOT NULL DEFAULT 0,
-                Attribute_Definition INTEGER NOT NULL DEFAULT 0,
-                Num_Value FLOAT8 DEFAULT 0,
-                String_Value TEXT,
-                Opt_Object_ID_1 INTEGER DEFAULT 0,
-                Opt_Object_ID_2 INTEGER DEFAULT 0,
-                BLOB_Value BLOB,
-                PRIMARY KEY(Object_ID,Attribute_Definition,Opt_Object_ID_1,Opt_Object_ID_2),
-                FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID)
-            );
-        '''
         for attr in attrs:
             stringValue = None
             numValue = None
@@ -264,9 +244,12 @@ class Loader(object):
             )
 
     def insertNodes(self, cur, nodes):
+        nodeSet = set()
         for node in nodes:
             cmt = self.db.fetchComment('BU', node)
-            self.db.insertStatement(cur, "Node", "Name, Comment", node, cmt)
+            if not node in nodeSet:
+                self.db.insertStatement(cur, "Node", "Name, Comment", node, cmt)
+            nodeSet.add(node)
 
     def insertMessageTransmitters(self, cur, transmitters):
         for transmitter in transmitters:
