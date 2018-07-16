@@ -117,6 +117,9 @@ class CanDatabase(object):
             return value[0][0]
         return None
 
+    def environmentVariablesData(self):
+        yield from self.fetchFromTable("EnvironmentVariablesData", "*")
+
     def fetchNodeId(self, name):
         cur = self.getCursor()
         cur.execute("""SELECT RID FROM Node WHERE Name = ?""", [name])

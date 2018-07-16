@@ -69,6 +69,9 @@ EV_ ${var['Name']}: ${var['Type']} [${"{:.14G}".format(var['Minimum'])}|${"{:.14
 ${"{:.14G}".format(var['Startup_Value'])} ${idx} DUMMY_NODE_VECTOR${var['Access']} ${db.spaceBeforeNodes(nodes)}\
 ${','.join(nodes)};
 
+%endfor\
+%for item in db.environmentVariablesData():
+ENVVAR_DATA_ ${item['name']}: ${item['value']};
 %endfor
 %for comment in db.comments():
 CM_ \

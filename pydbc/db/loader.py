@@ -150,7 +150,7 @@ class Loader(object):
         for item in data:
             name = item['name']
             value = item['value']
-            print(name, value)
+            #print(name, value)
             self.db.insertStatement(cur, "EnvironmentVariablesData", "name, value", name, value)
 
     def insertAttributeDefinitions(self, cur, attrs, defaults):
