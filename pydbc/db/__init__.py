@@ -33,6 +33,7 @@ __version__ = '0.1.0'
 from collections import namedtuple
 import itertools
 import logging
+import mmap
 from pprint import pprint
 import re
 import sqlite3
@@ -40,17 +41,22 @@ import types
 
 from pydbc.logger import Logger
 
-#logging.basicConfig()
+
+PAGE_SIZE = mmap.PAGESIZE
 
 def regexer(expr, value):
     return re.search(expr, value, re.UNICODE) is not None
 
+def calculateCacheSize(value):
+    return -(value // PAGE_SIZE)
+
 class CanDatabase(object):
 
-    def __init__(self, filename = ":memory:", logLevel = 'INFO'):
+    def __init__(self, filename = ":memory:", cachesize = 4, logLevel = 'INFO'):
         self.conn = sqlite3.connect(filename, isolation_level = None)
         self.conn.create_function("REGEXP", 2, regexer)
         self.conn.isolation_level = None
+        self.cachesize = cachesize
         self.setPragmas()
         self.filename = filename
         self.logger = Logger('db', level = logLevel)
@@ -70,7 +76,8 @@ class CanDatabase(object):
     def setPragmas(self):
         cur = self.getCursor()
         self.setPragma(cur, "FOREIGN_KEYS", "ON")
-        self.setPragma(cur, "CACHE_SIZE", "-4000")
+        self.setPragma(cur, "PAGE_SIZE", "{}".format(PAGE_SIZE))
+        self.setPragma(cur, "CACHE_SIZE", "{}".format(calculateCacheSize(self.cachesize * 1024 * 1024)))
         self.setPragma(cur, "SYNCHRONOUS", "OFF")   # FULL
         self.setPragma(cur, "LOCKING_MODE", "EXCLUSIVE")    # NORMAL
         self.setPragma(cur, "TEMP_STORE", "MEMORY") # FILE
