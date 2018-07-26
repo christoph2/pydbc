@@ -46,10 +46,21 @@ class ValueType(enum.IntEnum):
     ENUM = 4
 
 
+class ByteOrderType(enum.IntEnum):
+    INTEL = 0
+    MOTOROLA = 1
+
+
 class SignalType(enum.IntEnum):
     INT = 0
     FLOAT32 = 1
     FLOAT64 = 2
+
+
+class MultiplexingType:
+    NONE = 1
+    MULTIPLEXOR = 1
+    DEPENDENT = 3
 
 
 class IdentifierType(enum.IntEnum):
