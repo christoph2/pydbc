@@ -57,7 +57,7 @@ class SignalType(enum.IntEnum):
     FLOAT64 = 2
 
 
-class MultiplexingType:
+class MultiplexingType(enum.IntEnum):
     NONE = 1
     MULTIPLEXOR = 1
     DEPENDENT = 3
