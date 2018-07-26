@@ -32,7 +32,7 @@ import sys
 import os
 
 from pydbc.types import AttributeType, ValueType
-from pydbc.db.types import CANAddress
+from pydbc.types import CANAddress
 from pydbc.db.creator import Creator
 from pydbc.db import CanDatabase
 from pydbc.logger import Logger

@@ -32,11 +32,10 @@ from functools import lru_cache
 import sys
 import os
 
-from pydbc.types import AttributeType, ValueType
-from pydbc.db.types import CANAddress, EnvVarType, EnvVarAccessType
+from pydbc.types import AttributeType, ValueType, CANAddress, EnvVarType, EnvVarAccessType, ByteOrderType, MultiplexingType
 from pydbc.db.creator import Creator
 from pydbc.db import CanDatabase
-from pydbc.api.attribute import AttributeDefinition, Value, AttributeValue
+from pydbc.api.attribute import AttributeDefinition, Value, AttributeValue, Limits
 from pydbc.logger import Logger
 
 
@@ -245,21 +244,61 @@ class Message(BaseObject):
         self.sender = sender
         self.comment = comment
 
+    def signals(self):
+        for signal in self.database.db.signals(self.key):
+            ms = self.database.messageSignal(self.rid, signal['RID'])
+            mpxValue = ms['Multiplexor_Value']
+            mpxDependent = ms['Multiplex_Dependent']
+            mpxSignal = ms['Multiplexor_Signal']
+            if mpxSignal:
+                mpxType = MultiplexingType.MULTIPLEXOR
+            elif mpxDependent:
+                mpxType = MultiplexingType.DEPENDENT
+            else:
+                mpxType = MultiplexingType.NONE
+            mpx = Multiplexing(mpxType, mpxValue)
+            print("sign:", signal['Sign'])
+            yield Signal(self.database, self.rid, signal['RID'], signal['Name'], ms['Offset'], signal['Bitsize'], ByteOrderType(signal['Byteorder']),
+                         ValueType(signal['Valuetype']), Formula(signal['Formula_Factor'], signal['Formula_Offset']),
+                         Limits(signal['Minimum'], signal['Maximum']), signal['Unit'], mpx,
+                         signal['Comment']
+                    )
+
+
+class Multiplexing:
+    """
+    """
+
+    def __init__(self, type = None, value = None):
+        self.type =  MultiplexingType(type) or MultiplexingType(0)
+        self.value = value
+
+    def __str__(self):
+        if self.type == MultiplexingType.DEPENDENT:
+            result = "Depends on multiplexor-value {}".format(self.value)
+        else:
+            result = "type: {}".format(self.type.name)
+        return "{}({})".format(self.__class__.__name__, result)
+
+    __repr__ = __str__
+
+
+class Formula:
+    """
+    """
+
+    def __init__(self, factor = 1.0, offset = 0.0):
+        self.factor = float(factor)
+        self.offset = float(offset)
+
+    def __str__(self):
+        return "{}(factor = {}, offset = {})".format(self.__class__.__name__, self.factor, self.offset)
+
+    __repr__ = __str__
+
 
 class Signal(BaseObject):
     """
-        RID INTEGER NOT NULL DEFAULT 0,
-        Name VARCHAR(255) NOT NULL,
-        Bitsize INTEGER DEFAULT 0,
-        Byteorder INTEGER DEFAULT 0,
-        Valuetype INTEGER DEFAULT 0,
-        Initialvalue FLOAT8 DEFAULT 0,
-        Formula_Factor FLOAT8 DEFAULT 1,
-        Formula_Offset FLOAT8 DEFAULT 0,
-        Minimum FLOAT8 DEFAULT 0,
-        Maximum FLOAT8 DEFAULT 0,
-        Unit VARCHAR(255),
-        "Comment" VARCHAR(255),
     """
 
     OBJECT_TYPE = AttributeType.SIGNAL
@@ -269,19 +308,42 @@ class Signal(BaseObject):
     COLUMNS = (
         ('name', 'Name'),
         ('comment', 'Comment'),
+        ('bitSize', 'Bitsize'),
+        ('byteOrder', 'Byteorder'),
+        ('valueType', 'Valuetype'),
+        ('unit', 'Unit'),
     )
 
-    def __init__(self, database, rid, name, comment):
+    def __init__(self, database, messageId, rid, name, startBit, bitSize, byteOrder, valueType, formula,
+                 limits, unit, multiplexing, comment):
         super(Signal, self).__init__(database)
+        self.messageid = messageId
         self.rid = rid
         self.name = name
+        self.startBit = startBit
+        self.bitSize = bitSize
+        self.byteOrder = byteOrder
+        self.valueType = valueType
+        self.formula = formula
+        self.multiplexing = multiplexing
         self.comment = comment
+        self.limits = limits
+        self.unit = unit
 
     def values(self):
         pass
 
     def valuesFromGlobalTable(self):
         pass
+
+    def __str__(self):
+        return '{}(name = "{}", type = {}, byteOrder = {}, unit = "{}", bitSize = {}, startBit = {},\
+ limits = {}, formula = {}, multiplexing = {}, comment = "{}")'.format(self.__class__.__name__, self.name,
+            self.valueType.name, self.byteOrder.name, self.unit, self.bitSize, self.startBit, self.limits,
+            self.formula, self.multiplexing, self.comment
+        )
+
+    #__repr__ = __str__
 
 
 class Database:
@@ -409,6 +471,9 @@ class Database:
         for item in self._searchTableForName("Message", glob, regex):
             yield Message(self, item['RID'], item['Name'], CANAddress(item['Message_ID']), item['DLC'], item['Sender'], item['Comment'])
 
+    def messageSignal(self, messageId, signalId):
+        where = "Message = {} AND Signal = {}".format(messageId, signalId)
+        return self.db.fetchSingleRow(tname = "Message_Signal", column = "*", where = where)
 
     def envVar(self, name):
         """
