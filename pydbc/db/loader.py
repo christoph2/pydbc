@@ -298,11 +298,10 @@ class Loader(object):
                     multiplexorSignal = None
                     multiplexDependent = None
                     multiplexorValue = None
-                initialValue = 0.0
                 cmt = self.db.fetchComment('SG', mid, name)
-                self.db.insertStatement(cur, "Signal", """Name, Bitsize, Byteorder, Sign, Valuetype, Initialvalue, Formula_Factor, Formula_Offset,
+                self.db.insertStatement(cur, "Signal", """Name, Bitsize, Byteorder, Sign, Valuetype, Formula_Factor, Formula_Offset,
                     Minimum, Maximum, Unit, Comment""",
-                    name, signalSize, byteOrder, sign, valueType, initialValue, factor, offset, minimum, maximum, unit, cmt
+                    name, signalSize, byteOrder, sign, valueType, factor, offset, minimum, maximum, unit, cmt
                 )
                 srid = self.db.lastInsertedRowId(cur, "Signal")
                 self.db.insertStatement(cur, "Message_Signal", "Message, Signal, Offset, Multiplexor_Signal, Multiplex_Dependent, Multiplexor_Value",
