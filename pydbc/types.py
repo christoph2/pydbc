@@ -58,9 +58,9 @@ class SignalType(enum.IntEnum):
 
 
 class MultiplexingType(enum.IntEnum):
-    NONE = 1
+    NONE = 0
     MULTIPLEXOR = 1
-    DEPENDENT = 3
+    DEPENDENT = 2
 
 
 class IdentifierType(enum.IntEnum):
