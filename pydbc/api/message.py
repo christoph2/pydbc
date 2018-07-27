@@ -74,7 +74,7 @@ class Message(BaseObject):
             mpx = Multiplexing(mpxType, mpxValue)
             yield Signal(self.database, self.rid, signal['RID'], signal['Name'], ms['Offset'], signal['Bitsize'], ByteOrderType(signal['Byteorder']),
                          ValueType(signal['Valuetype']), Formula(signal['Formula_Factor'], signal['Formula_Offset']),
-                         Limits(signal['Minimum'], signal['Maximum']), signal['Unit'], mpx,
+                         Limits(signal['Minimum'], signal['Maximum']), signal['Unit'], mpx if mpx.type != MultiplexingType.NONE else None,
                          signal['Comment']
                     )
 

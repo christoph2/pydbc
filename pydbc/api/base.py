@@ -125,6 +125,8 @@ class BaseObject:
         result.append("{}(".format(self.__class__.__name__))
         for attr, column in self.COLUMNS:
             value = getattr(self, attr)
+            if attr == 'comment' and value is None:
+                value = ""
             fmt = "{} = '{}'" if isinstance(value, str) else "{} = {}"
             attrs.append(fmt.format(attr, value))
         result.append(', '.join(attrs))

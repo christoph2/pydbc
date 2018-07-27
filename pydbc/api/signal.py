@@ -108,7 +108,7 @@ class Signal(BaseObject):
         return '{}(name = "{}", type = {}, startBit = {}, bitSize = {}, byteOrder = {}, unit = "{}",\
  limits = {}, formula = {}, multiplexing = {}, comment = "{}")'.format(self.__class__.__name__, self.name,
             self.valueType.name, self.startBit, self.bitSize, self.byteOrder.name, self.unit, self.limits,
-            self.formula, self.multiplexing, self.comment
+            self.formula, self.multiplexing, self.comment or ""
         )
 
     #__repr__ = __str__
