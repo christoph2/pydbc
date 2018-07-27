@@ -47,8 +47,8 @@ class ValueType(enum.IntEnum):
 
 
 class ByteOrderType(enum.IntEnum):
-    INTEL = 0
-    MOTOROLA = 1
+    MOTOROLA = 0
+    INTEL = 1
 
 
 class SignalType(enum.IntEnum):
