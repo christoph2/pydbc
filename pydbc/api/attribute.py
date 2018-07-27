@@ -31,54 +31,9 @@ import enum
 import sys
 import os
 
-from pydbc.types import AttributeType, ValueType
-from pydbc.types import CANAddress
-from pydbc.db.creator import Creator
-from pydbc.db import CanDatabase
+from pydbc.types import CANAddress, AttributeType, ValueType
+from pydbc.api.limits import Limits
 from pydbc.logger import Logger
-
-
-class Limits:
-
-    def __init__(self, min, max):
-        self.typeCheck(min)
-        self.typeCheck(max)
-        if not (min is None and max is None) and max < min:
-            raise ValueError("max is smaller than min.")
-        self._min = min
-        self._max = max
-
-    def getMin(self):
-        return self._min
-
-    def setMin(self, value):
-        self.typeCheck(value)
-        if not (value is None and self.max is None) and self.max < value:
-            raise ValueError("min is larger than max.")
-        self._min = value
-
-    def getMax(self):
-        return self._max
-
-    def setMax(self, value):
-        self.typeCheck(value)
-        if not (self.min is None and value is None) and value < self.min:
-            raise ValueError("max is smaller than min.")
-        self._max = value
-
-    def typeCheck(self, value):
-        if not (isinstance(value, (int, float)) or value is None):
-            raise TypeError("Value needs to be int, float, or None.")
-
-    min = property(getMin, setMin)
-    max = property(getMax, setMax)
-
-    def __str__(self):
-        minimum = "N/A" if self.min is None else self.min
-        maximum = "N/A" if self.max is None else self.max
-        return "{}(min = {}, max = {})".format(self.__class__.__name__, minimum, maximum)
-
-    __repr__ = __str__
 
 
 class AttributeDefinition:
