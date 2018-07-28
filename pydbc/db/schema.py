@@ -27,6 +27,7 @@ __copyright__ = """
 __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
+#  datetime('now', 'localtime')
 
 INDICES = (
     "CREATE UNIQUE INDEX IF NOT EXISTS ECU_RID ON ECU(RID );",
@@ -60,7 +61,7 @@ TABLES = (
     "Attribute_Value",
     "AttributeRel_Value",
     "Attribute_Definition",
-    "DB_Info",
+    "VndbMeta",
     "EnvVar_AccessNode",
     "ECU_EnvVar",
     "ECU",
@@ -159,17 +160,9 @@ SCHEMA = ('''
         FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID)
     );
 ''', '''
-    CREATE TABLE IF NOT EXISTS DB_Info (
-        DB_Schema_Version INTEGER DEFAULT 2,
-        Req_DB_Editor_Version INTEGER DEFAULT 1,
-        Report_DB_Filename VARCHAR(255),
-        Report_Objecttype INTEGER DEFAULT 0,
-        Report_Objectname VARCHAR(255),
-        Display_Format_Motorola INTEGER DEFAULT 0,
-        Display_Format_Intel INTEGER DEFAULT 0,
-        Number_Format INTEGER DEFAULT 0,
-        Number_Format_Hex_Attributes INTEGER DEFAULT 0,
-        Number_Format_Int_Attributes INTEGER DEFAULT 0
+    CREATE TABLE IF NOT EXISTS VndbMeta (
+        Schema_Version INTEGER,
+        Created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS ECU (
