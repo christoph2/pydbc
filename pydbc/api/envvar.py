@@ -29,7 +29,7 @@ __version__ = '0.1.0'
 
 
 from pydbc.api.base import BaseObject
-
+from pydbc.types import AttributeType
 
 class EnvVar(BaseObject):
     """
@@ -43,24 +43,27 @@ class EnvVar(BaseObject):
     KEY = 'rid'
     COLUMNS = (
         ('name', 'Name'),
-        ('_type', 'Type'),
+        ('type', 'Type'),
         ('access', 'Access'),
         ('size', 'Size'),
         ('initialValue', 'Startup_Value'),
-        ('min', 'Minimum'),
-        ('max', 'Maximum'),
+        #('min', 'Minimum'),
+        #('max', 'Maximum'),
         ('comment', 'Comment'),
     )
 
-    def __init__(self, database, rid, name, _type, access, size, initialValue, min, max, comment):
+    def __init__(self, database, rid, name, type, access, size, initialValue, limits, comment):
         super(EnvVar, self).__init__(database)
         self.rid = rid
         self.name = name
-        self._type = _type
+        self.type = type
         self.access = access
         self.size = size
         self.initialValue = initialValue
-        self.min = min
-        self.max = max
+        self.limits = limits
         self.comment = comment
 
+    def __str__(self):
+        return '{}(name = {}, type = {}, size = {}, access = {}, initialValue = {}, limits = {}, comment = "{}")'.format(self.__class__.__name__,
+            self.name, self.type.name, self.size, self.access.name, self.initialValue, self.limits, self.comment or ""
+        )

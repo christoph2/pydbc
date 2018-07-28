@@ -31,13 +31,14 @@ import enum
 import sys
 import os
 
-from pydbc.types import AttributeType, CANAddress
+from pydbc.types import AttributeType, CANAddress, EnvVarType, EnvVarAccessType
 from pydbc.db.creator import Creator
 from pydbc.db import CanDatabase
 from pydbc.api.base import BaseObject
 from pydbc.api.message import Message
 from pydbc.api.node import Node
-
+from pydbc.api.envvar import EnvVar
+from pydbc.api.limits import Limits
 from pydbc.logger import Logger
 
 
@@ -185,9 +186,8 @@ class Database:
         """
         """
         for item in self._searchTableForName("EnvVar", glob, regex):
-            #def __init__(self, database, rid, name, _type, access, size, initialValue, min, max, comment):
-            yield EnvVar(self, item['RID'], item['Name'], EnvVarType(item['Type']), (item['Access']), item['Size'],
-                item['Startup_Value'], item['Minimum'], item['Maximum'], item['Comment']
+            yield EnvVar(self, item['RID'], item['Name'], EnvVarType(item['Type']), EnvVarAccessType(item['Access'] & 0x0f), item['Size'],
+                item['Startup_Value'], Limits(item['Minimum'], item['Maximum']), item['Comment']
             )
 
     def applicableAttributes(self, objectType):
