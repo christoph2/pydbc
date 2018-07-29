@@ -240,16 +240,14 @@ class CanDatabase(object):
             else:
                 yield self.createDictFromRow(row, cur.description)
 
-    def fetchSingleRow(self, tname, column, where):
-        cur = self.getCursor()
+    def fetchSingleRow(self, cur, tname, column, where):
         cur.execute("""SELECT {} FROM {} WHERE {}""".format(column, tname, where))
         row = cur.fetchone()
         if row is None:
             return []
         return self.createDictFromRow(row, cur.description)
 
-    def fetchSingleValue(self, tname, column, where):
-        cur = self.getCursor()
+    def fetchSingleValue(self, cur, tname, column, where):
         cur.execute("""SELECT {} FROM {} WHERE {}""".format(column, tname, where))
         result = cur.fetchone()
         if result is None:
@@ -258,6 +256,12 @@ class CanDatabase(object):
 
     def queryStatement(self, tname, columns = None, where = None, orderBy = None):
         pass
+
+    def updateStatement(self, cur, tname, columns, where, *values):
+        columns = [c.strip() for c in columns.split(",")]
+        print("UPH:", list(zip(columns, *values)))
+        sql = "UPDATE OR FAIL {} SET {} WHERE {} = {}".format(tname, columns, where, *values)
+        print("UPD:", sql)
 
     def insertOrReplaceStatement(self, insert, cur, tname, columns, *values):
         verb = "INSERT OR FAIL" if insert else "REPLACE"
@@ -278,8 +282,7 @@ class CanDatabase(object):
     def replaceStatement(self, cur, tname, columns, *values):
         return self.insertOrReplaceStatement(False, cur, tname, columns, *values)
 
-    def fetchFromTable(self, tname, columns = None, where = None, orderBy = None):
-        cur = self.getCursor()
+    def fetchFromTable(self, cur, tname, columns = None, where = None, orderBy = None):
         whereClause = "" if not where else "WHERE {}".format(where)
         orderByClause = "ORDER BY rowid" if not orderBy else "ORDER BY {}".format(orderBy)
         result = cur.execute("""SELECT * FROM {} {} {}""".format(tname, whereClause, orderByClause), [])

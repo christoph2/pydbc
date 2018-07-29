@@ -132,7 +132,7 @@ class Database:
         """
         pass
 
-    def addEnvironmentVariable(self, name, vartype, valueRange, unit, initialValue = None, accessNodes = None):
+    def addEnvVar(self, name, vartype, valueRange, unit, initialValue = None, accessNodes = None):
         """
         """
         pass
@@ -156,7 +156,8 @@ class Database:
             where = "Name GLOB '{}'".format(glob)
         elif regex is not None:
             where = "Name REGEXP '{}'".format(regex)
-        return self.db.fetchFromTable(tableName, where = where)
+        cur = self.db.getCursor()
+        return self.db.fetchFromTable(cur, tableName, where = where)
 
     def nodes(self, glob = None, regex = None):
         """
@@ -175,8 +176,9 @@ class Database:
             yield Message(self, item['RID'], item['Name'], CANAddress(item['Message_ID']), item['DLC'], item['Sender'], item['Comment'])
 
     def messageSignal(self, messageId, signalId):
+        cur = self.db.getCursor()
         where = "Message = {} AND Signal = {}".format(messageId, signalId)
-        return self.db.fetchSingleRow(tname = "Message_Signal", column = "*", where = where)
+        return self.db.fetchSingleRow(cur, tname = "Message_Signal", column = "*", where = where)
 
     def envVar(self, name):
         """
@@ -186,7 +188,7 @@ class Database:
         """
         """
         for item in self._searchTableForName("EnvVar", glob, regex):
-            yield EnvVar(self, item['RID'], item['Name'], EnvVarType(item['Type']), EnvVarAccessType(item['Access'] & 0x0f), item['Size'],
+            yield EnvVar(self, item['RID'], item['Name'], EnvVarType(item['Type']), item['Unit'], EnvVarAccessType(item['Access'] & 0x0f), item['Size'],
                 item['Startup_Value'], Limits(item['Minimum'], item['Maximum']), item['Comment']
             )
 
@@ -196,7 +198,8 @@ class Database:
         if not objectType in AttributeType.__members__.values():
             self.logger.error("applicableAttributes(): invalid objecttype '{}'.".format(objectType))
             return None
-        yield from self.db.fetchFromTable("Attribute_Definition", where = "objecttype = {}".format(objectType))
+        cur = self.db.getCursor()
+        yield from self.db.fetchFromTable(cur, "Attribute_Definition", where = "objecttype = {}".format(objectType))
 
 
     def singleAttribute(self, objectType, name):
@@ -205,8 +208,10 @@ class Database:
         if not objectType in AttributeType.__members__.values():
             self.logger.error("applicableAttributes(): invalid objecttype '{}'.".format(objectType))
             return None
-        return self.db.fetchSingleRow("Attribute_Definition", column = "*", where = "objecttype = {} AND Name = '{}'".format(objectType, name))
+        cur = self.db.getCursor()
+        return self.db.fetchSingleRow(cur, "Attribute_Definition", column = "*", where = "objecttype = {} AND Name = '{}'".format(objectType, name))
 
     def attributeValue(self, oid, attrDef):
-        return self.db.fetchSingleRow("Attribute_Value", column = "*", where = "Object_ID = {} AND Attribute_Definition = {}".format(oid, attrDef))
+        cur = self.db.getCursor()
+        return self.db.fetchSingleRow(cur, "Attribute_Value", column = "*", where = "Object_ID = {} AND Attribute_Definition = {}".format(oid, attrDef))
 
