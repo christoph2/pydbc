@@ -39,6 +39,7 @@ from pydbc.api.message import Message
 from pydbc.api.node import Node
 from pydbc.api.envvar import EnvVar
 from pydbc.api.limits import Limits
+from pydbc.api.valuetable import ValueTable, Value
 from pydbc.logger import Logger
 
 
@@ -214,4 +215,19 @@ class Database:
     def attributeValue(self, oid, attrDef):
         cur = self.db.getCursor()
         return self.db.fetchSingleRow(cur, "Attribute_Value", column = "*", where = "Object_ID = {} AND Attribute_Definition = {}".format(oid, attrDef))
+
+    def createValueTableObjects(self, objectType, rid):
+        cur = self.db.getCursor()
+        cur.execute("""SELECT Object_RID, Valuetable AS VT_RID, Name, Comment FROM Object_Valuetable AS t1,
+        Valuetable AS t2 WHERE t1.Valuetable = t2.RID AND Object_Type = ? AND Object_RID = ?""", [objectType, rid])
+        row = cur.fetchone()
+        if row:
+            res = self.db.createDictFromRow(row, cur.description)
+            vt = ValueTable(objectType, res['Object_RID'], res['VT_RID'], res['Name'], res['Comment'])
+            cur.execute("SELECT Value, Value_Description FROM Value_Description WHERE Valuetable = ?", [res['VT_RID']])
+            rows = cur.fetchall()
+            for value, desc in rows:
+                val = Value(desc, int(value))
+                vt.addValue(val)
+            print("VT:", vt)
 
