@@ -28,7 +28,7 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 
-from pydbc.types import AttributeType, MultiplexingType
+from pydbc.types import AttributeType, MultiplexingType, ValueTableType
 from pydbc.api.base import BaseObject
 from pydbc.api.limits import Limits
 
@@ -97,6 +97,7 @@ class Signal(BaseObject):
         self.comment = comment
         self.limits = limits
         self.unit = unit
+        self.database.createValueTableObjects(ValueTableType.SIGNAL, self.rid)
 
     def values(self):
         pass

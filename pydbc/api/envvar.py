@@ -52,11 +52,12 @@ class EnvVar(BaseObject):
         ('comment', 'Comment'),
     )
 
-    def __init__(self, database, rid, name, type, access, size, initialValue, limits, comment):
+    def __init__(self, database, rid, name, type, unit, access, size, initialValue, limits, comment):
         super(EnvVar, self).__init__(database)
         self.rid = rid
         self.name = name
         self.type = type
+        self.unit = unit
         self.access = access
         self.size = size
         self.initialValue = initialValue
@@ -64,6 +65,17 @@ class EnvVar(BaseObject):
         self.comment = comment
 
     def __str__(self):
-        return '{}(name = {}, type = {}, size = {}, access = {}, initialValue = {}, limits = {}, comment = "{}")'.format(self.__class__.__name__,
-            self.name, self.type.name, self.size, self.access.name, self.initialValue, self.limits, self.comment or ""
+        return '{}(name = {}, type = {}, size = {}, unit = "{}", access = {}, initialValue = {}, limits = {}, comment = "{}")'.format(
+            self.__class__.__name__, self.name, self.type.name, self.size, self.unit ,self.access.name, self.initialValue, self.limits,
+            self.comment or ""
         )
+
+    def update(self):
+        cur = self.database.getCursor()
+        where = "RID = {}".format(self.rid)
+        values = (self.name, self.type.value, self.unit, self.limits.min, self.limits.max, self.initialValue,
+            self.size, self.access.value, self.comment
+        )
+        self.database.db.updateStatement(cur, "EnvVar", "Name, Type, Unit, Minimum, Maximum, Startup_Value, Size, Access, Comment", where, values)
+        return
+
