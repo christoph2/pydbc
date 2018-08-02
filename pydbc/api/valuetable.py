@@ -47,21 +47,19 @@ class ValueTable:
     """
     """
 
-    def __init__(self, objectType, objectRid, vtRid, name, comment):
+    def __init__(self, objectType, objectRid, vtRid, name, comment, values = None):
         self.objectType = objectType
         self.objectRid = objectRid
         self.vtRid = vtRid
         self.name = name
         self.comment = comment
-        self.values = []
+        self.values = [] if values is None else values
 
-    def addValue(self, value):
-        if not isinstance(value, Value):
-            raise TypeError("value must be of type Value.")
-        self.values.append(value)
+    def addValue(self, name, value):
+        self.values.append(Value(name, value))
 
     def __str__(self):
-        return '{}(name = "{}", comment = "{}" values = {})'.format(self.__class__.__name__, self.name, self.comment or "", self.values)
+        return '{}(name = "{}", comment = "{}", values = {})'.format(self.__class__.__name__, self.name, self.comment or "", self.values)
 
     __repr__ = __str__
 

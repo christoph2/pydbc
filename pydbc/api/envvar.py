@@ -29,7 +29,7 @@ __version__ = '0.1.0'
 
 
 from pydbc.api.base import BaseObject
-from pydbc.types import AttributeType
+from pydbc.types import AttributeType, ValueTableType
 
 class EnvVar(BaseObject):
     """
@@ -47,8 +47,6 @@ class EnvVar(BaseObject):
         ('access', 'Access'),
         ('size', 'Size'),
         ('initialValue', 'Startup_Value'),
-        #('min', 'Minimum'),
-        #('max', 'Maximum'),
         ('comment', 'Comment'),
     )
 
@@ -63,11 +61,15 @@ class EnvVar(BaseObject):
         self.initialValue = initialValue
         self.limits = limits
         self.comment = comment
+        self._values = self.database.createValueTableObjects(ValueTableType.ENV_VAR, self.rid)
+
+    def values(self):
+        pass
 
     def __str__(self):
-        return '{}(name = {}, type = {}, size = {}, unit = "{}", access = {}, initialValue = {}, limits = {}, comment = "{}")'.format(
+        return '{}(name = {}, type = {}, size = {}, unit = "{}", access = {}, initialValue = {}, limits = {}, values = {}, comment = "{}")'.format(
             self.__class__.__name__, self.name, self.type.name, self.size, self.unit ,self.access.name, self.initialValue, self.limits,
-            self.comment or ""
+            self._values or [], self.comment or ""
         )
 
     def update(self):

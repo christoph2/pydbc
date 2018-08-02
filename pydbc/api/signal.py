@@ -97,7 +97,7 @@ class Signal(BaseObject):
         self.comment = comment
         self.limits = limits
         self.unit = unit
-        self.database.createValueTableObjects(ValueTableType.SIGNAL, self.rid)
+        self._values = self.database.createValueTableObjects(ValueTableType.SIGNAL, self.rid)
 
     def values(self):
         pass
@@ -107,9 +107,9 @@ class Signal(BaseObject):
 
     def __str__(self):
         return '{}(name = "{}", type = {}, startBit = {}, bitSize = {}, byteOrder = {}, unit = "{}",\
- limits = {}, formula = {}, multiplexing = {}, comment = "{}")'.format(self.__class__.__name__, self.name,
+ limits = {}, formula = {}, multiplexing = {}, values = {}, comment = "{}")'.format(self.__class__.__name__, self.name,
             self.valueType.name, self.startBit, self.bitSize, self.byteOrder.name, self.unit, self.limits,
-            self.formula, self.multiplexing, self.comment or ""
+            self.formula, self.multiplexing, self._values or [], self.comment or ""
         )
 
     #__repr__ = __str__
