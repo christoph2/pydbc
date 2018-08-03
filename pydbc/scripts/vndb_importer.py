@@ -71,7 +71,7 @@ def execute(fun, name, *args):
         msg = errorText("   Exiting import function due to exception while {}".format(name))
         if not isinstance(e, sqlite3.DatabaseError):
             msg += ": {}".format(str(e))
-        print(msg, flush = True)
+        print("{}\n".format(msg), flush = True)
         resetColorStyle()
         #sys.exit(1)
         return False
@@ -83,15 +83,15 @@ def importFile(name):
     fnbase, fnext = os.path.splitext(fname)
     db = CanDatabase(r"{}.vndb".format(fnbase))
 
-    print("FN", name, pth, fname, flush = True)
+    #print("FN", name, pth, fname, flush = True)
+    print(progressText("Processing file '{}'...").format(name), flush = True)
+    resetColorStyle()
 
     cr = Creator(db)
     if not execute(cr.dropTables, "dropping tables"):
         return
     if not execute(cr.createSchema, "creating schema"):
         return
-
-    print("DBName: ", db.filename, flush = True)
 
     pa = dbc.ParserWrapper('dbc', 'dbcfile')
 
@@ -102,7 +102,7 @@ def importFile(name):
         resetColorStyle()
         return
 
-    print("Finished ANTLR parsing.", flush = True)
+    #print("Finished ANTLR parsing.", flush = True)
 
     loader = Loader(db)
 
@@ -114,30 +114,26 @@ def importFile(name):
     #pprint(tree, indent = 4)
 
     namespace = dict(db = db)
-    print("Rending template...", flush = True)
+    #print("Rending template...", flush = True)
     res = renderTemplateFromText(template, namespace)
     #print(res)
     with io.open("{}.render".format(fnbase), "w", encoding = "latin-1", newline = "\n") as outf:
         outf.write(res)
-    print(successText("Finished."), flush = True)
+    print(successText("OK, finished.\n"), flush = True)
     resetColorStyle()
-    print("-" * 80, flush = True)
+    #print("-" * 80, flush = True)
+
 
 def main():
     colorama.init(convert = False, strip = False)
-
     footer = "CAVEAT: In this version dbc_importer is DESTRUCTIVE, i.e. no merging happens!"
     parser = argparse.ArgumentParser(description = 'Import .dbc file into Vehicle Network Database.', epilog = footer)
-
     parser.add_argument("dbcfile", help = ".dbc file(s) to import", nargs = "*")
-
     parser.add_argument("-k", dest = 'keepDirectory', action = "store_true", default = False,
         help = "keep directory; otherwise create db in current directory"
     )
     parser.add_argument("-l", help = "loglevel [warn | info | error | debug]", dest = "loglevel", type = str, default = "warn")
-
     args = parser.parse_args()
-    print(args)
     for name in args.dbcfile:
         importFile(name)
 
