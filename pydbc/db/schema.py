@@ -145,7 +145,7 @@ SCHEMA = ('''
         Num_Value FLOAT8 DEFAULT 0,
         String_Value TEXT,
         PRIMARY KEY(Object_ID,Attribute_Definition),
-        FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID)
+        FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS AttributeRel_Value (
@@ -157,7 +157,7 @@ SCHEMA = ('''
         Opt_Object_ID_2 INTEGER DEFAULT 0,
         BLOB_Value BLOB,
         PRIMARY KEY(Object_ID,Attribute_Definition,Opt_Object_ID_1,Opt_Object_ID_2),
-        FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID)
+        FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS VndbMeta (
@@ -190,16 +190,16 @@ SCHEMA = ('''
         ECU INTEGER NOT NULL DEFAULT 0,
         EnvVar INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(ECU,EnvVar),
-        FOREIGN KEY(ECU) REFERENCES ECU(RID),
-        FOREIGN KEY(EnvVar) REFERENCES EnvVar(RID)
+        FOREIGN KEY(ECU) REFERENCES ECU(RID) ON UPDATE CASCADE ON DELETE RESTRICT,
+        FOREIGN KEY(EnvVar) REFERENCES EnvVar(RID)ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS ECU_Node (
         ECU INTEGER NOT NULL DEFAULT 0,
         Node INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(ECU,Node),
-        FOREIGN KEY(ECU) REFERENCES ECU(RID),
-        FOREIGN KEY(Node) REFERENCES Node(RID)
+        FOREIGN KEY(ECU) REFERENCES ECU(RID) ON UPDATE CASCADE ON DELETE RESTRICT,
+        FOREIGN KEY(Node) REFERENCES Node(RID) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Gateway_Signal (
@@ -248,8 +248,8 @@ SCHEMA = ('''
         Multiplex_Dependent SMALLINT DEFAULT 0,
         Multiplexor_Value INTEGER,
         PRIMARY KEY(Message,Signal),
-        FOREIGN KEY(Message) REFERENCES Message(RID),
-        FOREIGN KEY(Signal) REFERENCES Signal(RID)
+        FOREIGN KEY(Message) REFERENCES Message(RID) ON UPDATE CASCADE ON DELETE CASCADE,
+        FOREIGN KEY(Signal) REFERENCES Signal(RID) ON UPDATE CASCADE ON DELETE CASCADE
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Network (
@@ -265,16 +265,16 @@ SCHEMA = ('''
         Network INTEGER NOT NULL DEFAULT 0,
         Node INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Network,Node),
-        FOREIGN KEY(Network) REFERENCES Network(RID),
-        FOREIGN KEY(Node) REFERENCES Node(RID)
+        FOREIGN KEY(Network) REFERENCES Network(RID) ON UPDATE CASCADE ON DELETE RESTRICT,
+        FOREIGN KEY(Node) REFERENCES Node(RID) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Node_RxSig (
         Node INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Signal),
-        FOREIGN KEY(Node) REFERENCES Node(RID),
-        FOREIGN KEY(Signal) REFERENCES Signal(RID)
+        FOREIGN KEY(Node) REFERENCES Node(RID) ON UPDATE CASCADE ON DELETE RESTRICT,
+        FOREIGN KEY(Signal) REFERENCES Signal(RID) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Node_RxSignal (
@@ -282,25 +282,25 @@ SCHEMA = ('''
         Message INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Message,Signal),
-        FOREIGN KEY(Message) REFERENCES Message(RID),
-        FOREIGN KEY(Node) REFERENCES Node(RID),
-        FOREIGN KEY(Signal) REFERENCES Signal(RID)
+        FOREIGN KEY(Message) REFERENCES Message(RID) ON UPDATE CASCADE ON DELETE CASCADE,
+        FOREIGN KEY(Node) REFERENCES Node(RID) ON UPDATE CASCADE ON DELETE CASCADE,
+        FOREIGN KEY(Signal) REFERENCES Signal(RID) ON UPDATE CASCADE ON DELETE CASCADE
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Node_TxMessage (
         Node INTEGER NOT NULL DEFAULT 0,
         Message INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Message),
-        FOREIGN KEY(Message) REFERENCES Message(RID),
-        FOREIGN KEY(Node) REFERENCES Node(RID)
+        FOREIGN KEY(Message) REFERENCES Message(RID) ON UPDATE CASCADE ON DELETE CASCADE,
+        FOREIGN KEY(Node) REFERENCES Node(RID) ON UPDATE CASCADE ON DELETE CASCADE
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Node_TxSig (
         Node INTEGER NOT NULL DEFAULT 0,
         Signal INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Node,Signal),
-        FOREIGN KEY(Node) REFERENCES Node(RID),
-        FOREIGN KEY(Signal) REFERENCES Signal(RID)
+        FOREIGN KEY(Node) REFERENCES Node(RID) ON UPDATE CASCADE ON DELETE CASCADE,
+        FOREIGN KEY(Signal) REFERENCES Signal(RID) ON UPDATE CASCADE ON DELETE CASCADE
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Object_Valuetable (
@@ -308,7 +308,7 @@ SCHEMA = ('''
         Object_RID INTEGER NOT NULL DEFAULT 0,
         Valuetable INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Object_Type,Object_RID),
-        FOREIGN KEY(Valuetable) REFERENCES Valuetable(RID)
+        FOREIGN KEY(Valuetable) REFERENCES Valuetable(RID) ON UPDATE CASCADE ON DELETE CASCADE
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Value_Description (
@@ -316,12 +316,12 @@ SCHEMA = ('''
         Value FLOAT8 NOT NULL DEFAULT 0,
         Value_Description VARCHAR(255) NOT NULL,
         PRIMARY KEY(Valuetable,Value),
-        FOREIGN KEY(Valuetable) REFERENCES Valuetable(RID)
+        FOREIGN KEY(Valuetable) REFERENCES Valuetable(RID) ON UPDATE CASCADE ON DELETE CASCADE
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Valuetable (
         RID INTEGER NOT NULL DEFAULT 0,
-        Name VARCHAR(255) NOT NULL,
+        Name VARCHAR(255),
         "Comment" VARCHAR(255),
         PRIMARY KEY(RID)
     );
@@ -337,16 +337,16 @@ SCHEMA = ('''
         Vehicle INTEGER NOT NULL DEFAULT 0,
         ECU INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Vehicle,ECU),
-        FOREIGN KEY(ECU) REFERENCES ECU(RID),
-        FOREIGN KEY(Vehicle) REFERENCES Vehicle(RID)
+        FOREIGN KEY(ECU) REFERENCES ECU(RID) ON UPDATE CASCADE ON DELETE RESTRICT,
+        FOREIGN KEY(Vehicle) REFERENCES Vehicle(RID) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Vehicle_Network (
         Vehicle INTEGER NOT NULL DEFAULT 0,
         Network INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Vehicle,Network),
-        FOREIGN KEY(Network) REFERENCES Network(RID),
-        FOREIGN KEY(Vehicle) REFERENCES Vehicle(RID)
+        FOREIGN KEY(Network) REFERENCES Network(RID) ON UPDATE CASCADE ON DELETE RESTRICT,
+        FOREIGN KEY(Vehicle) REFERENCES Vehicle(RID) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Versioninfo (
@@ -378,8 +378,8 @@ SCHEMA = ('''
         EnvVar INTEGER NOT NULL DEFAULT 0,
         Node INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(EnvVar, Node),
-        FOREIGN KEY(EnvVar) REFERENCES EnvVar(RID),
-        FOREIGN KEY(Node) REFERENCES Node(RID)
+        FOREIGN KEY(EnvVar) REFERENCES EnvVar(RID) ON UPDATE CASCADE ON DELETE RESTRICT,
+        FOREIGN KEY(Node) REFERENCES Node(RID) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', )
 
@@ -389,6 +389,14 @@ DEFAULTS = (
 
 TRIGGER = (
 """
+
+""",
+"""
+    CREATE TRIGGER IF NOT EXISTS delete_object_valuetable_signal AFTER DELETE ON Object_Valuetable
+    WHEN old.Object_Type = 0
+    BEGIN
+        DELETE
+    END;
 """,
 )
 
