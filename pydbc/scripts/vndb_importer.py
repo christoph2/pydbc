@@ -47,8 +47,6 @@ from pydbc.template import renderTemplateFromText
 
 template = pkgutil.get_data("pydbc", "cgen/templates/dbc.tmpl")
 
-# TODO: Rename 'vndb_importer'
-
 def coloredText(color, msg):
     return "{}{}".format(color, msg)
 
@@ -83,7 +81,6 @@ def importFile(name):
     fnbase, fnext = os.path.splitext(fname)
     db = CanDatabase(r"{}.vndb".format(fnbase))
 
-    #print("FN", name, pth, fname, flush = True)
     print(progressText("Processing file '{}'...").format(name), flush = True)
     resetColorStyle()
 
@@ -126,9 +123,9 @@ def importFile(name):
 
 def main():
     colorama.init(convert = False, strip = False)
-    footer = "CAVEAT: In this version dbc_importer is DESTRUCTIVE, i.e. no merging happens!"
+    footer = "CAVEAT: In this version vndb_importer is DESTRUCTIVE, i.e. no merging happens!"
     parser = argparse.ArgumentParser(description = 'Import .dbc file into Vehicle Network Database.', epilog = footer)
-    parser.add_argument("dbcfile", help = ".dbc file(s) to import", nargs = "*")
+    parser.add_argument("dbcfile", help = ".dbc file(s) to import", nargs = "+")
     parser.add_argument("-k", dest = 'keepDirectory', action = "store_true", default = False,
         help = "keep directory; otherwise create db in current directory"
     )
