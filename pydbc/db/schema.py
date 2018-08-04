@@ -49,6 +49,7 @@ INDICES = (
 )
 
 TABLES = (
+    "VndbMeta",
     "Message_Signal",
     "ECU_Node",
     "Network_Node",
@@ -79,7 +80,6 @@ TABLES = (
     "Versioninfo",
     "comments",
     "EnvironmentVariablesData",
-
     "Node",
 )
 
@@ -161,8 +161,10 @@ SCHEMA = ('''
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS VndbMeta (
+        RID INTEGER NOT NULL DEFAULT 0,
         Schema_Version INTEGER,
-        Created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        Created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY(RID)
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS ECU (

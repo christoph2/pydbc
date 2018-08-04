@@ -107,6 +107,8 @@ def importFile(name):
         return
     if not execute(cr.createIndices, "creating indices"):
         return
+    if not execute(cr.createMetaData, "creating meta-data"):
+        return
 
     #pprint(tree, indent = 4)
 

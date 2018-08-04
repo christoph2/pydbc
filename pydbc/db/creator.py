@@ -31,6 +31,8 @@ import sqlite3
 
 from pydbc.db.schema import TABLES, VIEWS, SCHEMA, INDICES, TRIGGER, DEFAULTS
 from pydbc.logger import Logger
+from pydbc.version import VNDB_SCHEMA_VERSION
+
 
 class Creator(object):
 
@@ -88,5 +90,15 @@ class Creator(object):
             except sqlite3.DatabaseError as e:
                 self.logger.error("Creation of index '{}' failed : '{}'".format(item, str(e)))
                 #raise
+        self.db.commitTransaction()
+
+    def createMetaData(self):
+        cur = self.db.getCursor()
+        self.db.beginTransaction()
+        self.logger.debug("Creating meta-data ")
+        try:
+            res = cur.execute("INSERT OR REPLACE INTO VndbMeta(RID, Schema_Version) VALUES(1, ?)", [VNDB_SCHEMA_VERSION])
+        except sqlite3.DatabaseError as e:
+            self.logger.error("Creation of meta-data failed : '{}'".format(str(e)))
         self.db.commitTransaction()
 
