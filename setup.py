@@ -21,7 +21,7 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-                'dbc_importer = pydbc.scripts.dbc_importer:main'
+                'vndb_importer = pydbc.scripts.vndb_importer:main'
         ],
     },
     data_files = [
