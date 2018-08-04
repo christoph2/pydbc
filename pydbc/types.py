@@ -82,6 +82,11 @@ class EnvVarAccessType(enum.IntEnum):
     READ_WRITE = 3
 
 
+class ValueTableType(enum.IntEnum):
+    SIGNAL  = 0
+    ENV_VAR = 1
+
+
 EXTENDED_ID_MASK = 0x80000000
 
 
