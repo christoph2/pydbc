@@ -41,14 +41,12 @@ from pydbc.api.node import Node
 from pydbc.api.envvar import EnvVar
 from pydbc.api.limits import Limits
 from pydbc.api.valuetable import ValueTable, Value
+from pydbc.api.exceptions import DuplicateKeyError
 from pydbc.logger import Logger
 
 
 DBC_EXTENSION = "dbc"
 DB_EXTENSION = "vndb"
-
-
-class DuplicateKeyError(Exception): pass
 
 
 class Database:
@@ -125,6 +123,8 @@ class Database:
 
     def addNode(self, name, comment):
         """
+
+        :returns: newly created `pydbc.api.node.Node` object on success else None.
         """
         cur = self.getCursor()
         self.insertStatement(cur, "Node", "Name, Comment", name, comment)
