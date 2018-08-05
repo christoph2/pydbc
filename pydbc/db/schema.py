@@ -155,6 +155,7 @@ SCHEMA = ('''
     CREATE TABLE IF NOT EXISTS VndbMeta (
         RID INTEGER NOT NULL DEFAULT 0,
         Schema_Version INTEGER,
+        Vndb_Type INTEGER NOT NULL DEFAULT 0,
         Created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY(RID)
     );
