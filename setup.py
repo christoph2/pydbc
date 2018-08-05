@@ -8,6 +8,13 @@ from glob import glob
 
 ANTLR_VERSION = '4.7.1'
 
+print(sys.version_info)
+print(dir(sys))
+
+if (sys.version_info.major == 3 and sys.version_info.minor < 4) or (sys.version_info.minor < 3):
+    print("ERROR: pyDBC requires at least Python 3.4")
+    sys.exit(1)
+
 setup(
     name = 'pydbc',
     version = '0.1.0',
