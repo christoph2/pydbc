@@ -3,6 +3,7 @@ from pprint import pprint
 import unittest
 
 from base import BaseTest
+from pydbc.api.db import DuplicateKeyError
 
 
 class TestNode(BaseTest):
@@ -19,10 +20,16 @@ class TestNode(BaseTest):
     self.assertEqual(node.comment, "test-node")
     
   def testNodeNameShallBeUnique(self):
-    pass
+    self.db.addNode("ABC", "test-node")
+    self.assertRaises(DuplicateKeyError, self.db.addNode, "ABC", "test-node")    
     
   def testNodeDeletionWorkx(self):
-    pass
+    self.db.addNode("ABC", "test-node")
+    node = self.db.node("ABC")   
+    node.remove()
+    node = self.db.node("ABC")     
+    self.assertIsNone(node)
+    
 
     
   @unittest.skip    
