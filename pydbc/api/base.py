@@ -32,7 +32,7 @@ from functools import lru_cache
 
 from pydbc.api.attribute import AttributeDefinition, AttributeValue, Value
 from pydbc.api.limits import Limits
-from pydbc.types import ValueType
+from pydbc.types import ValueType,AttributeType
 
 
 class BaseObject:
@@ -102,9 +102,17 @@ class BaseObject:
     def attribute(self, name):
         """
         """
-        tmp = self.database.singleAttribute(self.OBJECT_TYPE, name)
-        if tmp:
-            attr = AttributeDefinition(tmp)
+        item = self.database.singleAttribute(self.OBJECT_TYPE, name)
+        if item:
+            valueType = ValueType(item['Valuetype'])
+            if valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
+                defaultValue = item['Default_Number']
+            elif valueType in (ValueType.STRING, ValueType.ENUM):
+                defaultValue = item['Default_String']
+            limits = Limits(item['Minimum'], item['Maximum'])
+            attr = AttributeDefinition(self.database, item['RID'], item['Name'], AttributeType(item['Objecttype']),
+                valueType, defaultValue, limits, item['Enumvalues'], item['Comment'])
+
             value = self._attributeValue(self.key, attr)
             return AttributeValue(self.database.db, self.key, attr, value)
         else:
@@ -115,7 +123,14 @@ class BaseObject:
         """
         """
         for item in self.applicableAttributes():
-            attr = AttributeDefinition(item)
+            valueType = ValueType(item['Valuetype'])
+            if valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
+                defaultValue = item['Default_Number']
+            elif valueType in (ValueType.STRING, ValueType.ENUM):
+                defaultValue = item['Default_String']
+            limits = Limits(item['Minimum'], item['Maximum'])
+            attr = AttributeDefinition(self.database, item['RID'], item['Name'], AttributeType(item['Objecttype']),
+                valueType, defaultValue, limits, item['Enumvalues'], item['Comment'])
             value = self._attributeValue(self.key, attr)
             yield AttributeValue(self.database.db, self.key, attr, value)
 

@@ -37,23 +37,20 @@ from pydbc.logger import Logger
 
 
 class AttributeDefinition:
+    """
 
-    def __init__(self, attr):
-        self.valueType = ValueType(attr['Valuetype'])
-        self.name = attr['Name']
-        self.comment = attr['Comment']
-        self.objectType = AttributeType(attr['Objecttype'])
-        self.rid = attr['RID']
-        self.limits = Limits(attr['Minimum'], attr['Maximum'])
-        self.enumValues = [ev for ev in attr['Enumvalues'].split(";")] if attr['Enumvalues'] else []
+    """
 
-        if self.valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
-            self.defaultValue = attr['Default_Number']
-        elif self.valueType in (ValueType.STRING, ValueType.ENUM):
-            self.defaultValue = attr['Default_String']
-
-        #self.defaultNumber = attr['Default_Number']
-        #self.defaultString = attr['Default_String']
+    def __init__(self, database, rid, name, objectType, valueType, defaultValue, limits, enumValues = None, comment= None):
+        self.database = database
+        self.rid = rid
+        self.name = name
+        self.objectType = objectType
+        self.valueType = valueType
+        self.defaultValue = defaultValue
+        self.limits = limits
+        self.enumValues = [ev for ev in enumValues.split(";")] if enumValues else []
+        self.comment = comment
 
     def __str__(self):
         comment = '' if self.comment is None else self.comment
