@@ -46,16 +46,11 @@ class BaseObject:
 
     def update(self):
         attrValues = []
-        columns = []
-        for attr, column in self.COLUMNS:
+        for attr, _ in self.COLUMNS:
             attrValues.append(getattr(self, attr))
-            columns.append("{} = ?".format(column))
-        attrValues.append(getattr(self, self.KEY))
-        sqlColumns = ', '.join(columns)
-        sql = "UPDATE OR FAIL {} SET {} WHERE {} = {}".format(self.TABLE_NAME, sqlColumns, self.KEY, "?")
-        print("Updating {}... ==> {} :: {}".format(self.__class__.__name__, sql, attrValues))
         cur = self.database.getCursor()
-        cur.execute(sql, attrValues)
+        where = "{} = {}".format(self.KEY, getattr(self, self.KEY))
+        self.database.db.updateStatement(cur, self.TABLE_NAME, ','.join([c for a, c in self.COLUMNS]), where, attrValues)
 
     def remove(self):
         sql = "DELETE FROM {} WHERE {} = {}".format(self.TABLE_NAME, self.KEY, "?")
