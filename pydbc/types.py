@@ -30,6 +30,12 @@ __version__ = '0.1.0'
 
 import enum
 
+
+class VndbType(enum.IntEnum):
+    SINGLE_NETWORK = 0
+    MULTIPLE_NETWORKS = 1
+
+
 class AttributeType(enum.IntEnum):
     NODE = 0
     MESSAGE = 1
