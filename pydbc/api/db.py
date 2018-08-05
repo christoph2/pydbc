@@ -60,12 +60,14 @@ class Database:
         self.logger = Logger("api.database", level = logLevel)
         dbname = "{}.{}".format(dbname, DB_EXTENSION)
         self.dbname = dbname if not inMemory else ":memory:"
-        self.logger.info("Initializing Sqlite3 database '{}'".format(self.dbname))
+        self.logger.debug("Initializing Sqlite3 database '{}'".format(self.dbname))
         self.dbtype = dbtype    # TODO: check.
         self.db = CanDatabase(dbname, logLevel = logLevel)
         creator = Creator(self.db)
-        #creator.createSchema()
-        #creator.createIndices()
+
+        creator.createSchema()
+        creator.createIndices()
+
         self.db.beginTransaction()
 
     def __del__(self):
@@ -169,6 +171,13 @@ class Database:
     def node(self, name):
         """
         """
+        cur = self.db.getCursor()
+        where = "Name = '{}'".format(name)
+        item = self.db.fetchSingleRow(cur, tname = "Node", column = "*", where = where)
+        if item:
+            return Node(self, item['RID'], item['Name'], item['Comment'])
+        else:
+            return None
 
     def messages(self, glob = None, regex = None):
         """
@@ -232,7 +241,6 @@ class Database:
                 values.append(val)
             if values:
                 vt = ValueTable(objectType, res['Object_RID'], res['VT_RID'], res['Name'], res['Comment'], values)
-                #print("VT:", vt)
                 return vt
 
 
