@@ -91,7 +91,7 @@ class Database:
         except sqlite3.DatabaseError as e:
             excText = str(e)
             msg = "{} - Table: '{}'; Data: {}".format(excText, tname, values)
-            self.logger.error(msg)
+            self.logger.debug(msg)
             if excText.startswith("UNIQUE constraint failed:"):
                 ii = excText.find(":")
                 raise DuplicateKeyError("Table: '{}'; Key-Column: '{}'; Data: {}".format(tname, excText[ii + 2 : ], values)) from None
