@@ -27,25 +27,18 @@ __copyright__ = """
 __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
-#  datetime('now', 'localtime')
 
 INDICES = (
-    "CREATE UNIQUE INDEX IF NOT EXISTS ECU_RID ON ECU(RID );",
-    "CREATE INDEX IF NOT EXISTS ECU_EnvVar_ECU_EnvVarECU ON ECU_EnvVar(ECU );",
-    "CREATE INDEX IF NOT EXISTS ECU_Node_ECU_NodeECU ON ECU_Node(ECU );",
-    "CREATE UNIQUE INDEX IF NOT EXISTS Gateway_Signal_RID ON Gateway_Signal(RID );",
-    "CREATE INDEX IF NOT EXISTS Node_Group_Object_Node_Group_RID ON Node_Group_Object(Parent_RID );",
-    "CREATE INDEX IF NOT EXISTS Node_Group_Object_Object_RID ON Node_Group_Object(Object_RID );",
-    "CREATE INDEX IF NOT EXISTS Node_Group_Object_Object_RID_2 ON Node_Group_Object(Object_RID_2 );",
-    "CREATE INDEX IF NOT EXISTS Node_Group_Object_Object_Type ON Node_Group_Object(Object_Type );",
-    "CREATE INDEX IF NOT EXISTS Node_Group_Object_Parent_Type ON Node_Group_Object(Parent_Type );",
-    "CREATE UNIQUE INDEX IF NOT EXISTS Network_RID ON Network(RID );",
-    "CREATE INDEX IF NOT EXISTS Object_Valuetable_Object_RID ON Object_Valuetable(Object_RID );",
-    "CREATE INDEX IF NOT EXISTS Object_Valuetable_Object_Type ON Object_Valuetable(Object_Type );",
-    "CREATE UNIQUE INDEX IF NOT EXISTS Vehicle_RID ON Vehicle(RID );",
-
     "CREATE UNIQUE INDEX IF NOT EXISTS Node_Name ON Node(Name)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS Attribute_Definition_Name ON Attribute_Definition(Name)",
     "CREATE INDEX IF NOT EXISTS Signal_Name ON Signal(Name)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS EnvVar_Name ON EnvVar(Name)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS ECU_Name ON ECU(Name)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS Node_Group_Name ON Node_Group(Name)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS Network_Name ON Network(Name)",
+    "CREATE INDEX IF NOT EXISTS Valuetable_Name ON Valuetable(Name)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS Vehicle_Name ON Vehicle(Name)",
+
 )
 
 TABLES = (
@@ -104,7 +97,6 @@ SCHEMA = ('''
         Sender INTEGER DEFAULT 0,
         "Comment" VARCHAR(255),
         PRIMARY KEY(RID),
-        UNIQUE(Name),
         UNIQUE(Message_ID)
     );
 ''', '''
@@ -321,7 +313,7 @@ SCHEMA = ('''
         FOREIGN KEY(Valuetable) REFERENCES Valuetable(RID) ON UPDATE CASCADE ON DELETE CASCADE
     );
 ''', '''
-    CREATE TABLE IF NOT EXISTS Valuetable (
+    CREATE TABLE IF NOT EXISTS Valuetable(
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255),
         "Comment" VARCHAR(255),
