@@ -2,17 +2,10 @@
 from pprint import pprint
 import unittest
 
-from pydbc.api.db import Database
-from pydbc.api.db import BaseObject
+from base import BaseTest
 
 
-class TestCreation(unittest.TestCase):
-
-  def setUp(self):
-    self.db = Database("test", inMemory = True)
-    
-  def tearDown(self):
-    self.db.close()
+class TestNode(BaseTest):
 
   def testDummyNodeExists(self):
     node = list(self.db.nodes())[0]
@@ -24,6 +17,13 @@ class TestCreation(unittest.TestCase):
     node = self.db.node("ABC")
     self.assertEqual(node.name, "ABC")
     self.assertEqual(node.comment, "test-node")
+    
+  def testNodeNameShallBeUnique(self):
+    pass
+    
+  def testNodeDeletionWorkx(self):
+    pass
+
     
   @unittest.skip    
   def testNodeAttrs(self):
