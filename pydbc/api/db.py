@@ -29,6 +29,7 @@ __version__ = '0.1.0'
 
 import enum
 import sys
+import sqlite3
 import os
 
 from pydbc.types import AttributeType, CANAddress, EnvVarType, EnvVarAccessType
@@ -47,7 +48,7 @@ DBC_EXTENSION = "dbc"
 DB_EXTENSION = "vndb"
 
 
-class DuplicateRecordError(Exception): pass
+class DuplicateKeyError(Exception): pass
 
 
 class Database:
@@ -88,11 +89,14 @@ class Database:
             stmt = "{} INTO {}({}) VALUES({})".format(verb, tname, columns, placeholder)
             cur.execute(stmt, [*values])
         except sqlite3.DatabaseError as e:
-            msg = "{} - Data: {}".format(str(e), values)
+            excText = str(e)
+            msg = "{} - Table: '{}'; Data: {}".format(excText, tname, values)
             self.logger.error(msg)
-            raise
-        else:
-            pass
+            if excText.startswith("UNIQUE constraint failed:"):
+                ii = excText.find(":")
+                raise DuplicateKeyError("Table: '{}'; Key-Column: '{}'; Data: {}".format(tname, excText[ii + 2 : ], values)) from None
+            else:
+                raise
 
     def insertStatement(self, cur, tname, columns, *values):
         """
@@ -123,7 +127,7 @@ class Database:
         """
         """
         cur = self.getCursor()
-        self.db.insertStatement(cur, "Node", "Name, Comment", name, comment)
+        self.insertStatement(cur, "Node", "Name, Comment", name, comment)
 
     def addMessage(self, identifier, name, size):
         """
