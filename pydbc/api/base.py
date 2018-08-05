@@ -60,7 +60,7 @@ class BaseObject:
     def remove(self):
         sql = "DELETE FROM {} WHERE {} = {}".format(self.TABLE_NAME, self.KEY, "?")
         cur = self.database.getCursor()
-        key = getattr(self, self.KEY)
+        key = [getattr(self, self.KEY)]
         cur.execute(sql, key)
 
     def setMultipleValues(self, **values):
