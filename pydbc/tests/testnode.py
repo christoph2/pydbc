@@ -30,6 +30,24 @@ class TestNode(BaseTest):
     node = self.db.node("ABC")     
     self.assertIsNone(node)
     
+  def testUpdateWorkx(self):
+    self.db.addNode("ABC", "test-node")
+    node = self.db.node("ABC")     
+    node.name = "DEF"
+    node.comment = "foo bar"
+    node.update()
+    node = self.db.node("ABC")
+    self.assertIsNone(node)
+    node = self.db.node("DEF")    
+    self.assertEqual(node.name, "DEF")
+    self.assertEqual(node.comment, "foo bar")
+    
+  def testUpdateFails(self):
+    self.db.addNode("ABC", "test-node")
+    self.db.addNode("DEF", "test-node")    
+    node = self.db.node("ABC")   
+    node.name = "DEF"
+    self.assertRaises(DuplicateKeyError, node.update)
 
     
   @unittest.skip    
