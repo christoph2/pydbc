@@ -39,6 +39,7 @@ import re
 import sqlite3
 import types
 
+from pydbc.exceptions import DuplicateKeyError
 from pydbc.logger import Logger
 
 
@@ -259,9 +260,19 @@ class CanDatabase(object):
 
     def updateStatement(self, cur, tname, columns, where, *values):
         columns = [c.strip() for c in columns.split(",")]
-        print("UPH:", list(zip(columns, *values)))
-        sql = "UPDATE OR FAIL {} SET {} WHERE {} = {}".format(tname, columns, where, *values)
-        print("UPD:", sql)
+        colStmt = ', '.join(["{} = ?".format(c) for c in columns])
+        sql = "UPDATE OR FAIL {} SET {} WHERE {}".format(tname, colStmt, where)
+        try:
+            res = cur.execute(sql, *values)
+        except sqlite3.DatabaseError as e:
+            excText = str(e)
+            msg = "{} - Table: '{}'; Data: {}".format(excText, tname, values)
+            self.logger.debug(msg)
+            if excText.startswith("UNIQUE constraint failed:"):
+                ii = excText.find(":")
+                raise DuplicateKeyError("Table: '{}'; Key-Column: '{}'; Data: {}".format(tname, excText[ii + 2 : ], values)) from None
+            else:
+                raise
 
     def insertOrReplaceStatement(self, insert, cur, tname, columns, *values):
         verb = "INSERT OR FAIL" if insert else "REPLACE"
