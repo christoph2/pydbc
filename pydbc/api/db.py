@@ -32,16 +32,17 @@ import sys
 import sqlite3
 import os
 
-from pydbc.types import AttributeType, CANAddress, EnvVarType, EnvVarAccessType
+from pydbc.types import AttributeType, CANAddress, EnvVarType, EnvVarAccessType, ValueType
 from pydbc.db.creator import Creator
 from pydbc.db import CanDatabase
+from pydbc.api.attribute import AttributeDefinition
 from pydbc.api.base import BaseObject
 from pydbc.api.message import Message
 from pydbc.api.node import Node
 from pydbc.api.envvar import EnvVar
 from pydbc.api.limits import Limits
 from pydbc.api.valuetable import ValueTable, Value
-from pydbc.api.exceptions import DuplicateKeyError
+from pydbc.exceptions import DuplicateKeyError
 from pydbc.logger import Logger
 
 
@@ -134,11 +135,39 @@ class Database:
         """
         pass
 
-    def addAttributeDefinition(self):
-        """
-        """
-        pass
+    def addAttributeDefinition(self, name, objectType, valueType, defaultValue, limits, enumValues = None, comment= None):
+        cur = self.getCursor()
+        minimum = limits.min
+        maximum = limits.max
+        if valueType in (ValueType.FLOAT, ValueType.INT, ValueType.FLOAT):
+            # TODO: type-check!
+            defaultNumber = defaultValue
+            defaultString = None
+        else:
+            defaultString = defaultValue
+            defaultNumber = None
+        self.insertStatement(cur, "Attribute_Definition", """Name, Objecttype, Valuetype, Minimum, Maximum,
+            Enumvalues, Default_Number, Default_String, Comment""",
+             name, objectType, valueType, minimum, maximum, enumValues, defaultNumber, defaultString, comment
+        )
 
+    def attributeDefinitions(self, glob = None, regex = None):
+        """
+        """
+        for item in self._searchTableForName("Attribute_Definition", glob, regex):
+            yield AttributeDefinition.create(self.db, item)
+
+    def attributeDefinition(self, name):
+        """
+        """
+        cur = self.db.getCursor()
+        where = "Name = '{}'".format(name)
+        item = self.db.fetchSingleRow(cur, tname = "Attribute_Definition", column = "*", where = where)
+        if item:
+            return AttributeDefinition.create(self.db, item)
+        else:
+            return None
+###
     def addEnvVar(self, name, vartype, valueRange, unit, initialValue = None, accessNodes = None):
         """
         """
