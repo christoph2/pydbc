@@ -52,6 +52,17 @@ class AttributeDefinition:
         self.enumValues = [ev for ev in enumValues.split(";")] if enumValues else []
         self.comment = comment
 
+    @staticmethod
+    def create(database, item):
+        valueType = ValueType(item['Valuetype'])
+        if valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
+            defaultValue = item['Default_Number']
+        elif valueType in (ValueType.STRING, ValueType.ENUM):
+            defaultValue = item['Default_String']
+        limits = Limits(item['Minimum'], item['Maximum'])
+        return AttributeDefinition(database, item['RID'], item['Name'], AttributeType(item['Objecttype']),
+            valueType, defaultValue, limits, item['Enumvalues'], item['Comment'])
+
     def __str__(self):
         comment = '' if self.comment is None else self.comment
         return "{}(name = '{}', objectType = {}, valueType = {}, limits = {}, default = {}, values = {}, comment = '{}')".format(

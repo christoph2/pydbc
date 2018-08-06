@@ -99,15 +99,7 @@ class BaseObject:
         """
         item = self.database.singleAttribute(self.OBJECT_TYPE, name)
         if item:
-            valueType = ValueType(item['Valuetype'])
-            if valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
-                defaultValue = item['Default_Number']
-            elif valueType in (ValueType.STRING, ValueType.ENUM):
-                defaultValue = item['Default_String']
-            limits = Limits(item['Minimum'], item['Maximum'])
-            attr = AttributeDefinition(self.database, item['RID'], item['Name'], AttributeType(item['Objecttype']),
-                valueType, defaultValue, limits, item['Enumvalues'], item['Comment'])
-
+            attr = AttributeDefinition.create(self.database, item)
             value = self._attributeValue(self.key, attr)
             return AttributeValue(self.database.db, self.key, attr, value)
         else:
@@ -118,14 +110,7 @@ class BaseObject:
         """
         """
         for item in self.applicableAttributes():
-            valueType = ValueType(item['Valuetype'])
-            if valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
-                defaultValue = item['Default_Number']
-            elif valueType in (ValueType.STRING, ValueType.ENUM):
-                defaultValue = item['Default_String']
-            limits = Limits(item['Minimum'], item['Maximum'])
-            attr = AttributeDefinition(self.database, item['RID'], item['Name'], AttributeType(item['Objecttype']),
-                valueType, defaultValue, limits, item['Enumvalues'], item['Comment'])
+            attr = AttributeDefinition.create(self.database, item)
             value = self._attributeValue(self.key, attr)
             yield AttributeValue(self.database.db, self.key, attr, value)
 
