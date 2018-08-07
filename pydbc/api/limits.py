@@ -38,19 +38,19 @@ class Limits:
         self._min = min
         self._max = max
 
-    def getMin(self):
+    def _getMin(self):
         return self._min
 
-    def setMin(self, value):
+    def _setMin(self, value):
         self.typeCheck(value)
         if not (value is None and self.max is None) and self.max < value:
             raise ValueError("min is larger than max.")
         self._min = value
 
-    def getMax(self):
+    def _getMax(self):
         return self._max
 
-    def setMax(self, value):
+    def _setMax(self, value):
         self.typeCheck(value)
         if not (self.min is None and value is None) and value < self.min:
             raise ValueError("max is smaller than min.")
@@ -60,8 +60,11 @@ class Limits:
         if not (isinstance(value, (int, float)) or value is None):
             raise TypeError("Value needs to be int, float, or None.")
 
-    min = property(getMin, setMin)
-    max = property(getMax, setMax)
+    def __eq__(self, other):
+        return self.min == other.min and self.max == other.max
+
+    min = property(_getMin, _setMin)
+    max = property(_getMax, _setMax)
 
     def __str__(self):
         minimum = "N/A" if self.min is None else self.min
