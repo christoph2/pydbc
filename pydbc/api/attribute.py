@@ -47,9 +47,9 @@ class AttributeDefinition:
         self.name = name
         self.objectType = objectType
         self.valueType = valueType
-        self.defaultValue = defaultValue
+        self.default = defaultValue
         self.limits = limits
-        self.enumValues = [ev for ev in enumValues.split(";")] if enumValues else []
+        self.values = [ev for ev in enumValues.split(";")] if enumValues else []
         self.comment = comment
 
     @staticmethod
@@ -63,11 +63,36 @@ class AttributeDefinition:
         return AttributeDefinition(database, item['RID'], item['Name'], AttributeType(item['Objecttype']),
             valueType, defaultValue, limits, item['Enumvalues'], item['Comment'])
 
+    def update(self):
+
+        name = self.name
+        objectType = self.objectType.value
+        valueType = self.valueType.value
+
+        default = self.default
+
+        minimum = self.limits.min
+        maximum = self.limits.max
+        enumValues = self.enumValues
+        comment = self.comment
+
+        cur = self.database.getCursor()
+        where = "RID = {}".format(self.rid)
+        self.database.db.updateStatement(cur, 'Attribute_Definition', """Name, Objecttype, Valuetype, Minimum, Maximum,
+            Enumvalues, Default_Number, Default_String, Comment""", where,
+            [name, objectType, valueType, minimum, maximum, enumValues]
+        )
+
+    def remove(self):
+        sql = "DELETE FROM Attribute_Definition WHERE RID = {}".format(self.rid)
+        cur = self.database.getCursor()
+        cur.execute(sql, key)
+
     def __str__(self):
         comment = '' if self.comment is None else self.comment
         return "{}(name = '{}', objectType = {}, valueType = {}, limits = {}, default = {}, values = {}, comment = '{}')".format(
-            self.__class__.__name__, self.name, self.objectType.name, self.valueType.name, self.limits, self.defaultValue,
-            self.enumValues, comment
+            self.__class__.__name__, self.name, self.objectType.name, self.valueType.name, self.limits, self.default,
+            self.values, comment
         )
 
     __repr__ = __str__
