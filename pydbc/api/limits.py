@@ -30,7 +30,7 @@ __version__ = '0.1.0'
 
 class Limits:
 
-    def __init__(self, min, max):
+    def __init__(self, min = 0, max = 0):
         self.typeCheck(min)
         self.typeCheck(max)
         if not (min is None and max is None) and max < min:
