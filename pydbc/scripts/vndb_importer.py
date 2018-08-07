@@ -118,7 +118,7 @@ def importFile(name):
     #print(res)
     with io.open("{}.render".format(fnbase), "w", encoding = "latin-1", newline = "\n") as outf:
         outf.write(res)
-    print(successText("OK, finished.\n"), flush = True)
+    print(successText("OK, done.\n"), flush = True)
     resetColorStyle()
     #print("-" * 80, flush = True)
 
