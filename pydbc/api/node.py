@@ -46,7 +46,31 @@ class Node(BaseObject):
 
     def __init__(self, database, rid, name, comment):
         super(Node, self).__init__(database)
-        self.rid = rid
-        self.name = name
-        self.comment = comment
+        self._rid = rid
+        self._name = name
+        self._comment = comment
+
+    @property
+    def rid(self):
+        return self._rid
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Value must be of type string.")
+        self._name = value
+
+    @property
+    def comment(self):
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Value must be of type string.")
+        self._comment = value
 

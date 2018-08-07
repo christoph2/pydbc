@@ -42,15 +42,15 @@ class AttributeDefinition:
     """
 
     def __init__(self, database, rid, name, objectType, valueType, defaultValue, limits, enumValues = None, comment= None):
-        self.database = database
-        self.rid = rid
-        self.name = name
-        self.objectType = objectType
-        self.valueType = valueType
-        self.default = defaultValue
-        self.limits = limits
-        self.values = [ev for ev in enumValues.split(";")] if enumValues else []
-        self.comment = comment
+        self._database = database
+        self._rid = rid
+        self._name = name
+        self._objectType = objectType
+        self._valueType = valueType
+        self._default = defaultValue
+        self._limits = limits
+        self._values = [ev for ev in enumValues.split(";")] if enumValues else []
+        self._comment = comment
 
     @staticmethod
     def create(database, item):
@@ -64,18 +64,14 @@ class AttributeDefinition:
             valueType, defaultValue, limits, item['Enumvalues'], item['Comment'])
 
     def update(self):
-
         name = self.name
         objectType = self.objectType.value
         valueType = self.valueType.value
-
         default = self.default
-
         minimum = self.limits.min
         maximum = self.limits.max
         enumValues = self.enumValues
         comment = self.comment
-
         cur = self.database.getCursor()
         where = "RID = {}".format(self.rid)
         self.database.db.updateStatement(cur, 'Attribute_Definition', """Name, Objecttype, Valuetype, Minimum, Maximum,
@@ -87,6 +83,70 @@ class AttributeDefinition:
         sql = "DELETE FROM Attribute_Definition WHERE RID = {}".format(self.rid)
         cur = self.database.getCursor()
         cur.execute(sql, key)
+
+    @property
+    def database(self):
+        return self._database
+
+    @property
+    def rid(self):
+        return self._rid
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Value must be of type string.")
+        self._name = value
+
+    @property
+    def objectType(self):
+        return self._objectType
+
+    @objectType.setter
+    def objectType(self, value):
+        ot = AttributeType(value)
+        self._objectType = ot
+
+    @property
+    def valueType(self):
+        return self._valueType
+
+    @valueType.setter
+    def valueType(self, value):
+        vt = ValueType(value)
+        self._objectType = vt
+
+    @property
+    def limits(self):
+        return self._limits
+
+    @limits.setter
+    def limits(self, value):
+        if not isinstance(value, Limits):
+            raise TypeError("Value must be of type Limits.")
+        self._limits = value
+
+    @property
+    def default(self):
+        return self._default
+
+    @property
+    def values(self):
+        return self._values
+
+    @property
+    def comment(self):
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Value must be of type string.")
+        self._comment = value
 
     def __str__(self):
         comment = '' if self.comment is None else self.comment

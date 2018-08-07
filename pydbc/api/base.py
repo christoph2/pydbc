@@ -42,7 +42,7 @@ class BaseObject:
     KEY = None
 
     def __init__(self, database):
-        self.database = database
+        self._database = database
 
     def update(self):
         attrValues = []
@@ -75,6 +75,10 @@ class BaseObject:
     @lru_cache(maxsize = 1)
     def key(self):
         return getattr(self, self.KEY)
+
+    @property
+    def database(self):
+        return self._database
 
     def _attributeValue(self, oid, attr):   # TODO: factory.
         attrValue = self.database.attributeValue(oid, attr.rid)
