@@ -126,7 +126,6 @@ SCHEMA = ('''
         Enumvalues TEXT,
         Default_Number FLOAT8 DEFAULT 0,
         Default_String VARCHAR(255),
-        Column_Index INTEGER NOT NULL DEFAULT 0,
         "Comment" TEXT,
         PRIMARY KEY(RID)
     );
