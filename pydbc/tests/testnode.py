@@ -18,39 +18,69 @@ class TestNode(BaseTest):
     node = self.db.node("ABC")
     self.assertEqual(node.name, "ABC")
     self.assertEqual(node.comment, "test-node")
-    
+
   def testNodeNameShallBeUnique(self):
     self.db.addNode("ABC", "test-node")
-    self.assertRaises(DuplicateKeyError, self.db.addNode, "ABC", "test-node")    
-    
+    self.assertRaises(DuplicateKeyError, self.db.addNode, "ABC", "test-node")
+
   def testNodeDeletionWorkx(self):
     self.db.addNode("ABC", "test-node")
-    node = self.db.node("ABC")   
+    node = self.db.node("ABC")
     node.remove()
-    node = self.db.node("ABC")     
+    node = self.db.node("ABC")
     self.assertIsNone(node)
-    
+
   def testUpdateWorkx(self):
     self.db.addNode("ABC", "test-node")
-    node = self.db.node("ABC")     
+    node = self.db.node("ABC")
     node.name = "DEF"
     node.comment = "foo bar"
     node.update()
     node = self.db.node("ABC")
     self.assertIsNone(node)
-    node = self.db.node("DEF")    
+    node = self.db.node("DEF")
     self.assertEqual(node.name, "DEF")
     self.assertEqual(node.comment, "foo bar")
-    
-  def testUpdateFails(self):
+
+  def testUpdateFails1(self):
     self.db.addNode("ABC", "test-node")
-    self.db.addNode("DEF", "test-node")    
-    node = self.db.node("ABC")   
+    self.db.addNode("DEF", "test-node")
+    node = self.db.node("ABC")
     node.name = "DEF"
     self.assertRaises(DuplicateKeyError, node.update)
 
-    
-  @unittest.skip    
+  def testUpdateFails2(self):
+    self.db.addNode("ABC", "test-node")
+    node = self.db.node("ABC")
+    self.assertRaises(TypeError, node.name, 45.35)
+
+  def testUpdateFails3(self):
+    self.db.addNode("ABC", "test-node")
+    node = self.db.node("ABC")
+    self.assertRaises(TypeError, node.comment, 47.11)
+
+  def testRidCouldNotBeSet(self):
+    self.db.addNode("ABC", "test-node")
+    node = self.db.node("ABC")
+    try:
+      node.rid = 0
+    except AttributeError:
+      pass
+    except Exception as e:
+      raise
+
+  def testDatabaseCouldNotBeSet(self):
+    self.db.addNode("ABC", "test-node")
+    node = self.db.node("ABC")
+    try:
+      node.database = None
+    except AttributeError:
+      pass
+    except Exception:
+      raise
+
+
+  @unittest.skip
   def testNodeAttrs(self):
     #nodes = [n for n in self.db.nodes(regex = ".*Unit")]
     nodes = [n for n in self.db.nodes()]
@@ -70,8 +100,7 @@ class TestNode(BaseTest):
     attr = n.attribute("ECU")
     print(attr)
     self.db.db.commitTransaction()
-    
+
 if __name__ == '__main__':
   unittest.main()
 
-  
