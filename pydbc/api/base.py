@@ -80,19 +80,19 @@ class BaseObject:
         attrValue = self.database.attributeValue(oid, attr.rid)
         valueType = attr.valueType
         if attrValue:
-            default = False
+            useDefault = False
             if valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
                 value = attrValue['Num_Value']
             elif valueType == ValueType.STRING:
                 value = attrValue['String_Value']
             elif valueType == ValueType.ENUM:
-                enumValues = attr.enumValues
+                enumValues = attr.values
                 idx = int(attrValue['Num_Value'])
                 value = enumValues[idx]
         else:
-            default = True
-            value = attr.defaultValue
-        return Value(value, default)
+            useDefault = True
+            value = attr.default
+        return Value(value, useDefault)
 
     def attribute(self, name):
         """
