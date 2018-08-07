@@ -43,7 +43,7 @@ class Limits:
 
     def _setMin(self, value):
         self.typeCheck(value)
-        if not (value is None and self.max is None) and self.max < value:
+        if (value is not None and self.max is not None) and self.max < value:
             raise ValueError("min is larger than max.")
         self._min = value
 
@@ -52,7 +52,7 @@ class Limits:
 
     def _setMax(self, value):
         self.typeCheck(value)
-        if not (self.min is None and value is None) and value < self.min:
+        if (self.min is not None and value is not None) and value < self.min:
             raise ValueError("max is smaller than min.")
         self._max = value
 
