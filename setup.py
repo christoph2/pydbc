@@ -32,7 +32,7 @@ setup(
         ],
     },
     data_files = [
-        ('cgen/templates/', glob('cgen/templates/*.tmpl')),
+        ('cgen/templates', glob('cgen/templates/*.tmpl')),
     ],
     test_suite="pydbc.tests"
 )
