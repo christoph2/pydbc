@@ -31,7 +31,7 @@ test_script:
   - "%PYTHON%\\python.exe setup.py test"
   - "%PYTHON%\\scripts\\coveralls"
   - "%PYTHON%\\scripts\\coverage xml"
-  - "%PYTHON%\\scripts\python-codacy-coverage -r coverage.xml"
+  - "%PYTHON%\\scripts\\python-codacy-coverage -r coverage.xml"
 
 
 after_test:
