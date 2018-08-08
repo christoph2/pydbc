@@ -31,6 +31,7 @@ import enum
 import sys
 import os
 
+from pydbc.exceptions import RangeError
 from pydbc.types import CANAddress, AttributeType, ValueType
 from pydbc.api.limits import Limits
 from pydbc.logger import Logger
@@ -199,10 +200,10 @@ class Value:
         if vt in (ValueType.INT, ValueType.HEX, ValueType.FLOAT):
             if self.limits.min is not None:
                 if value < self.limits.min:
-                    raise ValueError("Value lesser than minimum")
+                    raise RangeError("Value lesser than minimum")
             if self.limits.max is not None:
-                if value > self.limits.min:
-                    raise ValueError("Value greater than maximum")
+                if value > self.limits.max:
+                    raise RangeError("Value greater than maximum")
         elif vt == ValueType.ENUM:
             enumValues = self.attr.enumValues
             if not value in self.attr.enumValues:
