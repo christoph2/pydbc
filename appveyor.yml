@@ -22,7 +22,7 @@ environment:
 install:
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install wheel"
-  - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
+  - "%PYTHON%\\python.exe -m pip install -r requirements_testings.txt"
   - "%PYTHON%\\python.exe -m pip install pytest-cov coverage coveralls codacy-coverage"
 
 build: off
