@@ -1,4 +1,3 @@
-mock
 mako
 antlr4-python3-runtime == 4.7.1
 wxPython >= 4.0.0
