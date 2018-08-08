@@ -79,7 +79,6 @@ class TestNode(BaseTest):
     except Exception:
       raise
 
-
   @unittest.skip
   def testNodeAttrs(self):
     #nodes = [n for n in self.db.nodes(regex = ".*Unit")]
@@ -96,7 +95,7 @@ class TestNode(BaseTest):
     attr.value = "TestECU"
     print("New AV:", attr)
     attr.update()
-    äattr = n.attribute("NmJ1939IndustryGroup")
+    attr = n.attribute("NmJ1939IndustryGroup")
     attr = n.attribute("ECU")
     print(attr)
     self.db.db.commitTransaction()
