@@ -2,7 +2,7 @@
 from pprint import pprint
 import unittest
 
-from base import BaseTest
+from pydbc.tests.base import BaseTest
 from pydbc.api.db import DuplicateKeyError
 
 
