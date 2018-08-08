@@ -23,6 +23,7 @@ install:
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install wheel"
   - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
+  - "%PYTHON%\\python.exe -m pip install pytest-cov coverage coveralls codacy-coverage"
 
 build: off
 
@@ -51,3 +52,6 @@ artifacts:
 #  You can use this step to upload your artifacts to a public website.
 #  See Appveyor's documentation for more details. Or you can simply
 #  access your wheels from the Appveyor "artifacts" tab for your build.
+  - coveralls
+  - coverage xml && python-codacy-coverage -r coverage.xml
+
