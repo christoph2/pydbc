@@ -5,6 +5,7 @@ from unittest import mock
 
 from pydbc.api.attribute import AttributeDefinition, Value, AttributeValue, Limits
 
+from pydbc.exceptions import RangeError
 
 class TestLimits(unittest.TestCase):
 
@@ -44,7 +45,7 @@ class TestLimits(unittest.TestCase):
     l.max = None
 
   def testMaxShallGreaterThanMin1(self):
-    self.assertRaises(ValueError, Limits, 100, 0)
+    self.assertRaises(RangeError, Limits, 100, 0)
 
   def testEquality(self):
     l0 = Limits(-10, 10)
@@ -58,3 +59,4 @@ class TestLimits(unittest.TestCase):
 
 if __name__ == '__main__':
   unittest.main()
+

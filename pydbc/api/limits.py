@@ -28,13 +28,16 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 
+from pydbc.exceptions import RangeError
+
+
 class Limits:
 
     def __init__(self, min = 0, max = 0):
         self.typeCheck(min)
         self.typeCheck(max)
         if not (min is None and max is None) and max < min:
-            raise ValueError("max is smaller than min.")
+            raise RangeError("max is smaller than min.")
         self._min = min
         self._max = max
 
@@ -44,7 +47,7 @@ class Limits:
     def _setMin(self, value):
         self.typeCheck(value)
         if (value is not None and self.max is not None) and self.max < value:
-            raise ValueError("min is larger than max.")
+            raise RangeError("min is larger than max.")
         self._min = value
 
     def _getMax(self):
@@ -53,7 +56,7 @@ class Limits:
     def _setMax(self, value):
         self.typeCheck(value)
         if (self.min is not None and value is not None) and value < self.min:
-            raise ValueError("max is smaller than min.")
+            raise RangeError("max is smaller than min.")
         self._max = value
 
     def typeCheck(self, value):
