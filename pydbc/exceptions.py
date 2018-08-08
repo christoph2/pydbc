@@ -30,3 +30,5 @@ __version__ = '0.1.0'
 
 class DuplicateKeyError(Exception): pass
 
+class RangeError(Exception): pass
+
