@@ -10,7 +10,6 @@ engines:
 ratings:
   paths:
   - "**.py"
-exclude_paths: ["pydbc/py3", " pydbc/py2"]
 
 checks:
   argument-count:
@@ -45,6 +44,6 @@ checks:
       threshold: # language-specific defaults. an override will affect all languages.
 
 exclude_patterns:
-- "pydbc/py3/"
-- "pydbc/py2/"
-- "pydbc/tests/"
+- "pydbc/py3/**"
+- "pydbc/py2/**"
+- "pydbc/tests/**"
