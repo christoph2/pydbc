@@ -24,7 +24,7 @@ setup(
     url = 'https://www.github.com/Christoph2/pydbc',
     packages = ['pydbc'],
     install_requires = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION),
-        'mock', 'mako', 'wxPython>=4.0.0', 'colorama'
+        'mock', 'mako', 'wxPython>=4.0.0', 'colorama', 'numpydoc', 'sphinxcontrib-napoleon'
     ],
     entry_points = {
         'console_scripts': [
