@@ -29,8 +29,8 @@ test_script:
   # the interpreter you're using - Appveyor does not do anything special
   # to put the Python evrsion you want to use on PATH.
   - "%PYTHON%\\python.exe setup.py test"
-  - coveralls
-  - coverage xml && python-codacy-coverage -r coverage.xml
+  - "%PYTHON%\\scripts\\coveralls"
+  - "%PYTHON%\\scripts\\coverage xml && %PYTHON%\\scripts\python-codacy-coverage -r coverage.xml"
 
 
 after_test:
