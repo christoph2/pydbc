@@ -3,7 +3,7 @@ pyDBC
 
 [![Build status](https://ci.appveyor.com/api/projects/status/6lf6kt2vle4jjou7?svg=true)](https://ci.appveyor.com/project/christoph2/pydbc)
 [![Maintainability](https://api.codeclimate.com/v1/badges/ee1e493f62896f3fea61/maintainability)](https://codeclimate.com/github/christoph2/pydbc/maintainability)
-
+[![Build Status](https://travis-ci.org/christoph2/pydbc.svg)](https://travis-ci.org/christoph2/pydbc)
 
 [![GPL License](http://img.shields.io/badge/license-GPL-blue.svg)](http://opensource.org/licenses/GPL-2.0)
 
