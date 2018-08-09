@@ -8,8 +8,11 @@ from glob import glob
 
 ANTLR_VERSION = '4.7.1'
 
-print(sys.version_info)
-print(dir(sys))
+if os.environ.get("TRAVIS") or os.environ.get("APPVEYOR"):
+    INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'colorama', 'numpydoc', 'sphinxcontrib-napoleon']
+else:
+    INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'wxPython>=4.0.0', 'colorama', 'numpydoc', 'sphinxcontrib-napoleon']
+
 
 if (sys.version_info.major == 3 and sys.version_info.minor < 5) or (sys.version_info.minor < 3):
     print("ERROR: pyDBC requires at least Python 3.5")
@@ -23,9 +26,7 @@ setup(
     author_email = 'cpu12.gems@googlemail.com',
     url = 'https://www.github.com/Christoph2/pydbc',
     packages = ['pydbc'],
-    install_requires = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION),
-        'mako', 'wxPython>=4.0.0', 'colorama', 'numpydoc', 'sphinxcontrib-napoleon'
-    ],
+    install_requires = INSTALL_REQUIRES,
     entry_points = {
         'console_scripts': [
                 'vndb_importer = pydbc.scripts.vndb_importer:main'
