@@ -40,23 +40,21 @@ class Creator(object):
         self.db = db
         self.logger = Logger(__name__)
 
+    def drop(self, entity, items):
+        cur = self.db.getCursor()
+        for item in items:
+            self.logger.debug("Dropping {} '{}'.".format(entity.lower(), item))
+            try:
+                cur.execute("DROP {} IF EXISTS {}".format(entity.upper(), item))
+            except sqlite3.DatabaseError as e:
+                self.logger.error("Deletion of {} '{}' failed : '{}'".format(entity.lower(), item, str(e)))
+                raise
+
     def dropTables(self):
         cur = self.db.getCursor()
         self.db.beginTransaction()
-        for item in TABLES:
-            self.logger.debug("Dropping table '{}'.".format(item))
-            try:
-                cur.execute("DROP TABLE IF EXISTS {}".format(item))
-            except sqlite3.DatabaseError as e:
-                self.logger.error("Deletion of table '{}' failed : '{}'".format(item, str(e)))
-                raise
-        for item in VIEWS:
-            self.logger.debug("Dropping view '{}'.".format(item))
-            try:
-                cur.execute("DROP VIEW IF EXISTS {}".format(item))
-            except sqlite3.DatabaseError as e:
-                self.logger.error("Deletion of view '{}' failed : '{}'".format(item, str(e)))
-                raise
+        self.drop("table", TABLES)
+        self.drop("view", VIEWS)
         self.db.commitTransaction()
 
     def createSchema(self):
