@@ -68,8 +68,10 @@ class Creator(object):
         #self.cur.execute('PRAGMA journal_mode = WAL')
 
         for item in SCHEMA:
-            self.logger.info("Executing SQL statement: {}".format(item))
-            #print("Executing SQL statement: {}".format(item))
+            self.logger.debug("Executing SQL statement: {}".format(item))
+            res = cur.execute(item)
+        for item in TRIGGER:
+            self.logger.debug("Executing SQL statement: {}".format(item))
             res = cur.execute(item)
         self.insertDefaults(cur)
         self.db.commitTransaction()
