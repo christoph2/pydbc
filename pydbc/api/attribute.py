@@ -71,13 +71,13 @@ class AttributeDefinition:
         default = self.default
         minimum = self.limits.min
         maximum = self.limits.max
-        enumValues = self.enumValues
+        values = self.values
         comment = self.comment
         cur = self.database.getCursor()
         where = "RID = {}".format(self.rid)
-        self.database.db.updateStatement(cur, 'Attribute_Definition', """Name, Objecttype, Valuetype, Minimum, Maximum,
+        self.database.updateStatement(cur, 'Attribute_Definition', """Name, Objecttype, Valuetype, Minimum, Maximum,
             Enumvalues, Default_Number, Default_String, Comment""", where,
-            [name, objectType, valueType, minimum, maximum, enumValues]
+            [name, objectType, valueType, minimum, maximum, values]
         )
 
     def remove(self):
