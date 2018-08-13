@@ -161,6 +161,7 @@ class Database:
             Enumvalues, Default_Number, Default_String, Comment""",
              name, objectType, valueType, minimum, maximum, enumValues, defaultNumber, defaultString, comment
         )
+        return self.attributeDefinition(name)
 
     def attributeDefinitions(self, glob = None, regex = None):
         """

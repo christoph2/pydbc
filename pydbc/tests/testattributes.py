@@ -10,8 +10,7 @@ from pydbc.api.limits import Limits
 class TestAttributes(BaseTest):
 
     def createAttribute(self):
-      self.db.addAttributeDefinition("ABC", AttributeType.NODE, ValueType.INT, 0, Limits(-10, 10), comment ="hello")
-      return self.db.attributeDefinition("ABC")
+      return self.db.addAttributeDefinition("ABC", AttributeType.NODE, ValueType.INT, 0, Limits(-10, 10), comment ="hello")
 
     def testAddWorkx(self):
       attr = self.createAttribute()
@@ -99,12 +98,11 @@ class TestAttributes(BaseTest):
 
     def testSettingWorkAttributeWorks1(self):
         attr = self.createAttribute()
-        self.db.addNode("XXX", "test-node")
-        node = self.db.node("XXX")
+        node = self.db.addNode("XXX", "test-node")
         av = node.attribute("ABC")
-        print(av)
+        #print(av)
         av.value = 10
-        print(av)
+        #print(av)
 
 if __name__ == '__main__':
   unittest.main()
