@@ -46,17 +46,15 @@ class Message(BaseObject):
         ('name', 'Name'),
         ('identifier', 'Message_ID'),
         ('dlc', 'DLC'),
-        ('sender', 'Sender'),
         ('comment', 'Comment'),
     )
 
-    def __init__(self, database, rid, name, identifier, dlc, sender, comment):
+    def __init__(self, database, rid, name, identifier, dlc, comment):
         super(Message, self).__init__(database)
         self.rid = rid
         self.name = name
         self.identifier = identifier
         self.dlc = dlc
-        self.sender = sender
         self.comment = comment
 
     def signals(self):
@@ -77,4 +75,5 @@ class Message(BaseObject):
                          Limits(signal['Minimum'], signal['Maximum']), signal['Unit'], mpx if mpx.type != MultiplexingType.NONE else None,
                          signal['Comment']
                     )
+    # TODO: __iter__ for signals.
 
