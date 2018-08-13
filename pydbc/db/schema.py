@@ -95,7 +95,7 @@ SCHEMA = ('''
         Message_ID INTEGER NOT NULL DEFAULT 0,
         DLC INTEGER DEFAULT 0,
         Sender INTEGER DEFAULT 0,
-        "Comment" VARCHAR(255),
+        "Comment" VARCHAR(255) DEFAULT NULL,
         PRIMARY KEY(RID),
         UNIQUE(Message_ID)
     );
@@ -383,14 +383,39 @@ DEFAULTS = (
 
 TRIGGER = (
 """
-
+    CREATE TRIGGER IF NOT EXISTS Insert_Message AFTER INSERT ON Message
+    BEGIN
+        INSERT INTO Node_TxMessage(Message, Node) VALUES (new.RID, new.Sender);
+    END;
 """,
 """
-    CREATE TRIGGER IF NOT EXISTS delete_object_valuetable_signal AFTER DELETE ON Object_Valuetable
-    WHEN old.Object_Type = 0
+    CREATE TRIGGER IF NOT EXISTS Insert_Node_TxMessage_0 AFTER INSERT ON Node_TxMessage
+    WHEN new.Node <> 0
     BEGIN
-        DELETE
+        DELETE FROM Node_TxMessage WHERE Message = new.Message AND Node = 0;
+    END;
+""",
+"""
+    CREATE TRIGGER IF NOT EXISTS Insert_Node_TxMessage_1 AFTER INSERT ON Node_TxMessage
+    WHEN new.Node = 0 AND (select exists (select * from Node_TxMessage where Message = new.Message AND Node <> 0)) = 1
+    BEGIN
+        SELECT RAISE(ABORT, 'Dummy sender invalid in present state.');
     END;
 """,
 )
 
+##
+##> CREATE TRIGGER <trigger-name> AFTER INSERT on <table-name> WHEN EXISTS
+##> (select * from <some-table>)
+##>
+##> BEGIN
+##>
+##>                RAISE(ROLLBACK);
+##>
+##> END
+##
+##create trigger <trigger-name> after insert on <table-name>
+##        begin
+##                select raise(rollback) when exists (select * from <some-table>);
+##        end
+##
