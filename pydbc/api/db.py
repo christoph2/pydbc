@@ -141,10 +141,28 @@ class Database:
         self.insertStatement(cur, "Node", "Name, Comment", name, comment)
         return self.node(name)
 
-    def addMessage(self, identifier, name, size):
+    def addMessage(self, name, identifier, size, comment = None):
+        """Add a new message to database.
+
+        Parameters
+        ----------
+        name : str
+            Message name needs to unique within the database and a valid C identifier.
+        identifier : int
+            CAN identifier.
+        size : int
+            Size of message in bytes.
+        comment : str
+            Arbitrary description of the node.
+
+        Returns
+        -------
+            `pydbc.api.message.Message`
+            newly created Message object on success else None.
         """
-        """
-        pass
+        cur = self.getCursor()
+        self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment", name, identifier, size, comment)
+        return self.message(name)
 
     def addAttributeDefinition(self, name, objectType, valueType, defaultValue, limits, enumValues = None, comment= None):
         cur = self.getCursor()
@@ -229,6 +247,17 @@ class Database:
         """
         for item in self._searchTableForName("Message", glob, regex):
             yield Message(self, item['RID'], item['Name'], CANAddress(item['Message_ID']), item['DLC'], item['Sender'], item['Comment'])
+
+    def message(self, name):
+        """
+        """
+        cur = self.db.getCursor()
+        where = "Name = '{}'".format(name)
+        item = self.db.fetchSingleRow(cur, tname = "Message", column = "*", where = where)
+        if item:
+            return Message(self, item['RID'], item['Name'], item['Message_ID'], item['DLC'], item['Comment'])
+        else:
+            return None
 
     def messageSignal(self, messageId, signalId):
         cur = self.db.getCursor()
