@@ -123,12 +123,23 @@ class Database:
         pass
 
     def addNode(self, name, comment):
-        """
+        """Add a Node to the database.
 
-        :returns: newly created `pydbc.api.node.Node` object on success else None.
+        Parameters
+        ----------
+        name : str
+            Node name needs to unique within the database and a valid C identifier.
+        comment : str
+            Arbitrary description of the node.
+
+        Returns
+        -------
+            `pydbc.api.node.Node`
+            newly created Node object on success else None.
         """
         cur = self.getCursor()
         self.insertStatement(cur, "Node", "Name, Comment", name, comment)
+        return self.node(name)
 
     def addMessage(self, identifier, name, size):
         """

@@ -14,8 +14,7 @@ class TestNode(BaseTest):
     self.assertEqual(node.comment, "Dummy node for non-existent senders/receivers.")
 
   def testInsertNodeWorkx(self):
-    self.db.addNode("ABC", "test-node")
-    node = self.db.node("ABC")
+    node = self.db.addNode("ABC", "test-node")
     self.assertEqual(node.name, "ABC")
     self.assertEqual(node.comment, "test-node")
 
@@ -24,15 +23,13 @@ class TestNode(BaseTest):
     self.assertRaises(DuplicateKeyError, self.db.addNode, "ABC", "test-node")
 
   def testNodeDeletionWorkx(self):
-    self.db.addNode("ABC", "test-node")
-    node = self.db.node("ABC")
+    node = self.db.addNode("ABC", "test-node")
     node.remove()
     node = self.db.node("ABC")
     self.assertIsNone(node)
 
   def testUpdateWorkx(self):
-    self.db.addNode("ABC", "test-node")
-    node = self.db.node("ABC")
+    node = self.db.addNode("ABC", "test-node")
     node.name = "DEF"
     node.comment = "foo bar"
     node.update()
@@ -43,25 +40,21 @@ class TestNode(BaseTest):
     self.assertEqual(node.comment, "foo bar")
 
   def testUpdateFails1(self):
-    self.db.addNode("ABC", "test-node")
+    node = self.db.addNode("ABC", "test-node")
     self.db.addNode("DEF", "test-node")
-    node = self.db.node("ABC")
     node.name = "DEF"
     self.assertRaises(DuplicateKeyError, node.update)
 
   def testUpdateFails2(self):
-    self.db.addNode("ABC", "test-node")
-    node = self.db.node("ABC")
+    node = self.db.addNode("ABC", "test-node")
     self.assertRaises(TypeError, node.name, 45.35)
 
   def testUpdateFails3(self):
-    self.db.addNode("ABC", "test-node")
-    node = self.db.node("ABC")
+    node = self.db.addNode("ABC", "test-node")
     self.assertRaises(TypeError, node.comment, 47.11)
 
   def testRidCouldNotBeSet(self):
-    self.db.addNode("ABC", "test-node")
-    node = self.db.node("ABC")
+    node = self.db.addNode("ABC", "test-node")
     try:
       node.rid = 0
     except AttributeError:
@@ -70,8 +63,7 @@ class TestNode(BaseTest):
       raise
 
   def testDatabaseCouldNotBeSet(self):
-    self.db.addNode("ABC", "test-node")
-    node = self.db.node("ABC")
+    node = self.db.addNode("ABC", "test-node")
     try:
       node.database = None
     except AttributeError:
