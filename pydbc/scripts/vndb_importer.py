@@ -45,6 +45,8 @@ from pydbc.db.creator import Creator
 from pydbc.db.loader import Loader
 from pydbc.template import renderTemplateFromText
 
+from pydbc.db.common import Queries
+
 template = pkgutil.get_data("pydbc", "cgen/templates/dbc.tmpl")
 
 def coloredText(color, msg):
@@ -101,7 +103,7 @@ def importFile(name):
 
     #print("Finished ANTLR parsing.", flush = True)
 
-    loader = Loader(db)
+    loader = Loader(db, Queries)
 
     if not execute(loader.insertValues, "inserting values", tree):
         return
@@ -112,9 +114,9 @@ def importFile(name):
 
     #pprint(tree, indent = 4)
 
-    namespace = dict(db = db)
+    namespace = dict(db = Queries(db))
     #print("Rending template...", flush = True)
-    res = renderTemplateFromText(template, namespace)
+    res = renderTemplateFromText(template, namespace, formatExceptions = True)
     #print(res)
     with io.open("{}.render".format(fnbase), "w", encoding = "latin-1", newline = "\n") as outf:
         outf.write(res)

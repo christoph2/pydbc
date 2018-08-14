@@ -34,8 +34,9 @@ from pydbc.types import AttributeType, ValueType
 
 class Loader(object):
 
-    def __init__(self, db):
+    def __init__(self, db, queryClass):
         self.db = db
+        self.queries = queryClass(db)
         self.logger = Logger(__name__)
 
     def insertValues(self, tree):
@@ -90,14 +91,14 @@ class Loader(object):
             envId = var['envId']
             varType = var['varType']
             name = var['name']
-            cmt = self.db.fetchComment('EV', name)
-            dataSize = self.db.fetchEnvironmentVariablesData(name)
+            cmt = self.queries.fetchComment('EV', name)
+            dataSize = self.queries.fetchEnvironmentVariablesData(name)
             self.db.insertStatement(cur, "EnvVar", "Name, Type, Unit, Minimum, Maximum, Access, Startup_Value, Comment, Size",
                 name, varType, unit, minimum, maximum, accessType, initialValue, cmt, dataSize
             )
-            evid = self.db.lastInsertedRowId(cur, "EnvVar")
+            evid = cur.lastrowid
             for node in accessNodes:
-                nid = self.db.fetchNodeId(node)
+                nid = self.queries.fetchNodeId(node)
                 self.db.insertStatement(cur, "EnvVar_AccessNode", "EnvVar,Node", evid, nid)
 
     def getSignalByName(self, cur, messageID, name):
@@ -120,14 +121,14 @@ class Loader(object):
                 otype = 1
                 rid = cur.execute("SELECT RID FROM EnvVar WHERE name = ?", [name]).fetchone()[0]
             self.db.insertStatement(cur, "Valuetable", "Name", name)
-            vtid = self.db.lastInsertedRowId(cur, "Valuetable")
+            vtid = cur.lastrowid
             self.db.insertStatement(cur, "Object_Valuetable", "Object_Type, Object_RID, Valuetable", otype, rid, vtid)
             self.insertValueDescription(cur, vtid, description)
 
     def insertReceivers(self, cur, messageId, signalId, receiver):
         SignalReceivers = set()
         for rcv in receiver:
-            nodeId = self.db.fetchNodeId(rcv)
+            nodeId = self.queries.fetchNodeId(rcv)
             if not (messageId, signalId, nodeId) in SignalReceivers:
                 self.db.insertStatement(cur, "Node_RxSignal", "Message, Signal, Node", messageId, signalId, nodeId)
             SignalReceivers.add((messageId, signalId, nodeId))
@@ -225,16 +226,16 @@ class Loader(object):
                 stringValue = value
             else:
                 numValue = value
-            aid = self.db.fetchAttributeId(attr['name'])
+            aid = self.queries.fetchAttributeId(attr['name'])
             attrType = self.getAttributeType(attr['type'])
             if attrType == AttributeType.MESSAGE:
-                rid = self.db.fetchMessageIdById(attr['messageID'])
+                rid = self.queries.fetchMessageIdById(attr['messageID'])
             elif attrType == AttributeType.SIGNAL:
                rid = self.getSignalByName(cur, attr['messageID'], attr['signalName'])
             elif attrType == AttributeType.NODE:
-                rid = self.db.fetchNodeId(attr['nodeName'])
+                rid = self.queries.fetchNodeId(attr['nodeName'])
             elif attrType == AttributeType.ENV_VAR:
-                rid = self.db.fetchEnvVarId(attr['envVarname'])
+                rid = self.queries.fetchEnvVarId(attr['envVarname'])
             elif attrType == AttributeType.GENERAL:
                 rid = 0
             else:
@@ -246,16 +247,16 @@ class Loader(object):
     def insertNodes(self, cur, nodes):
         nodeSet = set()
         for node in nodes:
-            cmt = self.db.fetchComment('BU', node)
+            cmt = self.queries.fetchComment('BU', node)
             if not node in nodeSet:
                 self.db.insertStatement(cur, "Node", "Name, Comment", node, cmt)
             nodeSet.add(node)
 
     def insertMessageTransmitters(self, cur, transmitters):
         for transmitter in transmitters:
-            mid = self.db.fetchMessageIdById(transmitter['messageID'])
+            mid = self.queries.fetchMessageIdById(transmitter['messageID'])
             for name in transmitter['transmitters']:
-                nid = self.db.fetchNodeId(name)
+                nid = self.queries.fetchNodeId(name)
                 self.db.replaceStatement(cur, "Node_TxMessage", "Node, Message", nid, mid)
 
     def insertMessages(self, cur, messages, valueTypes):
@@ -264,13 +265,13 @@ class Loader(object):
             mid = msg['messageID']
             dlc = msg['dlc']
             signals = msg['signals']
-            cmt = self.db.fetchComment('BO', mid)
-
+            cmt = self.queries.fetchComment('BO', mid)
             transmitter = msg['transmitter']
-            tid = self.db.fetchNodeId(transmitter)
+            tid = self.queries.fetchNodeId(transmitter)
             valueTypesForMessage = valueTypes.get(mid, {})
             mrid = self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment, Sender", name, mid, dlc, cmt, tid)
-            self.db.insertStatement(cur, "Node_TxMessage", "Node, Message", tid, mrid)
+            #if tid != 0:
+            #    self.db.insertStatement(cur, "Node_TxMessage", "Node, Message", tid, mrid)
             for signal in signals:
                 name = signal['name']
                 startBit = signal['startBit']
@@ -298,12 +299,12 @@ class Loader(object):
                     multiplexorSignal = None
                     multiplexDependent = None
                     multiplexorValue = None
-                cmt = self.db.fetchComment('SG', mid, name)
+                cmt = self.queries.fetchComment('SG', mid, name)
                 self.db.insertStatement(cur, "Signal", """Name, Bitsize, Byteorder, Sign, Valuetype, Formula_Factor, Formula_Offset,
                     Minimum, Maximum, Unit, Comment""",
                     name, signalSize, byteOrder, sign, valueType, factor, offset, minimum, maximum, unit, cmt
                 )
-                srid = self.db.lastInsertedRowId(cur, "Signal")
+                srid = cur.lastrowid
                 self.db.insertStatement(cur, "Message_Signal", "Message, Signal, Offset, Multiplexor_Signal, Multiplex_Dependent, Multiplexor_Value",
                     mrid, srid, startBit, multiplexorSignal, multiplexDependent, multiplexorValue
                 )
