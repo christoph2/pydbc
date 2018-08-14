@@ -122,47 +122,9 @@ class Database:
         """
         pass
 
-    def addNode(self, name, comment):
-        """Add a Node to the database.
-
-        Parameters
-        ----------
-        name : str
-            Node name needs to unique within the database and a valid C identifier.
-        comment : str
-            Arbitrary description of the node.
-
-        Returns
-        -------
-            `pydbc.api.node.Node`
-            newly created Node object on success else None.
-        """
-        cur = self.getCursor()
-        self.insertStatement(cur, "Node", "Name, Comment", name, comment)
-        return self.node(name)
-
-    def addMessage(self, name, identifier, size, comment = None):
-        """Add a new message to database.
-
-        Parameters
-        ----------
-        name : str
-            Message name needs to unique within the database and a valid C identifier.
-        identifier : int
-            CAN identifier.
-        size : int
-            Size of message in bytes.
-        comment : str
-            Arbitrary description of the node.
-
-        Returns
-        -------
-            `pydbc.api.message.Message`
-            newly created Message object on success else None.
-        """
-        cur = self.getCursor()
-        self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment", name, identifier, size, comment)
-        return self.message(name)
+    ##
+    ## Attribute stuff.
+    ##
 
     def addAttributeDefinition(self, name, objectType, valueType, defaultValue, limits, enumValues = None, comment= None):
         cur = self.getCursor()
@@ -197,84 +159,6 @@ class Database:
             return AttributeDefinition.create(self.db, item)
         else:
             return None
-###
-    def addEnvVar(self, name, vartype, valueRange, unit, initialValue = None, accessNodes = None):
-        """
-        """
-        pass
-
-    def addCategory(self):
-        """
-        """
-        pass
-
-    def addValuetable(self):
-        """
-        """
-        pass
-
-    def _searchTableForName(self, tableName, glob = None, regex = None):
-        """
-        """
-        if glob is None and regex is None:
-            where = None
-        elif glob is not None:
-            where = "Name GLOB '{}'".format(glob)
-        elif regex is not None:
-            where = "Name REGEXP '{}'".format(regex)
-        cur = self.db.getCursor()
-        return self.db.fetchFromTable(cur, tableName, where = where)
-
-    def nodes(self, glob = None, regex = None):
-        """
-        """
-        for item in self._searchTableForName("Node", glob, regex):
-            yield Node(self, item['RID'], item['Name'], item['Comment'])
-
-    def node(self, name):
-        """
-        """
-        cur = self.db.getCursor()
-        where = "Name = '{}'".format(name)
-        item = self.db.fetchSingleRow(cur, tname = "Node", column = "*", where = where)
-        if item:
-            return Node(self, item['RID'], item['Name'], item['Comment'])
-        else:
-            return None
-
-    def messages(self, glob = None, regex = None):
-        """
-        """
-        for item in self._searchTableForName("Message", glob, regex):
-            yield Message(self, item['RID'], item['Name'], CANAddress(item['Message_ID']), item['DLC'], item['Sender'], item['Comment'])
-
-    def message(self, name):
-        """
-        """
-        cur = self.db.getCursor()
-        where = "Name = '{}'".format(name)
-        item = self.db.fetchSingleRow(cur, tname = "Message", column = "*", where = where)
-        if item:
-            return Message(self, item['RID'], item['Name'], item['Message_ID'], item['DLC'], item['Comment'])
-        else:
-            return None
-
-    def messageSignal(self, messageId, signalId):
-        cur = self.db.getCursor()
-        where = "Message = {} AND Signal = {}".format(messageId, signalId)
-        return self.db.fetchSingleRow(cur, tname = "Message_Signal", column = "*", where = where)
-
-    def envVar(self, name):
-        """
-        """
-
-    def envVars(self, glob = None, regex = None):
-        """
-        """
-        for item in self._searchTableForName("EnvVar", glob, regex):
-            yield EnvVar(self, item['RID'], item['Name'], EnvVarType(item['Type']), item['Unit'], EnvVarAccessType(item['Access'] & 0x0f), item['Size'],
-                item['Startup_Value'], Limits(item['Minimum'], item['Maximum']), item['Comment']
-            )
 
     def applicableAttributes(self, objectType):
         """
@@ -298,6 +182,142 @@ class Database:
     def attributeValue(self, oid, attrDef):
         cur = self.db.getCursor()
         return self.db.fetchSingleRow(cur, "Attribute_Value", column = "*", where = "Object_ID = {} AND Attribute_Definition = {}".format(oid, attrDef))
+
+    ##
+    ## EnvVar Stuff.
+    ##
+
+    def addEnvVar(self, name, vartype, valueRange, unit, initialValue = None, accessNodes = None):
+        """
+        """
+        pass
+
+    def envVar(self, name):
+        """
+        """
+
+    def envVars(self, glob = None, regex = None):
+        """
+        """
+        for item in self._searchTableForName("EnvVar", glob, regex):
+            yield EnvVar(self, item['RID'], item['Name'], EnvVarType(item['Type']), item['Unit'], EnvVarAccessType(item['Access'] & 0x0f), item['Size'],
+                item['Startup_Value'], Limits(item['Minimum'], item['Maximum']), item['Comment']
+            )
+
+    ##
+    ## Message stuff.
+    ##
+
+    def addMessage(self, name, identifier, size, comment = None):
+        """Add a new message to database.
+
+        Parameters
+        ----------
+        name : str
+            Message name needs to unique within the database and a valid C identifier.
+        identifier : int
+            CAN identifier.
+        size : int
+            Size of message in bytes.
+        comment : str
+            Arbitrary description of the node.
+
+        Returns
+        -------
+            `pydbc.api.message.Message`
+            newly created Message object on success else None.
+        """
+        cur = self.getCursor()
+        self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment", name, identifier, size, comment)
+        return self.message(name)
+
+    def messages(self, glob = None, regex = None):
+        """
+        """
+        for item in self._searchTableForName("Message", glob, regex):
+            yield Message(self, item['RID'], item['Name'], CANAddress(item['Message_ID']), item['DLC'], item['Sender'], item['Comment'])
+
+    def message(self, name):
+        """
+        """
+        cur = self.db.getCursor()
+        where = "Name = '{}'".format(name)
+        item = self.db.fetchSingleRow(cur, tname = "Message", column = "*", where = where)
+        if item:
+            return Message(self, item['RID'], item['Name'], item['Message_ID'], item['DLC'], item['Comment'])
+        else:
+            return None
+
+    def messageSignal(self, messageId, signalId):
+        cur = self.db.getCursor()
+        where = "Message = {} AND Signal = {}".format(messageId, signalId)
+        return self.db.fetchSingleRow(cur, tname = "Message_Signal", column = "*", where = where)
+
+    ##
+    ## Node stuff.
+    ##
+
+    def addNode(self, name, comment):
+        """Add a Node to the database.
+
+        Parameters
+        ----------
+        name : str
+            Node name needs to unique within the database and a valid C identifier.
+        comment : str
+            Arbitrary description of the node.
+
+        Returns
+        -------
+            `pydbc.api.node.Node`
+            newly created Node object on success else None.
+        """
+        cur = self.getCursor()
+        self.insertStatement(cur, "Node", "Name, Comment", name, comment)
+        return self.node(name)
+
+    def nodes(self, glob = None, regex = None):
+        """
+        """
+        for item in self._searchTableForName("Node", glob, regex):
+            yield Node(self, item['RID'], item['Name'], item['Comment'])
+
+    def node(self, name):
+        """
+        """
+        cur = self.db.getCursor()
+        where = "Name = '{}'".format(name)
+        item = self.db.fetchSingleRow(cur, tname = "Node", column = "*", where = where)
+        if item:
+            return Node(self, item['RID'], item['Name'], item['Comment'])
+        else:
+            return None
+###
+    def addCategory(self):
+        """
+        """
+        pass
+
+    def addValuetable(self):
+        """
+        """
+        pass
+
+    ##
+    ## Misc. stuff.
+    ##
+
+    def _searchTableForName(self, tableName, glob = None, regex = None):
+        """
+        """
+        if glob is None and regex is None:
+            where = None
+        elif glob is not None:
+            where = "Name GLOB '{}'".format(glob)
+        elif regex is not None:
+            where = "Name REGEXP '{}'".format(regex)
+        cur = self.db.getCursor()
+        return self.db.fetchFromTable(cur, tableName, where = where)
 
     def createValueTableObjects(self, objectType, rid):
         vt = None
