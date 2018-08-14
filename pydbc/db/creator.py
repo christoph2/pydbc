@@ -59,46 +59,38 @@ class Creator(object):
 
     def createSchema(self):
         cur = self.db.getCursor()
-        self.db.beginTransaction()
-
-        #cur.execute("PRAGMA foreign_keys = ON")
-        #cur.execute('PRAGMA synchronous = OFF')
-        #cur.execute('PRAGMA LOCKING_MODE = EXCLUSIVE')
-        #self.cur.execute('PRAGMA journal_mode = MEMORY')
-        #self.cur.execute('PRAGMA journal_mode = WAL')
-
-        for item in SCHEMA:
-            self.logger.debug("Executing SQL statement: {}".format(item))
-            res = cur.execute(item)
-        for item in TRIGGER:
-            self.logger.debug("Executing SQL statement: {}".format(item))
-            res = cur.execute(item)
+        self.executeItems(SCHEMA, "table")
+        self.executeItems(TRIGGER, "trigger")
         self.insertDefaults(cur)
-        self.db.commitTransaction()
 
     def insertDefaults(self, cur):
-        for item in DEFAULTS:
-            res = cur.execute(item)
+        self.executeItems(DEFAULTS, "default")
 
     def createIndices(self):
-        cur = self.db.getCursor()
-        self.db.beginTransaction()
-        for item in INDICES:
-            self.logger.debug("Creating index '{}'.".format(item))
-            try:
-                res = cur.execute(item)
-            except sqlite3.DatabaseError as e:
-                self.logger.error("Creation of index '{}' failed : '{}'".format(item, str(e)))
-                #raise
-        self.db.commitTransaction()
+        self.executeItems(INDICES, "index")
 
     def createMetaData(self):
+        sql = "INSERT OR REPLACE INTO VndbMeta(RID, Schema_Version) VALUES(1, {})".format(VNDB_SCHEMA_VERSION)
+        self.executeItem(sql, "meta-data", transactional = True)
+
+    def executeItem(self, item, name, cur = None, transactional = False):
+        if not cur:
+            cur = self.db.getCursor()
+        if transactional:
+            self.db.beginTransaction()
+        self.logger.debug("Creating {} '{}'.".format(name, item))
+        try:
+            res = cur.execute(item)
+        except sqlite3.DatabaseError as e:
+            self.logger.error("Creation of {} '{}' failed : '{}'".format(name, item, str(e)))
+            #raise
+        if transactional:
+            self.db.commitTransaction()
+
+    def executeItems(self, items, name):
         cur = self.db.getCursor()
         self.db.beginTransaction()
-        self.logger.debug("Creating meta-data ")
-        try:
-            res = cur.execute("INSERT OR REPLACE INTO VndbMeta(RID, Schema_Version) VALUES(1, ?)", [VNDB_SCHEMA_VERSION])
-        except sqlite3.DatabaseError as e:
-            self.logger.error("Creation of meta-data failed : '{}'".format(str(e)))
+        for item in items:
+            self.executeItem(item, name, cur)
         self.db.commitTransaction()
 
