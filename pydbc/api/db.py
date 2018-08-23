@@ -28,6 +28,7 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 import enum
+import pkgutil
 import sys
 import sqlite3
 import os
@@ -44,7 +45,7 @@ from pydbc.api.limits import Limits
 from pydbc.api.valuetable import ValueTable, Value
 from pydbc.exceptions import DuplicateKeyError
 from pydbc.logger import Logger
-
+from pydbc.template import renderTemplateFromText
 from pydbc.db.common import Queries
 
 DBC_EXTENSION = "dbc"
@@ -52,6 +53,9 @@ DB_EXTENSION = "vndb"
 
 
 class Database:
+
+
+    DBC_TEMPLATE = pkgutil.get_data("pydbc", "cgen/templates/dbc.tmpl")
 
     """
     """
@@ -123,7 +127,12 @@ class Database:
     def renderDbcFile(self):
         """
         """
-        pass
+        namespace = dict(db = self.queries)
+        res = renderTemplateFromText(self.DBC_TEMPLATE, namespace, formatExceptions = True)
+        return res
+        #with io.open("{}.render".format(fnbase), "w", encoding = "latin-1", newline = "\n") as outf:
+        #    outf.write(res)
+
 
     def addCANCluster(self, name, comment):
         """
@@ -265,7 +274,7 @@ class Database:
     ##
     ## Node stuff.
     ##
-    def addNode(self, name, comment):
+    def addNode(self, name, comment = None):
         """Add a Node to the database.
 
         Parameters
