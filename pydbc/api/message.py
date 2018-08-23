@@ -27,7 +27,7 @@ __copyright__ = """
 __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
-from pydbc.types import AttributeType
+from pydbc.types import AttributeType, MultiplexingType
 from pydbc.api.base import BaseObject
 from pydbc.api.signal import Formula, Multiplexing, Signal
 from pydbc.api.limits import Limits
@@ -50,11 +50,11 @@ class Message(BaseObject):
 
     def __init__(self, database, rid, name, identifier, dlc, comment):
         super(Message, self).__init__(database)
-        self.rid = rid
-        self.name = name
-        self.identifier = identifier
-        self.dlc = dlc
-        self.comment = comment
+        self._rid = rid
+        self._name = name
+        self._identifier = identifier
+        self._dlc = dlc
+        self._comment = comment
 
     def signalsByRid(self, messageId):
         cur = self.getCursor()
@@ -104,8 +104,44 @@ class Message(BaseObject):
             return None
     """
 
-    def addSignal(self):
+    def addSignal(self, name, startBit, bitSize, byteOrder, valueType, unit, formula, limits,
+                  multiplexing = MultiplexingType.NONE, values = None, comment = None):
         """
         """
     # TODO: __iter__ for signals.
 
+    @property
+    def rid(self):
+        return self._rid
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @property
+    def identifier(self):
+        return self._identifier
+
+    @identifier.setter
+    def identifier(self, value):
+        self._identifier = value
+
+    @property
+    def dlc(self):
+        return self._dlc
+
+    @dlc.setter
+    def dlc(self, value):
+        self._dlc = value
+
+    @property
+    def comment(self):
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        self._comment = value
