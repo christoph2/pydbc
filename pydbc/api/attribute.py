@@ -210,7 +210,6 @@ class Value:
                 raise ValueError("Invalid enumerator '{}'".format(value))
 
     def _setValue(self, value):
-        print("Setting value", value)
         self._typeCheck(value)
         self._rangeCheck(value)
         self._value = value
@@ -223,7 +222,7 @@ class Value:
         value = self.fetchValue()
         valueType = self.attr.valueType
         cur = self.db.getCursor()
-        print("UPDATE:", self.objectID, self.attr.rid, value, self.attr.defaultValue, self.attr.valueType.name)
+        #print("UPDATE:", self.objectID, self.attr.rid, value, self.attr.defaultValue, self.attr.valueType.name)
         if valueType == ValueType.STRING:
             self.db.replaceStatement(cur, "Attribute_Value", "Object_ID, Attribute_Definition, String_Value", self.objectID, self.attr.rid, self.value)
         elif valueType == ValueType.ENUM:
