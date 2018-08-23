@@ -4,7 +4,9 @@ import unittest
 
 from pydbc.tests.base import BaseTest
 from pydbc.api.db import DuplicateKeyError
-
+from pydbc.types import AttributeType, MultiplexingType, ValueTableType, ByteOrderType, ValueType
+from pydbc.api.signal import Formula
+from pydbc.api.limits import Limits
 
 class TestMessage(BaseTest):
 
@@ -29,6 +31,27 @@ class TestMessage(BaseTest):
 
     def testAddSignalWorks(self):
         msg = self.createMessage()
-        signal = msg.addSignal()
+        signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, ValueType.INT, "rpm", Formula(), Limits())
+        #formula, limits,  multiplexing = MultiplexingType.NONE, values = None, comment = None
+
+    def testUpdateWorks(self):
+        msg = self.createMessage()
+        msg.name = "MSG2"
+        msg.identifier = 0x4711
+        msg.dlc = 8
+        msg.comment = "hello"
+        msg.update()
+        self.assertEqual(msg.name, "MSG2")
+        self.assertEqual(msg.identifier, 0x4711)
+        self.assertEqual(msg.dlc, 8)
+        self.assertEqual(msg.comment, "hello")
+
+    def testUpdateFails(self):
+        msg = self.createMessage()
+        msg2 = self.db.addMessage("MSG2", 0x4711, 8)
+        msg2.name = "MSG"
+        msg2.dlc = 7
+        self.assertRaises(DuplicateKeyError, msg2.update)
+
 
 

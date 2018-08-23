@@ -28,6 +28,7 @@ class TestNode(BaseTest):
     node = self.db.node("ABC")
     self.assertIsNone(node)
 
+
   def testUpdateWorkx(self):
     node = self.db.addNode("ABC", "test-node")
     node.name = "DEF"
@@ -38,6 +39,7 @@ class TestNode(BaseTest):
     node = self.db.node("DEF")
     self.assertEqual(node.name, "DEF")
     self.assertEqual(node.comment, "foo bar")
+
 
   def testUpdateFails1(self):
     node = self.db.addNode("ABC", "test-node")
