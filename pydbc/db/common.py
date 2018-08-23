@@ -222,7 +222,7 @@ class Queries:
         while True:
             row = cur.fetchone()
             if row is None:
-                raise StopIteration
+                return
             else:
                 vt = self.db.createDictFromRow(row, cur.description)
                 if vt['Object_Type'] == 0:
@@ -236,7 +236,7 @@ class Queries:
         while True:
             row = cur.fetchone()
             if row is None:
-                raise StopIteration
+                return
             else:
                 yield row[0]
 
