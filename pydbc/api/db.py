@@ -45,6 +45,7 @@ from pydbc.api.valuetable import ValueTable, Value
 from pydbc.exceptions import DuplicateKeyError
 from pydbc.logger import Logger
 
+from pydbc.db.common import Queries
 
 DBC_EXTENSION = "dbc"
 DB_EXTENSION = "vndb"
@@ -64,6 +65,8 @@ class Database:
         self.dbtype = dbtype    # TODO: check.
         self.db = CanDatabase(dbname, logLevel = logLevel)
         creator = Creator(self.db)
+
+        self.queries = Queries(self.db)
 
         creator.createSchema()
         creator.createIndices()
@@ -122,10 +125,18 @@ class Database:
         """
         pass
 
+    def addCANCluster(self, name, comment):
+        """
+        """
+
+
+    def addLINCluster(self, name, comment):
+        """
+        """
+
     ##
     ## Attribute stuff.
     ##
-
     def addAttributeDefinition(self, name, objectType, valueType, defaultValue, limits, enumValues = None, comment= None):
         cur = self.getCursor()
         minimum = limits.min
@@ -186,7 +197,6 @@ class Database:
     ##
     ## EnvVar Stuff.
     ##
-
     def addEnvVar(self, name, vartype, valueRange, unit, initialValue = None, accessNodes = None):
         """
         """
@@ -207,7 +217,6 @@ class Database:
     ##
     ## Message stuff.
     ##
-
     def addMessage(self, name, identifier, size, comment = None):
         """Add a new message to database.
 
@@ -228,14 +237,14 @@ class Database:
             newly created Message object on success else None.
         """
         cur = self.getCursor()
-        self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment", name, identifier, size, comment)
+        self.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment", name, identifier, size, comment)
         return self.message(name)
 
     def messages(self, glob = None, regex = None):
         """
         """
         for item in self._searchTableForName("Message", glob, regex):
-            yield Message(self, item['RID'], item['Name'], CANAddress(item['Message_ID']), item['DLC'], item['Sender'], item['Comment'])
+            yield Message(self, item['RID'], item['Name'], CANAddress(item['Message_ID']), item['DLC'], item['Comment'])
 
     def message(self, name):
         """
@@ -256,7 +265,6 @@ class Database:
     ##
     ## Node stuff.
     ##
-
     def addNode(self, name, comment):
         """Add a Node to the database.
 
@@ -306,8 +314,7 @@ class Database:
     ##
     ## Misc. stuff.
     ##
-
-    def _searchTableForName(self, tableName, glob = None, regex = None):
+    def _searchTableForName(self, tableName, glob = None, regex = None, additionalWhereClause = None):
         """
         """
         if glob is None and regex is None:
@@ -316,10 +323,12 @@ class Database:
             where = "Name GLOB '{}'".format(glob)
         elif regex is not None:
             where = "Name REGEXP '{}'".format(regex)
+        if where is not None and additionalWhereClause is not None:
+            where = "{} AND {}".format(where, additionalWhereClause)
         cur = self.db.getCursor()
         return self.db.fetchFromTable(cur, tableName, where = where)
 
-    def createValueTableObjects(self, objectType, rid):
+    def valueTableObjects(self, objectType, rid):
         vt = None
         cur = self.db.getCursor()
         cur.execute("""SELECT Object_RID, Valuetable AS VT_RID, Name, Comment FROM Object_Valuetable AS t1,
