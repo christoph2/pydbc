@@ -82,13 +82,13 @@ class Signal(BaseObject):
         ('unit', 'Unit'),
     )
 
-    def __init__(self, database, messageId, signal):
+    def __init__(self, database, mrid, signal):
         super(Signal, self).__init__(database)
-        self.messageid = messageId
+        self.messageid = mrid
         self.rid = signal['RID']
         self.name = signal['Name']
 
-        ms = self.database.messageSignal(messageId, self.rid)
+        ms = self.database.messageSignal(mrid, self.rid)
         mpxValue = ms['Multiplexor_Value']
         mpxDependent = ms['Multiplex_Dependent']
         mpxSignal = ms['Multiplexor_Signal']
