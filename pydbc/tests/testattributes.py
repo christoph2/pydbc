@@ -22,8 +22,17 @@ class TestAttributes(BaseTest):
       self.assertEqual(attr.values, [])
       self.assertEqual(attr.comment, "hello")
 
+    @unittest.skip
     def testUpdateWorkx(self):
-        pass
+        attr = self.createAttribute()
+        attr.comment = "world"
+        attr.valueType = ValueType.FLOAT
+        attr.objectType = AttributeType.ENV_VAR
+        attr.update()
+        attr = self.db.AttributeDefinition("ABC")
+        self.assertEqual(attr.objectType, AttributeType.ENV_VAR)
+        self.assertEqual(attr.valueType, ValueType.FLOAT)
+        self.assertEqual(attr.comment, "world")
 
     def testUpdateFails(self):
         pass
@@ -49,6 +58,7 @@ class TestAttributes(BaseTest):
     def testSetNameWorks(self):
         attr = self.createAttribute()
         attr.name = "DEF"
+        self.assertEqual(attr.name, "DEF")
 
     def testSetNameFails(self):
         attr = self.createAttribute()
@@ -57,10 +67,12 @@ class TestAttributes(BaseTest):
     def testSetObjectTypeWorks1(self):
         attr = self.createAttribute()
         attr.objectType = 4
+        self.assertEqual(attr.objectType, 4)
 
     def testSetObjectTypeWorks2(self):
         attr = self.createAttribute()
         attr.objectType = AttributeType.NODE
+        self.assertEqual(attr.objectType, AttributeType.NODE)
 
     def testSetObjectTypeFails1(self):
         attr = self.createAttribute()
@@ -83,6 +95,7 @@ class TestAttributes(BaseTest):
     def testSetLimitsWorks(self):
         attr = self.createAttribute()
         attr.limits = Limits(-1, 1)
+        self.assertEqual(attr.limits, Limits(-1, 1))
 
     def testSetLimitsFails(self):
         attr = self.createAttribute()
@@ -91,6 +104,7 @@ class TestAttributes(BaseTest):
     def testSetCommentWorks(self):
         attr = self.createAttribute()
         attr.comment = "world"
+        self.assertEqual(attr.comment, "world")
 
     def testSetCommentFails(self):
         attr = self.createAttribute()
@@ -100,9 +114,7 @@ class TestAttributes(BaseTest):
         attr = self.createAttribute()
         node = self.db.addNode("XXX", "test-node")
         av = node.attribute("ABC")
-        #print(av)
         av.value = 10
-        #print(av)
 
 if __name__ == '__main__':
   unittest.main()

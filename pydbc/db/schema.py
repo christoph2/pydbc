@@ -159,6 +159,14 @@ SCHEMA = ('''
         PRIMARY KEY(RID)
     );
 ''', '''
+    CREATE TABLE IF NOT EXISTS Vndb_Migrations (
+        RID INTEGER NOT NULL,
+        App varchar(255) NOT NULL,
+        Name varchar(255) NOT NULL,
+        Applied TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY(RID)
+    );
+''', '''
     CREATE TABLE IF NOT EXISTS ECU (
         RID INTEGER NOT NULL DEFAULT 0,
         Name VARCHAR(255),

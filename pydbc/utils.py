@@ -47,6 +47,10 @@ else:
         from StringIO import StringIO
 
 
+def runningOnTravis():
+    return os.environ.get("TRAVIS") == "true"
+
+
 def createStringBuffer(*args):
     """Create a string with file-like behaviour (StringIO on Python 2.x).
     """

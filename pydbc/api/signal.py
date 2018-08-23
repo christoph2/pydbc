@@ -28,7 +28,7 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 
-from pydbc.types import AttributeType, MultiplexingType, ValueTableType
+from pydbc.types import AttributeType, MultiplexingType, ValueTableType, ByteOrderType, ValueType
 from pydbc.api.base import BaseObject
 from pydbc.api.limits import Limits
 
@@ -82,22 +82,34 @@ class Signal(BaseObject):
         ('unit', 'Unit'),
     )
 
-    def __init__(self, database, messageId, rid, name, startBit, bitSize, byteOrder, valueType, formula,
-                 limits, unit, multiplexing, comment):
+    def __init__(self, database, messageId, signal):
         super(Signal, self).__init__(database)
         self.messageid = messageId
-        self.rid = rid
-        self.name = name
-        self.startBit = startBit
-        self.bitSize = bitSize
-        self.byteOrder = byteOrder
-        self.valueType = valueType
-        self.formula = formula
-        self.multiplexing = multiplexing
-        self.comment = comment
-        self.limits = limits
-        self.unit = unit
-        self._values = self.database.createValueTableObjects(ValueTableType.SIGNAL, self.rid)
+        self.rid = signal['RID']
+        self.name = signal['Name']
+
+        ms = self.database.messageSignal(messageId, self.rid)
+        mpxValue = ms['Multiplexor_Value']
+        mpxDependent = ms['Multiplex_Dependent']
+        mpxSignal = ms['Multiplexor_Signal']
+        if mpxSignal == 1:
+            mpxType = MultiplexingType.MULTIPLEXOR
+        elif mpxDependent == 1:
+            mpxType = MultiplexingType.DEPENDENT
+        else:
+            mpxType = MultiplexingType.NONE
+        mpx = Multiplexing(mpxType, mpxValue)
+
+        self.startBit = ms['Offset']
+        self.bitSize = signal['Bitsize']
+        self.byteOrder = ByteOrderType(signal['Byteorder'])
+        self.valueType = ValueType(signal['Valuetype'])
+        self.formula = Formula(signal['Formula_Factor'], signal['Formula_Offset'])
+        self.multiplexing = mpx if mpx.type != MultiplexingType.NONE else None
+        self.comment = signal['Comment']
+        self.limits = Limits(signal['Minimum'], signal['Maximum'])
+        self.unit = signal['Unit']
+        self._values = self.database.valueTableObjects(ValueTableType.SIGNAL, self.rid)
 
     def values(self):
         pass

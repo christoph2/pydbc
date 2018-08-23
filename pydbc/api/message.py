@@ -27,8 +27,7 @@ __copyright__ = """
 __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
-
-from pydbc.types import AttributeType, MultiplexingType, ByteOrderType, ValueType
+from pydbc.types import AttributeType
 from pydbc.api.base import BaseObject
 from pydbc.api.signal import Formula, Multiplexing, Signal
 from pydbc.api.limits import Limits
@@ -57,23 +56,56 @@ class Message(BaseObject):
         self.dlc = dlc
         self.comment = comment
 
-    def signals(self):
-        for signal in self.database.db.signals(self.key):
-            ms = self.database.messageSignal(self.rid, signal['RID'])
-            mpxValue = ms['Multiplexor_Value']
-            mpxDependent = ms['Multiplex_Dependent']
-            mpxSignal = ms['Multiplexor_Signal']
-            if mpxSignal == 1:
-                mpxType = MultiplexingType.MULTIPLEXOR
-            elif mpxDependent == 1:
-                mpxType = MultiplexingType.DEPENDENT
+    def signalsByRid(self, messageId):
+        cur = self.getCursor()
+        res = cur.execute("""SELECT * FROM message_signal AS t1, signal AS t2 WHERE t1.message = ? AND t1.signal = t2.RID""", [messageId])
+        while True:
+            row = cur.fetchone()
+            if row is None:
+                return
             else:
-                mpxType = MultiplexingType.NONE
-            mpx = Multiplexing(mpxType, mpxValue)
-            yield Signal(self.database, self.rid, signal['RID'], signal['Name'], ms['Offset'], signal['Bitsize'], ByteOrderType(signal['Byteorder']),
-                         ValueType(signal['Valuetype']), Formula(signal['Formula_Factor'], signal['Formula_Offset']),
-                         Limits(signal['Minimum'], signal['Maximum']), signal['Unit'], mpx if mpx.type != MultiplexingType.NONE else None,
-                         signal['Comment']
-                    )
+                yield self.db.createDictFromRow(row, cur.description)
+
+    def signalByRidAndName(self, rid, name):
+        cur = self.getCursor()
+        cur.execute("""SELECT * FROM signal WHERE rid IN (SELECT t1.signal FROM message_signal AS t1, signal AS t2
+        WHERE t1.message = 2 AND t1.signal = t2.RID)""", [rid])
+        result = cur.fetchone()
+        return self.db.createDictFromRow(result, cur.description)
+
+    def signals(self):
+        for signal in self.database.queries.signals(self.key):
+            yield Signal(self.database, self.rid, signal)
+
+    def signal(self, name):
+        """
+        """
+        cur = self.getCursor()
+        cur.execute("""SELECT * FROM signal WHERE rid = (SELECT t1.signal FROM message_signal AS t1, signal AS t2
+        WHERE t1.message = ? AND t2.name = ? AND t1.signal = t2.RID)""", [self.rid, name])
+        result = cur.fetchone()
+        if result:
+            return self.db.createDictFromRow(result, cur.description)
+        else:
+            return None
+
+    """
+        def messages(self, glob = None, regex = None):
+        for item in self._searchTableForName("Message", glob, regex):
+            yield Message(self, item['RID'], item['Name'], CANAddress(item['Message_ID']), item['DLC'], item['Comment'])
+
+    def message(self, name):
+        cur = self.db.getCursor()
+        where = "Name = '{}'".format(name)
+        item = self.db.fetchSingleRow(cur, tname = "Message", column = "*", where = where)
+        if item:
+            return Message(self, item['RID'], item['Name'], item['Message_ID'], item['DLC'], item['Comment'])
+        else:
+            return None
+    """
+
+    def addSignal(self):
+        """
+        """
     # TODO: __iter__ for signals.
 
