@@ -94,10 +94,6 @@ class CanDatabase(object):
     def rollbackTransaction(self):
         self.conn.rollback()
 
-    #def lastInsertedRowId(self, cur, table):
-    #    rowid = cur.lastrowid
-    #    return rowid
-
     def createDictFromRow(self, row, description):
         names = [d[0] for d in description]
         di = dict(zip(names, row))
@@ -116,9 +112,6 @@ class CanDatabase(object):
         if result is None:
             return []
         return result[0]
-
-    def queryStatement(self, tname, columns = None, where = None, orderBy = None):
-        pass
 
     def updateStatement(self, cur, tname, columns, where, *values):
         columns = [c.strip() for c in columns.split(",")]
