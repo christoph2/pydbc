@@ -32,6 +32,7 @@ INDICES = (
     "CREATE UNIQUE INDEX IF NOT EXISTS Node_Name ON Node(Name)",
     "CREATE UNIQUE INDEX IF NOT EXISTS Attribute_Definition_Name ON Attribute_Definition(Name)",
     "CREATE INDEX IF NOT EXISTS Signal_Name ON Signal(Name)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS Message_Name ON Message(Name)",
     "CREATE UNIQUE INDEX IF NOT EXISTS EnvVar_Name ON EnvVar(Name)",
     "CREATE UNIQUE INDEX IF NOT EXISTS ECU_Name ON ECU(Name)",
     "CREATE UNIQUE INDEX IF NOT EXISTS Node_Group_Name ON Node_Group(Name)",
