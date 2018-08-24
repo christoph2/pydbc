@@ -93,7 +93,8 @@ class Database:
         try:
             placeholder = ','.join("?" * len(values))
             stmt = "{} INTO {}({}) VALUES({})".format(verb, tname, columns, placeholder)
-            cur.execute(stmt, [*values])
+            result = cur.execute(stmt, [*values])
+            return cur.lastrowid
         except sqlite3.DatabaseError as e:
             excText = str(e)
             msg = "{} - Table: '{}'; Data: {}".format(excText, tname, values)
@@ -214,6 +215,15 @@ class Database:
     def envVar(self, name):
         """
         """
+        cur = self.db.getCursor()
+        where = "Name = '{}'".format(name)
+        item = self.db.fetchSingleRow(cur, tname = "EnvVar", column = "*", where = where)
+        if item:
+            return EnvVar(self, item['RID'], item['Name'], EnvVarType(item['Type']), item['Unit'], EnvVarAccessType(item['Access'] & 0x0f), item['Size'],
+                item['Startup_Value'], Limits(item['Minimum'], item['Maximum']), item['Comment']
+            )
+        else:
+            return None
 
     def envVars(self, glob = None, regex = None):
         """
