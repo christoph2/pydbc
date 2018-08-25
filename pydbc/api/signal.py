@@ -28,7 +28,7 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 
-from pydbc.types import AttributeType, MultiplexingType, ValueTableType, ByteOrderType, ValueType
+from pydbc.types import AttributeType, MultiplexingType, ValueTableType, ByteOrderType, SignalType
 from pydbc.api.base import BaseObject
 from pydbc.api.limits import Limits
 
@@ -103,7 +103,7 @@ class Signal(BaseObject):
         self.startBit = ms['Offset']
         self.bitSize = signal['Bitsize']
         self.byteOrder = ByteOrderType(signal['Byteorder'])
-        self.valueType = ValueType(signal['Valuetype'])
+        self.valueType = SignalType(signal['Valuetype'])
         self.formula = Formula(signal['Formula_Factor'], signal['Formula_Offset'])
         self.multiplexing = mpx if mpx.type != MultiplexingType.NONE else None
         self.comment = signal['Comment']
