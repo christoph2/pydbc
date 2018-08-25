@@ -58,9 +58,10 @@ class ByteOrderType(enum.IntEnum):
 
 
 class SignalType(enum.IntEnum):
-    INT = 0
+    SINT = 0
     FLOAT32 = 1
     FLOAT64 = 2
+    UINT = 8
 
 
 class MultiplexingType(enum.IntEnum):
