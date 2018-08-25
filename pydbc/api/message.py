@@ -27,7 +27,7 @@ __copyright__ = """
 __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
-from pydbc.types import AttributeType, MultiplexingType
+from pydbc.types import AttributeType, MultiplexingType, SignalType
 from pydbc.api.base import BaseObject
 from pydbc.api.signal import Formula, Multiplexing, Signal
 from pydbc.api.limits import Limits
@@ -80,12 +80,13 @@ class Message(BaseObject):
     def signal(self, name):
         """
         """
-        cur = self.getCursor()
+        cur = self.database.getCursor()
         cur.execute("""SELECT * FROM signal WHERE rid = (SELECT t1.signal FROM message_signal AS t1, signal AS t2
         WHERE t1.message = ? AND t2.name = ? AND t1.signal = t2.RID)""", [self.rid, name])
         result = cur.fetchone()
         if result:
-            return self.db.createDictFromRow(result, cur.description)
+            sg = self.database.db.createDictFromRow(result, cur.description)
+            return Signal(self.database, self.rid, sg)
         else:
             return None
 
@@ -104,11 +105,25 @@ class Message(BaseObject):
             return None
     """
 
-    def addSignal(self, name, startBit, bitSize, byteOrder, valueType, unit, formula, limits,
+    def addSignal(self, name, startBit, bitSize, byteOrder, valueType, unit, formula = Formula(), limits = Limits(),
                   multiplexing = MultiplexingType.NONE, values = None, comment = None):
         """
+        Multiplexor_Signal SMALLINT DEFAULT 0,
+        Multiplex_Dependent SMALLINT DEFAULT 0,
+        Multiplexor_Value INTEGER,
         """
-    # TODO: __iter__ for signals.
+        cur = self.database.getCursor()
+        if valueType == SignalType.UINT:
+            sign = +1
+            valueType = SignalType.SINT
+        else:
+            sign = -1
+        srid = self.database.insertStatement(cur, "Signal", """Name, Bitsize, Byteorder, Sign, Valuetype, Formula_Factor,
+            Formula_Offset, Minimum, Maximum, Unit, Comment""", name, bitSize, byteOrder.value, sign,
+            valueType.value, formula.factor, formula.offset, limits.min, limits.max, unit, comment)
+
+        self.database.insertStatement(cur, "Message_Signal", """Message, Signal, Offset""", self.rid, srid, startBit)
+        return self.signal(name)
 
     @property
     def rid(self):
@@ -120,6 +135,8 @@ class Message(BaseObject):
 
     @name.setter
     def name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Value must be of type string.")
         self._name = value
 
     @property
@@ -128,6 +145,8 @@ class Message(BaseObject):
 
     @identifier.setter
     def identifier(self, value):
+        if not isinstance(value, int):
+            raise TypeError("Value must be of type integer.")
         self._identifier = value
 
     @property
@@ -136,6 +155,8 @@ class Message(BaseObject):
 
     @dlc.setter
     def dlc(self, value):
+        if not isinstance(value, int):
+            raise TypeError("Value must be of type integer.")
         self._dlc = value
 
     @property
@@ -144,4 +165,9 @@ class Message(BaseObject):
 
     @comment.setter
     def comment(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Value must be of type string.")
         self._comment = value
+
+    # TODO: __iter__ for signals.
+
