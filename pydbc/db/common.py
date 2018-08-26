@@ -178,7 +178,7 @@ class Queries:
 
     def comments(self):
         cur = self.getCursor()
-        cur.execute("SELECT name, comment FROM node WHERE name IS NOT NULL AND name <> 'Vector__XXX'")
+        cur.execute("SELECT name, comment FROM node WHERE comment IS NOT NULL AND name <> 'Vector__XXX'")
         result = cur.fetchall()
         for name, comment in result:
             yield dict(type = 'BU', k0 = name, k1 = None, comment = comment)
