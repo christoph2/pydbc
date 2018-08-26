@@ -47,6 +47,7 @@ from pydbc.exceptions import DuplicateKeyError
 from pydbc.logger import Logger
 from pydbc.template import renderTemplateFromText
 from pydbc.db.common import Queries
+from pydbc.utils import unpackValues
 
 DBC_EXTENSION = "dbc"
 DB_EXTENSION = "vndb"
@@ -93,7 +94,8 @@ class Database:
         try:
             placeholder = ','.join("?" * len(values))
             stmt = "{} INTO {}({}) VALUES({})".format(verb, tname, columns, placeholder)
-            result = cur.execute(stmt, [*values])
+            #result = cur.execute(stmt, [*values])
+            result = cur.execute(stmt, unpackValues(*values))
             return cur.lastrowid
         except sqlite3.DatabaseError as e:
             excText = str(e)
@@ -252,8 +254,13 @@ class Database:
 
         Returns
         -------
-            `pydbc.api.message.Message`
+        `pydbc.api.message.Message`
             newly created Message object on success else None.
+
+        Raises
+        ------
+        `pydbc.exceptions.DuplicateKeyError`
+            If a message with the same name already exists.
         """
         cur = self.getCursor()
         self.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment", name, identifier, size, comment)

@@ -102,6 +102,12 @@ class StructureWithEnums(ctypes.Structure):
     __repr__ = __str__
 
 
+def unpackValues(*values):
+    result = []
+    for value in values:
+        result.append(value)
+    return result
+
 import subprocess
 
 class CommandError(Exception):

@@ -34,11 +34,12 @@ import mmap
 from pprint import pprint
 import re
 import sqlite3
+import sys
 import types
 
 from pydbc.exceptions import DuplicateKeyError
 from pydbc.logger import Logger
-
+from pydbc.utils import unpackValues
 
 PAGE_SIZE = mmap.PAGESIZE
 
@@ -47,6 +48,8 @@ def regexer(expr, value):
 
 def calculateCacheSize(value):
     return -(value // PAGE_SIZE)
+
+
 
 class CanDatabase(object):
 
@@ -136,7 +139,8 @@ class CanDatabase(object):
         try:
             placeholder = ','.join("?" * len(values))
             stmt = "{} INTO {}({}) VALUES({})".format(verb, tname, columns, placeholder)
-            cur.execute(stmt, [*values])
+            cur.execute(stmt, unpackValues(*values))
+            #cur.execute(stmt, *values)
         except sqlite3.DatabaseError as e:
             msg = "{} - Data: {}".format(str(e), values)
             self.logger.error(msg)
