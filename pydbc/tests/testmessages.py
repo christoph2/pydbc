@@ -32,7 +32,6 @@ class TestMessage(BaseTest):
     def testAddSignalWorks(self):
         msg = self.createMessage()
         signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.UINT, "rpm", Formula(), Limits())
-        #formula, limits,  multiplexing = MultiplexingType.NONE, values = None, comment = None
 
     def testSignalTypeUintWorks(self):
         msg = self.createMessage()
@@ -53,6 +52,16 @@ class TestMessage(BaseTest):
         msg = self.createMessage()
         signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.FLOAT64, "rpm", Formula(), Limits())
         self.assertEqual(signal.valueType, SignalType.FLOAT64)
+
+    def testSignalByteOrderIntelWorks(self):
+        msg = self.createMessage()
+        signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.UINT, "rpm", Formula(), Limits())
+        self.assertEqual(signal.byteOrder, ByteOrderType.INTEL)
+
+    def testSignalByteOrderMotorolaWorks(self):
+        msg = self.createMessage()
+        signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.MOTOROLA, SignalType.UINT, "rpm", Formula(), Limits())
+        self.assertEqual(signal.byteOrder, ByteOrderType.MOTOROLA)
 
     def testUpdateWorks(self):
         msg = self.createMessage()
