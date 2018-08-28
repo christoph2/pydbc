@@ -88,28 +88,36 @@ class Signal(BaseObject):
         self.rid = signal['RID']
         self.name = signal['Name']
 
-        ms = self.database.messageSignal(mrid, self.rid)
-        mpxValue = ms['Multiplexor_Value']
-        mpxDependent = ms['Multiplex_Dependent']
-        mpxSignal = ms['Multiplexor_Signal']
-        if mpxSignal == 1:
-            mpxType = MultiplexingType.MULTIPLEXOR
-        elif mpxDependent == 1:
-            mpxType = MultiplexingType.DEPENDENT
-        else:
-            mpxType = MultiplexingType.NONE
-        mpx = Multiplexing(mpxType, mpxValue)
+        messageSignal = self.database.messageSignal(mrid, self.rid)
+        mpx = self.getMultiplexing(messageSignal)
 
-        self.startBit = ms['Offset']
+        self.startBit = messageSignal['Offset']
         self.bitSize = signal['Bitsize']
         self.byteOrder = ByteOrderType(signal['Byteorder'])
-        self.valueType = SignalType(signal['Valuetype'])
+
+        valueType = SignalType(signal['Valuetype'])
+        sign = signal['Sign']
+        if valueType == SignalType.SINT and sign == +1:
+            valueType = SignalType.UINT
+        self.valueType = valueType
         self.formula = Formula(signal['Formula_Factor'], signal['Formula_Offset'])
         self.multiplexing = mpx if mpx.type != MultiplexingType.NONE else None
         self.comment = signal['Comment']
         self.limits = Limits(signal['Minimum'], signal['Maximum'])
         self.unit = signal['Unit']
         self._values = self.database.valueTableObjects(ValueTableType.SIGNAL, self.rid)
+
+    def getMultiplexing(self, messageSignal):
+        mpxValue = messageSignal['Multiplexor_Value']
+        mpxDependent = messageSignal['Multiplex_Dependent']
+        mpxSignal = messageSignal['Multiplexor_Signal']
+        if mpxSignal == 1:
+            mpxType = MultiplexingType.MULTIPLEXOR
+        elif mpxDependent == 1:
+            mpxType = MultiplexingType.DEPENDENT
+        else:
+            mpxType = MultiplexingType.NONE
+        return Multiplexing(mpxType, mpxValue)
 
     def values(self):
         pass
