@@ -105,13 +105,17 @@ class Message(BaseObject):
             return None
     """
 
-    def addSignal(self, name, startBit, bitSize, byteOrder, valueType, unit, formula = Formula(), limits = Limits(),
+    def addSignal(self, name, startBit, bitSize, byteOrder, valueType, unit, formula = None, limits = None,
                   multiplexing = MultiplexingType.NONE, values = None, comment = None):
         """
         Multiplexor_Signal SMALLINT DEFAULT 0,
         Multiplex_Dependent SMALLINT DEFAULT 0,
         Multiplexor_Value INTEGER,
         """
+        if not formula:
+            formula = Formula()
+        if not limits:
+            limits = Limits()
         cur = self.database.getCursor()
         if valueType == SignalType.UINT:
             sign = +1
