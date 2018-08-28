@@ -32,8 +32,27 @@ class TestMessage(BaseTest):
     def testAddSignalWorks(self):
         msg = self.createMessage()
         signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.UINT, "rpm", Formula(), Limits())
-        print("SIG::", signal)
         #formula, limits,  multiplexing = MultiplexingType.NONE, values = None, comment = None
+
+    def testSignalTypeUintWorks(self):
+        msg = self.createMessage()
+        signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.UINT, "rpm", Formula(), Limits())
+        self.assertEqual(signal.valueType, SignalType.UINT)
+
+    def testSignalTypeSintWorks(self):
+        msg = self.createMessage()
+        signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.SINT, "rpm", Formula(), Limits())
+        self.assertEqual(signal.valueType, SignalType.SINT)
+
+    def testSignalTypeFloat32Works(self):
+        msg = self.createMessage()
+        signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.FLOAT32, "rpm", Formula(), Limits())
+        self.assertEqual(signal.valueType, SignalType.FLOAT32)
+
+    def testSignalTypeFloat64Works(self):
+        msg = self.createMessage()
+        signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.FLOAT64, "rpm", Formula(), Limits())
+        self.assertEqual(signal.valueType, SignalType.FLOAT64)
 
     def testUpdateWorks(self):
         msg = self.createMessage()
