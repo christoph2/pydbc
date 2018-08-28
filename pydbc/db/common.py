@@ -39,19 +39,6 @@ class Queries:
     def getCursor(self):
         return self.db.getCursor()
 
-    def fetchComment(self, tp, k0, k1 = None):
-        cur = self.getCursor()
-        if k1:
-            cur.execute("SELECT comment FROM comments WHERE type = ? AND k0 = ? AND k1 = ?;", [tp, k0, k1])
-        else:
-            cur.execute("SELECT comment FROM comments WHERE type = ? AND k0 = ?;", [tp, k0])
-        cmt = cur.fetchall()
-        if cmt:
-            assert len(cmt[0]) <= 1
-            return cmt[0][0]
-        else:
-            return None
-
     def fetchEnvironmentVariablesData(self, name):
         cur = self.getCursor()
         cur.execute("SELECT value FROM EnvironmentVariablesData WHERE name = ?", [name])
@@ -191,7 +178,28 @@ class Queries:
 
     def comments(self):
         cur = self.getCursor()
-        yield from self.db.fetchFromTable(cur, "comments")
+        cur.execute("SELECT name, comment FROM node WHERE name IS NOT NULL AND name <> 'Vector__XXX'")
+        result = cur.fetchall()
+        for name, comment in result:
+            yield dict(type = 'BU', k0 = name, k1 = None, comment = comment)
+        cur.execute("SELECT rid, message_id, comment FROM message WHERE comment IS NOT NULL")
+        while True:
+            row = cur.fetchone()
+            if row is None:
+                break
+            else:
+                mRid, msgId, mComment = row
+                yield dict(type = 'BO', k0 = msgId, k1 = None, comment = mComment)
+                cur2 = self.getCursor()
+                cur2.execute("""SELECT DISTINCT(name), comment FROM signal WHERE rid IN
+                    (SELECT signal FROM message_signal WHERE message = ?) AND comment IS NOT NULL""", [mRid])
+                result = cur2.fetchall()
+                for name, sComment in result:
+                    yield dict(type = 'SG', k0 = msgId, k1 = name, comment = sComment)
+        cur.execute("SELECT name, comment FROM envvar WHERE comment IS NOT NULL")
+        result = cur.fetchall()
+        for name, comment in result:
+            yield dict(type = 'EV', k0 = name, k1 = None, comment = comment)
 
     def valueTablesGlobal(self):
         cur = self.getCursor()

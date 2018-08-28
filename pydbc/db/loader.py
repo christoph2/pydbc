@@ -32,10 +32,55 @@ import itertools
 from pydbc.logger import Logger
 from pydbc.types import AttributeType, ValueType
 
+
+class Comments:
+    """This class contains the comments found in .dbc files.
+    """
+    def __init__(self):
+        self.bu = {}
+        self.bo = {}
+        self.sg = {}
+        self.ev = {}
+
+##
+##    def __del__(self):
+##        from pprint import pprint
+##        pprint(self.bu)
+##        pprint(self.bo)
+##        pprint(self.sg)
+##        pprint(self.ev)
+##
+
+    def addNode(self, key, value):
+        self.bu[key] = value
+
+    def addMessage(self, key, value):
+        self.bo[key] = value
+
+    def addSignal(self, key, value):
+        self.sg[key] = value
+
+    def addEnvVar(self, key, value):
+        self.ev[key] = value
+
+    def node(self, key):
+        return self.bu.get(key)
+
+    def message(self, key):
+        return self.bo.get(key)
+
+    def signal(self, key):
+        return self.sg.get(key)
+
+    def envVar(self, key):
+        return self.ev.get(key)
+
+
 class Loader(object):
 
     def __init__(self, db, queryClass):
         self.db = db
+        self.comments = Comments()
         self.queries = queryClass(db)
         self.logger = Logger(__name__)
 
@@ -91,7 +136,7 @@ class Loader(object):
             envId = var['envId']
             varType = var['varType']
             name = var['name']
-            cmt = self.queries.fetchComment('EV', name)
+            cmt = self.comments.envVar(name)
             dataSize = self.queries.fetchEnvironmentVariablesData(name)
             self.db.insertStatement(cur, "EnvVar", "Name, Type, Unit, Minimum, Maximum, Access, Startup_Value, Comment, Size",
                 name, varType, unit, minimum, maximum, accessType, initialValue, cmt, dataSize
@@ -138,17 +183,14 @@ class Loader(object):
             tp = comment['type']
             text = comment['comment']
             key = comment['key']
-            k0 = k1 = None
-            if tp == 'BU':  # TODO: dict
-                k0 = key
+            if tp == 'BU':
+                self.comments.addNode(key, text)
             elif tp == 'BO':
-                k0 = key
+                self.comments.addMessage(key, text)
             elif tp == 'SG':
-                k0 = key[0]
-                k1 = key[1]
+                self.comments.addSignal(key, text)
             elif tp == 'EV':
-                k0 = key
-            self.db.insertStatement(cur, "comments", "type, k0, k1, comment", tp, k0, k1, text)
+                self.comments.addEnvVar(key,text)
 
     def insertEnvironmentVariablesData(self, cur, data):
         for item in data:
@@ -247,7 +289,7 @@ class Loader(object):
     def insertNodes(self, cur, nodes):
         nodeSet = set()
         for node in nodes:
-            cmt = self.queries.fetchComment('BU', node)
+            cmt = self.comments.node(node)
             if not node in nodeSet:
                 self.db.insertStatement(cur, "Node", "Name, Comment", node, cmt)
             nodeSet.add(node)
@@ -265,7 +307,8 @@ class Loader(object):
             mid = msg['messageID']
             dlc = msg['dlc']
             signals = msg['signals']
-            cmt = self.queries.fetchComment('BO', mid)
+            cmt = self.comments.message(mid)
+
             transmitter = msg['transmitter']
             tid = self.queries.fetchNodeId(transmitter)
             valueTypesForMessage = valueTypes.get(mid, {})
@@ -299,7 +342,7 @@ class Loader(object):
                     multiplexorSignal = None
                     multiplexDependent = None
                     multiplexorValue = None
-                cmt = self.queries.fetchComment('SG', mid, name)
+                cmt = self.comments.signal((mid, name, ))
                 self.db.insertStatement(cur, "Signal", """Name, Bitsize, Byteorder, Sign, Valuetype, Formula_Factor, Formula_Offset,
                     Minimum, Maximum, Unit, Comment""",
                     name, signalSize, byteOrder, sign, valueType, factor, offset, minimum, maximum, unit, cmt
