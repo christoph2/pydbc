@@ -47,7 +47,7 @@ from pydbc.exceptions import DuplicateKeyError
 from pydbc.logger import Logger
 from pydbc.template import renderTemplateFromText
 from pydbc.db.common import Queries
-from pydbc.utils import unpackValues
+from pydbc.utils import flatten
 
 DBC_EXTENSION = "dbc"
 DB_EXTENSION = "vndb"
@@ -95,7 +95,7 @@ class Database:
             placeholder = ','.join("?" * len(values))
             stmt = "{} INTO {}({}) VALUES({})".format(verb, tname, columns, placeholder)
             #result = cur.execute(stmt, [*values])
-            result = cur.execute(stmt, unpackValues(*values))
+            result = cur.execute(stmt, flatten(*values))
             return cur.lastrowid
         except sqlite3.DatabaseError as e:
             excText = str(e)

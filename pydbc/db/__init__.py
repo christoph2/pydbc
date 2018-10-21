@@ -39,7 +39,7 @@ import types
 
 from pydbc.exceptions import DuplicateKeyError
 from pydbc.logger import Logger
-from pydbc.utils import unpackValues
+from pydbc.utils import flatten
 
 PAGE_SIZE = mmap.PAGESIZE
 
@@ -139,7 +139,7 @@ class CanDatabase(object):
         try:
             placeholder = ','.join("?" * len(values))
             stmt = "{} INTO {}({}) VALUES({})".format(verb, tname, columns, placeholder)
-            cur.execute(stmt, unpackValues(*values))
+            cur.execute(stmt, flatten(*values))
             #cur.execute(stmt, *values)
         except sqlite3.DatabaseError as e:
             msg = "{} - Data: {}".format(str(e), values)
