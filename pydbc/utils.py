@@ -102,10 +102,13 @@ class StructureWithEnums(ctypes.Structure):
     __repr__ = __str__
 
 
-def unpackValues(*values):
+def flatten(*args):
     result = []
-    for value in values:
-        result.append(value)
+    for arg in list(args):
+        if isinstance(arg, (list, tuple)):
+            result.extend(flatten(*arg))
+        else:
+            result.append(arg)
     return result
 
 import subprocess
