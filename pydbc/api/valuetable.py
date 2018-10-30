@@ -28,6 +28,8 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 
+from collections import OrderedDict
+
 from pydbc.types import ValueTableType
 
 
@@ -47,12 +49,27 @@ class ValueTable:
     """
     """
 
-    def __init__(self, objectType, objectRid, vtRid, name, comment, values = None):
+    def __init__(self, database, objectType, objectRid):
+        self.database = database
         self.objectType = objectType
         self.objectRid = objectRid
-        self.vtRid = vtRid
-        self.name = name
-        self.comment = comment
+        cur = self.database.getCursor()
+        cur.execute("""SELECT Object_RID, Valuetable AS VT_RID, Name, Comment FROM Object_Valuetable AS t1,
+        Valuetable AS t2 WHERE t1.Valuetable = t2.RID AND Object_Type = ? AND Object_RID = ?""", [objectType, objectRid])
+        row = cur.fetchone()
+        values = []
+        if row:
+            res = self.database.db.createDictFromRow(row, cur.description)
+            self.name = res['Name']
+            self.comment = res['Comment']
+            cur.execute("SELECT Value, Value_Description FROM Value_Description WHERE Valuetable = ?", [res['VT_RID']])
+            rows = cur.fetchall()
+            for value, desc in rows:
+                val = Value(desc, int(value))
+                values.append(val)
+        else:
+            self.name = ''
+            self.comment = ''
         self.values = [] if values is None else values
 
     def addValue(self, name, value):

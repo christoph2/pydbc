@@ -42,7 +42,6 @@ from pydbc.api.message import Message
 from pydbc.api.node import Node
 from pydbc.api.envvar import EnvVar
 from pydbc.api.limits import Limits
-from pydbc.api.valuetable import ValueTable, Value
 from pydbc.exceptions import DuplicateKeyError
 from pydbc.logger import Logger
 from pydbc.template import renderTemplateFromText
@@ -354,22 +353,5 @@ class Database:
         cur = self.db.getCursor()
         return self.db.fetchFromTable(cur, tableName, where = where)
 
-    def valueTableObjects(self, objectType, rid):
-        vt = None
-        cur = self.db.getCursor()
-        cur.execute("""SELECT Object_RID, Valuetable AS VT_RID, Name, Comment FROM Object_Valuetable AS t1,
-        Valuetable AS t2 WHERE t1.Valuetable = t2.RID AND Object_Type = ? AND Object_RID = ?""", [objectType, rid])
-        row = cur.fetchone()
-        if row:
-            res = self.db.createDictFromRow(row, cur.description)
-            cur.execute("SELECT Value, Value_Description FROM Value_Description WHERE Valuetable = ?", [res['VT_RID']])
-            rows = cur.fetchall()
-            values = []
-            for value, desc in rows:
-                val = Value(desc, int(value))
-                values.append(val)
-            if values:
-                vt = ValueTable(objectType, res['Object_RID'], res['VT_RID'], res['Name'], res['Comment'], values)
-                return vt
 
 
