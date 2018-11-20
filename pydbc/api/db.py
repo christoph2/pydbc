@@ -49,7 +49,6 @@ from pydbc.db.common import Queries
 from pydbc.utils import flatten
 
 DBC_EXTENSION = "dbc"
-DB_EXTENSION = "vndb"
 
 
 class Database:
@@ -63,11 +62,9 @@ class Database:
         """
         """
         self.logger = Logger("api.database", level = logLevel)
-        dbname = "{}.{}".format(dbname, DB_EXTENSION)
-        self.dbname = dbname if not inMemory else ":memory:"
-        self.logger.debug("Initializing Sqlite3 database '{}'".format(self.dbname))
+        self.logger.debug("Initializing Sqlite3 database '{}'".format(dbname))
         self.dbtype = dbtype    # TODO: check.
-        self.db = CanDatabase(dbname, logLevel = logLevel)
+        self.db = CanDatabase(dbname, logLevel = logLevel, inMemory = inMemory)
         creator = Creator(self.db)
 
         self.queries = Queries(self.db)
@@ -77,8 +74,18 @@ class Database:
 
         self.db.beginTransaction()
 
+    def __str__(self):
+        return "{}(name: {})".format(self.__class__.__name__, self.dbname)
+
     def __del__(self):
         self.close()
+
+    @property
+    def dbname(self):
+        return self.db.dbname
+
+    def name(self):
+        return self.db.name
 
     def close(self):
         self.db.close()

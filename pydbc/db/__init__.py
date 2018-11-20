@@ -31,6 +31,7 @@ from collections import namedtuple
 import itertools
 import logging
 import mmap
+import os
 from pprint import pprint
 import re
 import sqlite3
@@ -42,6 +43,7 @@ from pydbc.logger import Logger
 from pydbc.utils import flatten
 
 PAGE_SIZE = mmap.PAGESIZE
+DB_EXTENSION = "vndb"
 
 def regexer(expr, value):
     return re.search(expr, value, re.UNICODE) is not None
@@ -50,16 +52,27 @@ def calculateCacheSize(value):
     return -(value // PAGE_SIZE)
 
 
-
 class CanDatabase(object):
+    """
 
-    def __init__(self, filename = ":memory:", cachesize = 4, logLevel = 'INFO'):
-        self.conn = sqlite3.connect(filename, isolation_level = None)
+    """
+
+    def __init__(self, filename = ":memory:", inMemory = False, cachesize = 4, logLevel = 'INFO'):
+        self._name,_ = os.path.splitext(filename)
+        if inMemory:
+            self._dbname = ":memory:"
+        else:
+            if not filename.lower().endswith(DB_EXTENSION):
+                self._dbname = "{}.{}".format(filename, DB_EXTENSION)
+            else:
+                self._dbname = filename
+        self._filename = filename
+        self.conn = sqlite3.connect(self.dbname, isolation_level = None)
         self.conn.create_function("REGEXP", 2, regexer)
         self.conn.isolation_level = None
         self.cachesize = cachesize
         self.setPragmas()
-        self.filename = filename
+        self._filename = filename
         self.logger = Logger('db', level = logLevel)
 
     def __del__(self):
@@ -67,6 +80,18 @@ class CanDatabase(object):
 
     def close(self):
         self.conn.close()
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def dbname(self):
+        return self._dbname
+
+    @property
+    def filename(self):
+        return self._filename
 
     def getCursor(self):
         return self.conn.cursor()
