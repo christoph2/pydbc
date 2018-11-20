@@ -41,7 +41,7 @@ class AttributeType(enum.IntEnum):
     MESSAGE = 1
     SIGNAL = 2
     ENV_VAR = 3
-    GENERAL = 4
+    NETWORK = 4
 
 
 class ValueType(enum.IntEnum):
@@ -110,15 +110,15 @@ class CANAddress(AddressBaseType):
     def __init__(self, rawId):
         if (rawId & EXTENDED_ID_MASK) == EXTENDED_ID_MASK:
             self.mtype = IdentifierType.EXTENDED
-            self.mid = rawId & (~0x80000000)
+            self.value = rawId & (~0x80000000)
         else:
             self.mtype = IdentifierType.STANDARD
-            self.mid = mid = rawId
+            self.value = mid = rawId
 
     def __str__(self):
         """
         """
-        return "{}({:08x} [{}])".format(self.__class__.__name__, self.mid, self.mtype.name)
+        return "{}({:08x} [{}])".format(self.__class__.__name__, self.value, self.mtype.name)
 
     def __int__(self):
         """

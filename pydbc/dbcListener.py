@@ -227,7 +227,7 @@ class dbcListener(ParseTreeListener):
             tp = "EV"
             key = ctx.c3.value
         else:
-            tp = "GENERAL"
+            tp = "NETWORK"
             key = None
         ctx.value = OrderedDict(type = tp, key = key, comment = comment)
 
@@ -254,7 +254,7 @@ class dbcListener(ParseTreeListener):
             tp = "INT"
             value = (ctx.i00.value, ctx.i01.value, )
         elif ctx.i10:
-            tp = "INT"
+            tp = "HEX"
             value = (ctx.i10.value, ctx.i11.value, )
         elif ctx.f0:
             tp = "FLOAT"
@@ -325,7 +325,7 @@ class dbcListener(ParseTreeListener):
         else:
             evValue = ctx.attrValue.value
             evName = None
-            di = OrderedDict(type = "GENERAL", value = evValue)
+            di = OrderedDict(type = "NETWORK", value = evValue)
         ctx.value = OrderedDict(name = attributeName, **di)
 
     def exitCategoryDefinitions(self, ctx):
