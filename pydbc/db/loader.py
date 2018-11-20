@@ -41,6 +41,7 @@ class Comments:
         self.bo = {}
         self.sg = {}
         self.ev = {}
+        self.nw = None
 
 ##
 ##    def __del__(self):
@@ -63,6 +64,9 @@ class Comments:
     def addEnvVar(self, key, value):
         self.ev[key] = value
 
+    def addNetwork(self, value):
+        self.nw = value
+
     def node(self, key):
         return self.bu.get(key)
 
@@ -74,6 +78,9 @@ class Comments:
 
     def envVar(self, key):
         return self.ev.get(key)
+
+    def network(self):
+        return self.nw
 
 
 class Loader(object):
@@ -90,6 +97,7 @@ class Loader(object):
         self.insertEnvironmentVariablesData(cur, tree['environmentVariablesData'])
         self.insertComments(cur, tree['comments'])
         self.insertValueTables(cur, tree['valueTables'])
+        self.insertNetwork(cur)
         self.insertNodes(cur, tree['nodes'])
         valueTypes = self.processExtendedSignalValueTypes(cur, tree['signalExtendedValueTypeList'])
         self.insertMessages(cur, tree['messages'], valueTypes)
@@ -111,6 +119,10 @@ class Loader(object):
             for item in grouper:
                 result[key][item['signalName']] = item['valueType']
         return result
+
+    def insertNetwork(self, cur):
+        comment = self.comments.network()
+        self.db.insertStatement(cur, "Network", "Name, Comment", self.db.name, comment)
 
     def insertValueTables(self, cur, tables):
         for table in tables:
@@ -191,6 +203,8 @@ class Loader(object):
                 self.comments.addSignal(key, text)
             elif tp == 'EV':
                 self.comments.addEnvVar(key,text)
+            else:
+                self.comments.addNetwork(text)
 
     def insertEnvironmentVariablesData(self, cur, data):
         for item in data:
@@ -220,7 +234,7 @@ class Loader(object):
             elif attrType == 'EV_':
                 objType = AttributeType.ENV_VAR
             elif attrType is None:
-                objType = AttributeType.GENERAL
+                objType = AttributeType.NETWORK
             if vt == 'INT':
                 valueType = ValueType.INT
                 minimum, maximum = values
@@ -251,7 +265,7 @@ class Loader(object):
 
     def getAttributeType(self, value):
         ATS = {
-            "GENERAL": AttributeType.GENERAL,
+            "NETWORK": AttributeType.NETWORK,
             "BU": AttributeType.NODE,
             "BO": AttributeType.MESSAGE,
             "SG": AttributeType.SIGNAL,
@@ -278,10 +292,10 @@ class Loader(object):
                 rid = self.queries.fetchNodeId(attr['nodeName'])
             elif attrType == AttributeType.ENV_VAR:
                 rid = self.queries.fetchEnvVarId(attr['envVarname'])
-            elif attrType == AttributeType.GENERAL:
+            elif attrType == AttributeType.NETWORK:
                 rid = 0
             else:
-                pass
+                rid = 0
             self.db.insertStatement(cur, "Attribute_Value", "Object_ID, Attribute_Definition, Num_Value, String_Value",
                 rid, aid, numValue, stringValue
             )
