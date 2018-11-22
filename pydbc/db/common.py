@@ -178,18 +178,24 @@ class Queries:
 
     def comments(self):
         cur = self.getCursor()
+        cur.execute("SELECT name, comment FROM network WHERE comment IS NOT NULL")
+        result = cur.fetchone()
+        if result:
+            name, comment = result
+            yield dict(type = "NW", k0 = name, k1 = None, comment = comment)
         cur.execute("SELECT name, comment FROM node WHERE comment IS NOT NULL AND name <> 'Vector__XXX'")
         result = cur.fetchall()
         for name, comment in result:
             yield dict(type = 'BU', k0 = name, k1 = None, comment = comment)
-        cur.execute("SELECT rid, message_id, comment FROM message WHERE comment IS NOT NULL")
+        cur.execute("SELECT rid, message_id, comment FROM message") #  WHERE comment IS NOT NULL
         while True:
             row = cur.fetchone()
             if row is None:
                 break
             else:
                 mRid, msgId, mComment = row
-                yield dict(type = 'BO', k0 = msgId, k1 = None, comment = mComment)
+                if mComment:
+                    yield dict(type = 'BO', k0 = msgId, k1 = None, comment = mComment)
                 cur2 = self.getCursor()
                 cur2.execute("""SELECT DISTINCT(name), comment FROM signal WHERE rid IN
                     (SELECT signal FROM message_signal WHERE message = ?) AND comment IS NOT NULL""", [mRid])
