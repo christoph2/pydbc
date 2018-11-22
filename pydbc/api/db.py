@@ -123,17 +123,17 @@ class Database:
         """
         return self.insertOrReplaceStatement(False, cur, tname, columns, *values)
 
-    def writeDbcFile(self, filename = None):
+    def writeDbcFile(self, network = None, filename = None):
         """
         """
         pass
 
-    def readDbcFile(self, filename = None):
+    def readDbcFile(self, network = None, filename = None):
         """
         """
         pass
 
-    def renderDbcFile(self):
+    def renderDbcFile(self, network):
         """
         """
         namespace = dict(db = self.queries)
