@@ -69,13 +69,15 @@ EV_ ${var['Name']}: ${var['Type']} [${"{:.14G}".format(var['Minimum'])}|${"{:.14
 ${"{:.14G}".format(var['Startup_Value'])} ${idx} DUMMY_NODE_VECTOR${var['Access']} ${db.spaceBeforeNodes(nodes)}\
 ${','.join(nodes)};
 
-%endfor\
+%endfor
 %for item in db.environmentVariablesData():
 ENVVAR_DATA_ ${item['name']}: ${item['value']};
 %endfor
 %for comment in db.comments():
 CM_ \
-%if comment['type'] == 'BO':
+%if comment['type'] == 'NW':
+"${comment['comment']}";
+%elif comment['type'] == 'BO':
 BO_ ${comment['k0']} "${comment['comment']}";
 %elif comment['type'] == 'SG':
 SG_ ${comment['k0']} ${comment['k1']} "${comment['comment']}";
@@ -94,7 +96,7 @@ BO_ \
 %elif attr['Objecttype'] == 2:
 SG_ \
 %elif attr['Objecttype'] == 3:
-EV \
+EV_ \
 %endif
  "${attr['Name']}" \
 %if attr['Valuetype'] == 0:
