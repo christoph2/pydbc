@@ -118,7 +118,7 @@ def importFile(name):
     #print("Rending template...", flush = True)
     res = renderTemplateFromText(template, namespace, formatExceptions = True)
     #print(res)
-    with io.open("{}.render".format(fnbase), "w", encoding = "latin-1", newline = "\n") as outf:
+    with io.open("{}.render".format(fnbase), "w", encoding = "latin-1", newline = "\r\n") as outf:
         outf.write(res)
     print(successText("OK, done.\n"), flush = True)
     resetColorStyle()
