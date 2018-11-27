@@ -1,4 +1,4 @@
-VERSION ""
+VERSION "${db.dbcVersion()}"
 
 
 NS_ : 
@@ -159,6 +159,11 @@ ${int(desc['Value'])} "${desc['Value_Description']}" \
 %endfor
 ;
 %endfor
-%for item in db.fetchExtendedSignalValueTypes():
+<% signalValueTypes = db.fetchExtendedSignalValueTypes() %>\
+%if signalValueTypes:
+%for item in signalValueTypes:
 SIG_VALTYPE_ ${item['Message_ID']} ${item['Name']} : ${item['Valuetype']};
 %endfor
+
+
+%endif

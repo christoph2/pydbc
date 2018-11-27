@@ -94,6 +94,7 @@ class Loader(object):
     def insertValues(self, tree):
         cur = self.db.getCursor()
         self.db.beginTransaction()
+        self.insertVersion(cur, tree['version'])
         self.insertEnvironmentVariablesData(cur, tree['environmentVariablesData'])
         self.insertComments(cur, tree['comments'])
         self.insertValueTables(cur, tree['valueTables'])
@@ -119,6 +120,10 @@ class Loader(object):
             for item in grouper:
                 result[key][item['signalName']] = item['valueType']
         return result
+
+    def insertVersion(self, cur, version):
+        network = 0 ## TODO: Real value!!!
+        self.db.insertStatement(cur, "Dbc_Version", "Version_String, Network", version, network)
 
     def insertNetwork(self, cur):
         comment = self.comments.network()
@@ -203,7 +208,7 @@ class Loader(object):
                 self.comments.addSignal(key, text)
             elif tp == 'EV':
                 self.comments.addEnvVar(key,text)
-            else:
+            else:   # NW !?
                 self.comments.addNetwork(text)
 
     def insertEnvironmentVariablesData(self, cur, data):

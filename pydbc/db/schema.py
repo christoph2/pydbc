@@ -75,6 +75,9 @@ TABLES = (
     "comments",
     "EnvironmentVariablesData",
     "Node",
+    "Category_Definition",
+    "Category_Value",
+    "Dbc_Version",
 )
 
 VIEWS = (
@@ -358,6 +361,31 @@ SCHEMA = ('''
         Version_Number INTEGER NOT NULL DEFAULT 0,
         Is_Modified BOOLEAN NOT NULL,
         PRIMARY KEY(Obj_Type,Obj_RID)
+    );
+''', '''
+    CREATE TABLE IF NOT EXISTS Category_Definition (
+        RID INTEGER NOT NULL DEFAULT 0,
+        Name VARCHAR(255) NOT NULL,
+        Key INTEGER NOT NULL DEFAULT 0,
+        Level INTEGER NOT NULL DEFAULT 0,
+        UNIQUE(Key),
+        PRIMARY KEY(RID)
+    );
+''', '''
+    CREATE TABLE IF NOT EXISTS Category_Value (
+        Object_ID INTEGER NOT NULL DEFAULT 0,
+        Category_Definition INTEGER NOT NULL DEFAULT 0,
+        Objecttype INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY(Object_ID, Objecttype),
+        FOREIGN KEY(Category_Definition) REFERENCES Category_Definition(RID) ON UPDATE CASCADE ON DELETE RESTRICT
+    );
+''', '''
+    CREATE TABLE IF NOT EXISTS Dbc_Version (
+        RID INTEGER NOT NULL DEFAULT 0,
+        Version_String VARCHAR(255) DEFAULT '',
+        Network INTEGER NOT NULL DEFAULT 0,
+        UNIQUE(Network),
+        PRIMARY KEY(RID)
     );
 ''', '''
     CREATE VIEW IF NOT EXISTS schema AS SELECT * FROM sqlite_master;

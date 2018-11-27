@@ -148,6 +148,11 @@ class Queries:
         res = cur.execute("""SELECT Name FROM Node WHERE RID = ?""", [nid]).fetchall()
         return res[0][0]
 
+    def dbcVersion(self, networkId = 0):
+        cur = self.getCursor()
+        res = cur.execute("""SELECT Version_String FROM Dbc_Version WHERE Network = ?""", [networkId]).fetchone()
+        return res[0]
+
     def signals(self, messageId):
         cur = self.getCursor()
         res = cur.execute("""SELECT * FROM message_signal AS t1, signal AS t2 WHERE t1.message = ? AND t1.signal = t2.RID""", [messageId])
