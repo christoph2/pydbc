@@ -75,8 +75,8 @@ TABLES = (
     "comments",
     "EnvironmentVariablesData",
     "Node",
-    "Category_Definition",
     "Category_Value",
+    "Category_Definition",
     "Dbc_Version",
 )
 
@@ -377,7 +377,7 @@ SCHEMA = ('''
         Category_Definition INTEGER NOT NULL DEFAULT 0,
         Objecttype INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(Object_ID, Objecttype),
-        FOREIGN KEY(Category_Definition) REFERENCES Category_Definition(RID) ON UPDATE CASCADE ON DELETE RESTRICT
+        FOREIGN KEY(Category_Definition) REFERENCES Category_Definition(Key) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS Dbc_Version (

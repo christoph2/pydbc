@@ -289,3 +289,11 @@ class Queries:
         else:
             return []
 
+    def categoryDefinitions(self):
+        cur = self.getCursor()
+        yield from self.db.fetchFromTable(cur, "Category_Definition")
+
+    def categoryValues(self):
+        cur = self.getCursor()
+        yield from self.db.fetchFromTable(cur, "Category_Value")
+

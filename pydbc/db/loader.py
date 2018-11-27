@@ -108,6 +108,8 @@ class Loader(object):
         defaults = tree['attributeDefaults']
         self.insertAttributeDefinitions(cur, tree['attributeDefinitions'], defaults)
         self.insertAttributes(cur, tree['attributeValues'])
+        self.insertCategoryDefinitions(cur, tree['categoryDefinitions'])
+        self.insertCategoryValues(cur, tree['categories'])
         self.db.commitTransaction()
 
     def processExtendedSignalValueTypes(self, cur, valueTypes):
@@ -217,6 +219,30 @@ class Loader(object):
             value = item['value']
             #print(name, value)
             self.db.insertStatement(cur, "EnvironmentVariablesData", "name, value", name, value)
+
+    def insertCategoryDefinitions(self, cur, catagories):
+        for category in catagories:
+            self.db.insertStatement(cur, "Category_Definition", "name, key, level",
+                category['name'], category['category'], category['value']
+            )
+
+    def insertCategoryValues(self, cur, catagories):
+        for category in catagories:
+            attrType = category['type']
+            catId = category['category']
+            if attrType == 'BU':
+                nodeName = category['nodeName']
+                objType = AttributeType.NODE
+                rid = self.queries.fetchNodeId(nodeName)
+            elif attrType == 'BO':
+                objType = AttributeType.MESSAGE
+                messageID = category['messageID']
+                rid = self.queries.fetchMessageIdById(messageID)
+            elif attrType == 'EV':
+                envVarname = category['envVarname']
+                objType = AttributeType.ENV_VAR
+                rid = self.queries.fetchEnvVarId(envVarname)
+            self.db.insertStatement(cur, "Category_Value", "Object_ID,Category_Definition,Objecttype", rid, catId, objType)
 
     def insertAttributeDefinitions(self, cur, attrs, defaults):
         for attr in attrs:

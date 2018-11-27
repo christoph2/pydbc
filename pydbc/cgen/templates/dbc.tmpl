@@ -164,6 +164,18 @@ ${int(desc['Value'])} "${desc['Value_Description']}" \
 %for item in signalValueTypes:
 SIG_VALTYPE_ ${item['Message_ID']} ${item['Name']} : ${item['Valuetype']};
 %endfor
-
-
 %endif
+%for cat in db.categoryDefinitions():
+CAT_DEF_ ${cat['Key']} ${cat['Name']} ${cat['Level']};
+%endfor
+%for cat in db.categoryValues():
+CAT_ \
+%if cat['Objecttype'] == 0:
+BU_ ${db.fetchNodenameByRid(cat['Object_ID'])} \
+%elif cat['Objecttype'] == 1:
+BO_ ${db.fetchMessageIdByRid(cat['Object_ID'])} \
+%elif cat['Objecttype'] == 3:
+EV_ ${db.fetchEnvvarNameByRid(cat['Object_ID'])} \
+%endif
+${cat['Category_Definition']};
+%endfor
