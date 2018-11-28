@@ -32,6 +32,7 @@ import itertools
 import logging
 import mmap
 import os
+import pkgutil
 from pprint import pprint
 import re
 import sqlite3
@@ -138,7 +139,7 @@ class CanDatabase(object):
         cur.execute("""SELECT {} FROM {} WHERE {}""".format(column, tname, where))
         result = cur.fetchone()
         if result is None:
-            return []
+            return None
         return result[0]
 
     def updateStatement(self, cur, tname, columns, where, *values):

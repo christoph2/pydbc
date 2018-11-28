@@ -41,11 +41,7 @@ class Queries:
 
     def fetchEnvironmentVariablesData(self, name):
         cur = self.getCursor()
-        cur.execute("SELECT value FROM EnvironmentVariablesData WHERE name = ?", [name])
-        value = cur.fetchall()
-        if value:
-            return value[0][0]
-        return None
+        return self.db.fetchSingleValue(cur, "EnvironmentVariablesData", "value", "name = '{}'".format(name))
 
     def environmentVariablesData(self):
         cur = self.getCursor()
@@ -53,51 +49,35 @@ class Queries:
 
     def fetchNodeId(self, name):
         cur = self.getCursor()
-        cur.execute("""SELECT RID FROM Node WHERE Name = ?""", [name])
-        result = cur.fetchone()[0]
-        return result
+        return self.db.fetchSingleValue(cur, "Node", "RID", "Name = '{}'".format(name))
 
     def fetchNodenameByRid(self, rid):
         cur = self.getCursor()
-        cur.execute("""SELECT Name FROM Node WHERE RID = ?""", [rid])
-        result = cur.fetchone()[0]
-        return result
+        return self.db.fetchSingleValue(cur, "Node", "Name", "RID = {}".format(rid))
 
     def fetchEnvvarNameByRid(self, rid):
         cur = self.getCursor()
-        cur.execute("""SELECT Name FROM EnvVar WHERE RID = ?""", [rid])
-        result = cur.fetchone()[0]
-        return result
+        return self.db.fetchSingleValue(cur, "EnvVar", "Name", "RID = {}".format(rid))
 
     def fetchMessageIdByRid(self, rid):
         cur = self.getCursor()
-        cur.execute("""SELECT Message_ID FROM Message WHERE RID = ?""", [rid])
-        result = cur.fetchone()[0]
-        return result
+        return self.db.fetchSingleValue(cur, "Message", "Message_ID", "RID = {}".format(rid))
 
     def fetchMessageIdById(self, messageId):
         cur = self.getCursor()
-        cur.execute("""SELECT RID FROM Message WHERE Message_ID = ?""", [messageId])
-        result = cur.fetchone()[0]
-        return result
+        return self.db.fetchSingleValue(cur, "Message", "RID", "Message_ID = {}".format(messageId))
 
     def fetchEnvVarId(self, name):
         cur = self.getCursor()
-        cur.execute("""SELECT RID FROM EnvVar WHERE Name = ?""", [name])
-        result = cur.fetchone()[0]
-        return result
+        return self.db.fetchSingleValue(cur, "EnvVar", "RID", "Name = '{}'".format(name))
 
     def fetchAttributeId(self, name):
         cur = self.getCursor()
-        cur.execute("""SELECT RID FROM Attribute_Definition WHERE Name = ?""", [name])
-        result = cur.fetchone()[0]
-        return result
+        return self.db.fetchSingleValue(cur, "Attribute_Definition", "RID", "Name = '{}'".format(name))
 
     def fetchMessageIdByName(self, name):
         cur = self.getCursor()
-        cur.execute("""SELECT RID FROM Message WHERE Name = ?""", [name])
-        result = cur.fetchone()[0]
-        return result
+        return self.db.fetchSingleValue(cur, "Message", "RID", "Name = '{}'".format(name))
 
     def fetchSignalByRid(self, rid):
         cur = self.getCursor()

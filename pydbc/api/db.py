@@ -28,10 +28,10 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 import enum
-import pkgutil
 import sys
 import sqlite3
 import os
+import pkgutil
 
 from pydbc.types import AttributeType, CANAddress, EnvVarType, EnvVarAccessType, ValueType
 from pydbc.db.creator import Creator
@@ -52,12 +52,11 @@ DBC_EXTENSION = "dbc"
 
 
 class Database:
-
+    """
+    """
 
     DBC_TEMPLATE = pkgutil.get_data("pydbc", "cgen/templates/dbc.tmpl")
 
-    """
-    """
     def __init__(self, dbname, dbtype = "CAN", template = None, inMemory = False, logLevel = 'INFO'):
         """
         """
@@ -123,25 +122,6 @@ class Database:
         """
         return self.insertOrReplaceStatement(False, cur, tname, columns, *values)
 
-    def writeDbcFile(self, network = None, filename = None):
-        """
-        """
-        pass
-
-    def readDbcFile(self, network = None, filename = None):
-        """
-        """
-        pass
-
-    def renderDbcFile(self, network):
-        """
-        """
-        namespace = dict(db = self.queries)
-        res = renderTemplateFromText(self.DBC_TEMPLATE, namespace, formatExceptions = True)
-        return res
-        #with io.open("{}.render".format(fnbase), "w", encoding = "latin-1", newline = "\n") as outf:
-        #    outf.write(res)
-
 
     def addCANCluster(self, name, comment):
         """
@@ -151,6 +131,29 @@ class Database:
     def addLINCluster(self, name, comment):
         """
         """
+
+    def writeDbcFile(self, network = None, filename = None):
+        """
+        """
+        pass
+
+    def outputDbc(self, network, filename = None):
+        """
+        """
+        dbcData = self.renderDbc(network)
+        if filename:
+            with open(os.fsencode(filename), "w", encoding = "latin-1", newline = "\r\n") as outf:
+                outf.write(dbcData)
+        else:
+            print(dbcData)
+
+    def renderDbc(self, network):
+        """
+        """
+        namespace = dict(db = self.queries)
+        res = renderTemplateFromText(self.DBC_TEMPLATE, namespace, formatExceptions = True)
+        return res
+
 
     ##
     ## Attribute stuff.
