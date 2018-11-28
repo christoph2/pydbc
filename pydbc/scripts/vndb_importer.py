@@ -72,6 +72,7 @@ def execute(fun, name, *args):
         if not isinstance(e, sqlite3.DatabaseError):
             msg += ": {}".format(str(e))
         print("{}\n".format(msg), flush = True)
+        print(str(e))
         resetColorStyle()
         #sys.exit(1)
         return False
@@ -116,17 +117,18 @@ def importFile(name):
 
     namespace = dict(db = Queries(db))
     #print("Rending template...", flush = True)
+
+#    db.outputDbc(0, "{}.render".format(fnbase))
     res = renderTemplateFromText(template, namespace, formatExceptions = True)
-    #print(res)
     with io.open("{}.render".format(fnbase), "w", encoding = "latin-1", newline = "\r\n") as outf:
         outf.write(res)
+
     print(successText("OK, done.\n"), flush = True)
     resetColorStyle()
     #print("-" * 80, flush = True)
 
 
 def main():
-    colorama.init(convert = False, strip = False)
     footer = "CAVEAT: In this version vndb_importer is DESTRUCTIVE, i.e. no merging happens!"
     parser = argparse.ArgumentParser(description = 'Import .dbc file into Vehicle Network Database.', epilog = footer)
     parser.add_argument("dbcfile", help = ".dbc file(s) to import", nargs = "+")
@@ -134,11 +136,12 @@ def main():
         help = "keep directory; otherwise create db in current directory"
     )
     parser.add_argument("-l", help = "loglevel [warn | info | error | debug]", dest = "loglevel", type = str, default = "warn")
+    parser.add_argument("-w", help = "Format output for Windows console.", dest = "winout", action = "store_true")
     args = parser.parse_args()
+    colorama.init(convert = args.winout, strip = False)
     for name in args.dbcfile:
         importFile(name)
 
 if __name__ == '__main__':
     main()
-
 
