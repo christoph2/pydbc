@@ -174,7 +174,7 @@ CAT_ \
 BU_ ${db.fetchNodenameByRid(cat['Object_ID'])} \
 %elif cat['Objecttype'] == 1:
 BO_ ${db.fetchMessageIdByRid(cat['Object_ID'])} \
-%elif cat['Objecttype'] == 3:
+%elif cat['Objecttype'] == 2:
 EV_ ${db.fetchEnvvarNameByRid(cat['Object_ID'])} \
 %endif
 ${cat['Category_Definition']};

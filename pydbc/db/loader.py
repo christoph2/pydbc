@@ -30,7 +30,7 @@ __version__ = '0.1.0'
 import itertools
 
 from pydbc.logger import Logger
-from pydbc.types import AttributeType, ValueType
+from pydbc.types import AttributeType, ValueType, CategoryType
 
 
 class Comments:
@@ -232,15 +232,15 @@ class Loader(object):
             catId = category['category']
             if attrType == 'BU':
                 nodeName = category['nodeName']
-                objType = AttributeType.NODE
+                objType = CategoryType.NODE
                 rid = self.queries.fetchNodeId(nodeName)
             elif attrType == 'BO':
-                objType = AttributeType.MESSAGE
+                objType = CategoryType.MESSAGE
                 messageID = category['messageID']
                 rid = self.queries.fetchMessageIdById(messageID)
             elif attrType == 'EV':
                 envVarname = category['envVarname']
-                objType = AttributeType.ENV_VAR
+                objType = CategoryType.ENV_VAR
                 rid = self.queries.fetchEnvVarId(envVarname)
             self.db.insertStatement(cur, "Category_Value", "Object_ID,Category_Definition,Objecttype", rid, catId, objType)
 

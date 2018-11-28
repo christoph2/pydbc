@@ -94,6 +94,12 @@ class ValueTableType(enum.IntEnum):
     ENV_VAR = 1
 
 
+class CategoryType(enum.IntEnum):
+    NODE = 0
+    MESSAGE = 1
+    ENV_VAR = 2
+
+
 EXTENDED_ID_MASK = 0x80000000
 
 
