@@ -82,10 +82,10 @@ class ParserWrapper(object):
         walker.walk(listener, tree)
         return listener.value
 
-    def parseFromFile(self, fileName, trace = False):
-        return self.parse(ParserWrapper.stringStream(fileName), trace)
+    def parseFromFile(self, fileName, encoding = 'latin-1', trace = False):
+        return self.parse(ParserWrapper.stringStream(fileName, encoding), trace)
 
-    def parseFromString(self, buffer, trace = False):
+    def parseFromString(self, buffer, encoding = 'latin-1', trace = False):
         return self.parse(antlr4.InputStream(buffer), trace)
 
     @staticmethod
