@@ -18,7 +18,7 @@ pyDBC is hosted on Github, get the latest release: [https://github.com/christoph
 
 ### Requirements
 
-- Python >= 3.5
+- Python >= 3.4
 
 ## First steps
 
