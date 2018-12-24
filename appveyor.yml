@@ -19,11 +19,12 @@ install:
   - "%PYTHON%\\python.exe -m pip install wheel"
   - "%PYTHON%\\python.exe -m pip install -r requirements_testings.txt"
   - "%PYTHON%\\python.exe -m pip install pytest-cov coverage coveralls codacy-coverage"
-  - curl -O http://www.antlr.org/download/antlr-4.7.1-complete.jar
-  - set
-  - set CLASSPATH = "./antlr-4.7.1-complete.jar" # + %CLASSPATH%
+  - curl -O https://www.antlr.org/download/antlr-4.7.2-complete.jar
+    #- set
+  - set CLASSPATH = ".\\antlr-4.7.1-complete.jar" # + %CLASSPATH%
   - dir
-    #- alias antlr4='java -jar /usr/local/lib/antlr-4.7-complete.jar'
+    #- alias antlr4='java -jar /usr/local/lib/antlr-4.7.2-complete.jar'
+  - java -jar antlr-4.7.2-complete.jar
 
 build: off
 
@@ -47,6 +48,7 @@ after_test:
   # 64-bit Python 3.3/3.4. And you need to use %PYTHON% to get the correct
   # interpreter
   -  "%PYTHON%\\python.exe setup.py bdist_wheel"
+  -  "%PYTHON%\\python.exe setup.py sdist --formats=zip"
 
 artifacts:
   # bdist_wheel puts your built wheel in the dist directory
