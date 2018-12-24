@@ -8,7 +8,9 @@ environment:
     # isn't covered by this document) at the time of writing.
 
     - PYTHON: "C:\\Python35"
+    - PYTHON: "C:\\Python34"
     - PYTHON: "C:\\Python36"
+    - PYTHON: "C:\\Python34-x64"
     - PYTHON: "C:\\Python35-x64"
     - PYTHON: "C:\\Python36-x64"
 
@@ -17,6 +19,11 @@ install:
   - "%PYTHON%\\python.exe -m pip install wheel"
   - "%PYTHON%\\python.exe -m pip install -r requirements_testings.txt"
   - "%PYTHON%\\python.exe -m pip install pytest-cov coverage coveralls codacy-coverage"
+  - curl -O http://www.antlr.org/download/antlr-4.7.1-complete.jar
+  - set
+  - set CLASSPATH = "./antlr-4.7.1-complete.jar" # + %CLASSPATH%
+  - dir
+    #- alias antlr4='java -jar /usr/local/lib/antlr-4.7-complete.jar'
 
 build: off
 
