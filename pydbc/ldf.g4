@@ -137,7 +137,7 @@ jitter:
 
 node_attributes_def:
     'Node_attributes' '{'
-    nodes += (name = node_name '{'
+      (name = node_name '{'
         'LIN_protocol' '=' version = protocol_version ';'
         'configured_NAD' '=' n0 = diag_address ';'
         ('initial_NAD' '=' n1 = diag_address ';')?
@@ -183,7 +183,7 @@ signal_name:
 
 configurable_frames_20_def:
     'configurable_frames' '{'
-        frames += (fname = frame_name '=' mid = message_id ';')*
+        (fname = frame_name '=' mid = message_id ';')*
     '}'
     ;
 
@@ -200,7 +200,7 @@ configurable_frames_21_def:
 node_composition_def:
     'composite' '{'
         ('configuration' cname = configuration_name '{'
-            nodes += (cnode = composite_node '{' lnodes += logical_node (',' lnodes += logical_node)* ';')*
+            (cnode = composite_node '{' lnodes += logical_node (',' lnodes += logical_node)* ';')*
         '}')*
     '}'
     ;
@@ -219,7 +219,7 @@ logical_node:
 
 signal_def:
     'Signals' '{'
-        signals += (sname = signal_name ':' ssize = signal_size ',' initValue = init_value ',' pub = published_by (',' sub += subscribed_by)* ';')*
+        (sname = signal_name ':' ssize = signal_size ',' initValue = init_value ',' pub = published_by (',' sub += subscribed_by)* ';')*
     '}'
     ;
 
@@ -251,7 +251,7 @@ subscribed_by:
 
 diagnostic_signal_def:
     'Diagnostic_signals' '{'
-        signals += (i10 = identifierValue ':' i11 = intValue ',' i12 = intValue ';')*
+        (i10 = identifierValue ':' i11 = intValue ',' i12 = intValue ';')*
 /*
         MasterReqB0: 8, 0 ;
         MasterReqB1: 8, 0 ;
@@ -276,7 +276,7 @@ diagnostic_signal_def:
 signal_groups_def:
     'Signal_groups' '{'
         (sgname = signal_group_name ':' gsize = group_size '{'
-            signals += (sname = signal_name ',' goffs = group_offset ';')*
+            (sname = signal_name ',' goffs = group_offset ';')*
         '}')*
     '}'
     ;
@@ -296,7 +296,7 @@ group_offset:
 frame_def:
     'Frames' '{'
         (fname = frame_name ':' fid = frame_id ',' p = published_by ',' fsize = frame_size '{'
-          signals += (sname = signal_name ',' soffs = signal_offset ';')*
+          (sname = signal_name ',' soffs = signal_offset ';')*
         '}')*
     '}'
     ;
@@ -329,7 +329,7 @@ sporadic_frame_name:
 
 event_triggered_frame_def:
     'Event_triggered_frames' '{'
-        (e = event_trig_frm_name ':' c = collision_resolving_schedule_table ',' fid = frame_id names += (',' frame_name ';')* )*
+        (e = event_trig_frm_name ':' c = collision_resolving_schedule_table ',' fid = frame_id (',' frame_name ';')* )*
     '}'
     ;
 
@@ -344,7 +344,7 @@ collision_resolving_schedule_table:
 diag_frame_def:
     'Diagnostic_frames' '{'
         'MasterReq' ':' m = intValue '{'
-            ms += (i10 = identifierValue ',' i11 = intValue ';')*
+            (i10 = identifierValue ',' i11 = intValue ';')*
 /*
           MasterReqB0, 0;
           MasterReqB1, 8;
@@ -357,7 +357,7 @@ diag_frame_def:
 */
         '}'
         'SlaveResp' ':' s = intValue '{'
-            ss += (i20 = identifierValue ',' i21 = intValue ';')*
+            (i20 = identifierValue ',' i21 = intValue ';')*
 /*
           SlaveRespB0, 0;
           SlaveRespB1, 8;
@@ -374,7 +374,7 @@ diag_frame_def:
 
 schedule_table_def:
     'Schedule_tables' '{'
-        items += (s = schedule_table_name  '{' (c = command 'delay' f = frame_time 'ms' ';')*  '}')*
+        (s = schedule_table_name  '{' (c = command 'delay' f = frame_time 'ms' ';')*  '}')*
     '}'
     ;
 
