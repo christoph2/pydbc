@@ -189,7 +189,7 @@ frame_properties:
 
 signal_definition:
     'signals' '{'
-        (items += (n = signal_name '{' p = signal_properties '}'))*
+        (n = signal_name '{' p = signal_properties '}')*
     '}'
     ;
 
@@ -221,7 +221,7 @@ init_value_array:
 
 encoding_definition:
     'encoding' '{'
-        items += (encoding_name '{' values += (l = logical_value | p = physical_range | b = bcd_value | a = ascii_value)* '}')*
+        (encoding_name '{' (l = logical_value | p = physical_range | b = bcd_value | a = ascii_value)* '}')*
     '}'
     ;
 
