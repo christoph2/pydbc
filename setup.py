@@ -6,7 +6,7 @@ import sys
 from setuptools import find_packages
 from glob import glob
 
-ANTLR_VERSION = '4.7.1'
+ANTLR_VERSION = '4.7.2'
 
 
 if os.environ.get("TRAVIS") or os.environ.get("APPVEYOR"):
@@ -26,7 +26,7 @@ setup(
     author = 'Christoph Schueler',
     author_email = 'cpu12.gems@googlemail.com',
     url = 'https://www.github.com/Christoph2/pydbc',
-    packages = ['pydbc'],
+    packages = find_packages(),
     install_requires = INSTALL_REQUIRES,
     entry_points = {
         'console_scripts': [
