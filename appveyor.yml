@@ -25,7 +25,10 @@ install:
   - set CLASSPATH = "%APPVEYOR_BUILD_FOLDER%\\antlr-4.7.2-complete.jar"
   - dir
     #- alias antlr4='java -jar /usr/local/lib/antlr-4.7.2-complete.jar'
-  - java -jar antlr-4.7.2-complete.jar
+    #- java -jar antlr-4.7.2-complete.jar
+  - cd pydbc
+  - call buildGrammars.cmd
+  - cd ..
 
 build: off
 
