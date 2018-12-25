@@ -23,12 +23,9 @@ install:
   - "%PYTHON%\\python.exe -m pip install -r requirements_testings.txt"
   - "%PYTHON%\\python.exe -m pip install pytest-cov coverage coveralls codacy-coverage"
   - cmd: curl -O https://www.antlr.org/download/antlr-4.7.2-complete.jar
-    #- set
   - cmd: set CLASSPATH = "%APPVEYOR_BUILD_FOLDER%\antlr-4.7.2-complete.jar"
   - cmd: set CLASSPATH
   - cmd: dir
-    #- alias antlr4='java -jar /usr/local/lib/antlr-4.7.2-complete.jar'
-    #- java -jar antlr-4.7.2-complete.jar
   - cmd: cd pydbc
   - cmd: java -jar ..\antlr-4.7.2-complete.jar -Dlanguage=Python3 -long-messages -visitor dbc.g4 -o ./py3/
   - cmd: java -jar ..\antlr-4.7.2-complete.jar -Dlanguage=Python3 -long-messages -visitor ncf.g4 -o ./py3/
@@ -36,8 +33,9 @@ install:
   - cmd: cd ..
 
 
-build:
-  verbosity: normal
+build: off
+    #  mode: Script
+    # verbosity: normal
 
 test_script:
   # Put your test command here.
