@@ -1,3 +1,5 @@
+version: 1.0.{build}
+
 environment:
 
   matrix:
@@ -20,19 +22,21 @@ install:
   - "%PYTHON%\\python.exe -m pip install wheel"
   - "%PYTHON%\\python.exe -m pip install -r requirements_testings.txt"
   - "%PYTHON%\\python.exe -m pip install pytest-cov coverage coveralls codacy-coverage"
-  - curl -O https://www.antlr.org/download/antlr-4.7.2-complete.jar
+  - cmd: curl -O https://www.antlr.org/download/antlr-4.7.2-complete.jar
     #- set
-  - set CLASSPATH = "%APPVEYOR_BUILD_FOLDER%\\antlr-4.7.2-complete.jar"
-  - set CLASSPATH
-  - dir
+  - cmd: set CLASSPATH = "%APPVEYOR_BUILD_FOLDER%\antlr-4.7.2-complete.jar"
+  - cmd: set CLASSPATH
+  - cmd: dir
     #- alias antlr4='java -jar /usr/local/lib/antlr-4.7.2-complete.jar'
     #- java -jar antlr-4.7.2-complete.jar
-  - cd pydbc
-  - java -jar ..\antlr-4.7.2-complete.jar -Dlanguage=Python3 -long-messages -visitor dbc.g4 -o ./py3/
-  # - call buildGrammars.cmd
-  - cd ..
+  - cmd: cd pydbc
+    #  - cmd: java -jar ..\antlr-4.7.2-complete.jar -Dlanguage=Python3 -long-messages -visitor dbc.g4 -o ./py3/
+  - cmd: call buildGrammars.cmd
+  - cmd: cd ..
 
-build: off
+
+build:
+  verbosity: normal
 
 test_script:
   # Put your test command here.
@@ -64,4 +68,13 @@ artifacts:
 #  You can use this step to upload your artifacts to a public website.
 #  See Appveyor's documentation for more details. Or you can simply
 #  access your wheels from the Appveyor "artifacts" tab for your build.
+
+deploy:
+- provider: GitHub
+  artifact: '*.*'
+  description: Test release -- do not use
+  auth_token:
+    secure: Wiweaot1JAHzV9mMZ3Zhn/5XUuLe5XYAyfpRZmWNpLW7fMW1FhAdoRliiAhz3Sv6
+  draft: false
+  prerelease: true
 
