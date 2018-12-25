@@ -23,11 +23,13 @@ install:
   - curl -O https://www.antlr.org/download/antlr-4.7.2-complete.jar
     #- set
   - set CLASSPATH = "%APPVEYOR_BUILD_FOLDER%\\antlr-4.7.2-complete.jar"
+  - set CLASSPATH
   - dir
     #- alias antlr4='java -jar /usr/local/lib/antlr-4.7.2-complete.jar'
     #- java -jar antlr-4.7.2-complete.jar
   - cd pydbc
-  - call buildGrammars.cmd
+  - java -jar ..\antlr-4.7.2-complete.jar -Dlanguage=Python3 -long-messages -visitor dbc.g4 -o ./py3/
+  # - call buildGrammars.cmd
   - cd ..
 
 build: off
