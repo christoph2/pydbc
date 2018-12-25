@@ -21,7 +21,7 @@ install:
   - "%PYTHON%\\python.exe -m pip install pytest-cov coverage coveralls codacy-coverage"
   - curl -O https://www.antlr.org/download/antlr-4.7.2-complete.jar
     #- set
-  - set CLASSPATH = "%APPVEYOR_BUILD_FOLDER%\\antlr-4.7.2-complete.jar" # + %CLASSPATH%
+  - set CLASSPATH = "%APPVEYOR_BUILD_FOLDER%\\antlr-4.7.2-complete.jar"
   - dir
     #- alias antlr4='java -jar /usr/local/lib/antlr-4.7.2-complete.jar'
   - java -jar antlr-4.7.2-complete.jar
