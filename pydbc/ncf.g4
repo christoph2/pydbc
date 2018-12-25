@@ -189,7 +189,7 @@ frame_properties:
 
 signal_definition:
     'signals' '{'
-        items += (n = signal_name '{' p = signal_properties '}')*
+        (items += (n = signal_name '{' p = signal_properties '}'))*
     '}'
     ;
 
