@@ -101,7 +101,7 @@ node_definition:
         f = frame_definition
         e = encoding_definition
         s = status_management
-        f = free_text_definition?
+        t = free_text_definition?
     '}'
     ;
 
