@@ -30,8 +30,9 @@ install:
     #- alias antlr4='java -jar /usr/local/lib/antlr-4.7.2-complete.jar'
     #- java -jar antlr-4.7.2-complete.jar
   - cmd: cd pydbc
-    #  - cmd: java -jar ..\antlr-4.7.2-complete.jar -Dlanguage=Python3 -long-messages -visitor dbc.g4 -o ./py3/
-  - cmd: call buildGrammars.cmd
+  - cmd: java -jar ..\antlr-4.7.2-complete.jar -Dlanguage=Python3 -long-messages -visitor dbc.g4 -o ./py3/
+  - cmd: java -jar ..\antlr-4.7.2-complete.jar -Dlanguage=Python3 -long-messages -visitor ncf.g4 -o ./py3/
+  - cmd: java -jar ..\antlr-4.7.2-complete.jar -Dlanguage=Python3 -long-messages -visitor ldf.g4 -o ./py3/
   - cmd: cd ..
 
 
