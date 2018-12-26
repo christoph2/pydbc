@@ -35,8 +35,6 @@ import sys
 import six
 import antlr4
 import antlr4.tree
-from pydbc.dbcListener import dbcListener
-
 
 def indent(level):
     print(" " * level,)
@@ -54,13 +52,14 @@ def dump(tree, level = 0):
     indent(level)
     print(")")
 
-
 class ParserWrapper(object):
-    def __init__(self, grammarName, startSymbol):
+
+    def __init__(self, grammarName, startSymbol, listener):
         self.grammarName = grammarName
         self.startSymbol = startSymbol
         self.lexerModule, self.lexerClass = self._load('Lexer')
         self.parserModule, self.parserClass = self._load('Parser')
+        self.listener = listener
 
     def _load(self, name):
         className = '{0}{1}'.format(self.grammarName, name)
@@ -77,7 +76,7 @@ class ParserWrapper(object):
         meth = getattr(parser, self.startSymbol)
         self._syntaxErrors = parser._syntaxErrors
         tree = meth()
-        listener = dbcListener()
+        listener = self.listener()
         walker = antlr4.ParseTreeWalker()
         walker.walk(listener, tree)
         return listener.value
