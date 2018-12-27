@@ -99,8 +99,13 @@ class ldfVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by ldfParser#configurable_frames_20_def.
-    def visitConfigurable_frames_20_def(self, ctx:ldfParser.Configurable_frames_20_defContext):
+    # Visit a parse tree produced by ldfParser#configurable_frames.
+    def visitConfigurable_frames(self, ctx:ldfParser.Configurable_framesContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#configurable_frame.
+    def visitConfigurable_frame(self, ctx:ldfParser.Configurable_frameContext):
         return self.visitChildren(ctx)
 
 
@@ -109,13 +114,18 @@ class ldfVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by ldfParser#configurable_frames_21_def.
-    def visitConfigurable_frames_21_def(self, ctx:ldfParser.Configurable_frames_21_defContext):
+    # Visit a parse tree produced by ldfParser#node_composition_def.
+    def visitNode_composition_def(self, ctx:ldfParser.Node_composition_defContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by ldfParser#node_composition_def.
-    def visitNode_composition_def(self, ctx:ldfParser.Node_composition_defContext):
+    # Visit a parse tree produced by ldfParser#configuration.
+    def visitConfiguration(self, ctx:ldfParser.ConfigurationContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#configuration_item.
+    def visitConfiguration_item(self, ctx:ldfParser.Configuration_itemContext):
         return self.visitChildren(ctx)
 
 
@@ -136,6 +146,11 @@ class ldfVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ldfParser#signal_def.
     def visitSignal_def(self, ctx:ldfParser.Signal_defContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#signal_item.
+    def visitSignal_item(self, ctx:ldfParser.Signal_itemContext):
         return self.visitChildren(ctx)
 
 
@@ -174,8 +189,23 @@ class ldfVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ldfParser#diagnostic_item.
+    def visitDiagnostic_item(self, ctx:ldfParser.Diagnostic_itemContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ldfParser#signal_groups_def.
     def visitSignal_groups_def(self, ctx:ldfParser.Signal_groups_defContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#signal_group.
+    def visitSignal_group(self, ctx:ldfParser.Signal_groupContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#signal_group_item.
+    def visitSignal_group_item(self, ctx:ldfParser.Signal_group_itemContext):
         return self.visitChildren(ctx)
 
 
@@ -196,6 +226,16 @@ class ldfVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ldfParser#frame_def.
     def visitFrame_def(self, ctx:ldfParser.Frame_defContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#frame_item.
+    def visitFrame_item(self, ctx:ldfParser.Frame_itemContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#frame_signal.
+    def visitFrame_signal(self, ctx:ldfParser.Frame_signalContext):
         return self.visitChildren(ctx)
 
 
@@ -224,6 +264,11 @@ class ldfVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ldfParser#sporadic_frame_item.
+    def visitSporadic_frame_item(self, ctx:ldfParser.Sporadic_frame_itemContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ldfParser#sporadic_frame_name.
     def visitSporadic_frame_name(self, ctx:ldfParser.Sporadic_frame_nameContext):
         return self.visitChildren(ctx)
@@ -231,6 +276,11 @@ class ldfVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ldfParser#event_triggered_frame_def.
     def visitEvent_triggered_frame_def(self, ctx:ldfParser.Event_triggered_frame_defContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#event_triggered_frame_item.
+    def visitEvent_triggered_frame_item(self, ctx:ldfParser.Event_triggered_frame_itemContext):
         return self.visitChildren(ctx)
 
 
@@ -249,8 +299,23 @@ class ldfVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ldfParser#diag_frame_item.
+    def visitDiag_frame_item(self, ctx:ldfParser.Diag_frame_itemContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ldfParser#schedule_table_def.
     def visitSchedule_table_def(self, ctx:ldfParser.Schedule_table_defContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#schedule_table_entry.
+    def visitSchedule_table_entry(self, ctx:ldfParser.Schedule_table_entryContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#schedule_table_command.
+    def visitSchedule_table_command(self, ctx:ldfParser.Schedule_table_commandContext):
         return self.visitChildren(ctx)
 
 
@@ -281,6 +346,16 @@ class ldfVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ldfParser#signal_encoding_type_def.
     def visitSignal_encoding_type_def(self, ctx:ldfParser.Signal_encoding_type_defContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#signal_encoding_entry.
+    def visitSignal_encoding_entry(self, ctx:ldfParser.Signal_encoding_entryContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#signal_encoding_value.
+    def visitSignal_encoding_value(self, ctx:ldfParser.Signal_encoding_valueContext):
         return self.visitChildren(ctx)
 
 
@@ -341,6 +416,11 @@ class ldfVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ldfParser#signal_representation_def.
     def visitSignal_representation_def(self, ctx:ldfParser.Signal_representation_defContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ldfParser#signal_representation_entry.
+    def visitSignal_representation_entry(self, ctx:ldfParser.Signal_representation_entryContext):
         return self.visitChildren(ctx)
 
 

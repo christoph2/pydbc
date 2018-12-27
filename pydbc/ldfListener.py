@@ -64,7 +64,9 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = ctx.n.value
 
     def exitNode_attributes_def(self, ctx):
-        print("node_attr_def", ctx.name.value, ctx.getChildren())
+        items = [x.value for x in ctx.items]
+        ctx.value = items
+        print("node_attr_def", ctx.value)
 
     def exitNode_attribute(self, ctx):
         name = ctx.name.value
@@ -82,7 +84,19 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = ctx.i.value
 
     def exitAttributes_def(self, ctx):
-        pass
+        sid = ctx.sid.value
+        fid = ctx.fid.value
+        v = ctx.v.value if ctx.v else None
+        sn0 = ctx.sn0.value
+        sn1s = [x.value for x in ctx.sn1s]
+        cf = ctx.cf.value
+        p2Min = ctx.p2Min.value
+        stMin = ctx.stMin.value
+        nAs = ctx.nAs.value
+        nCr = ctx.nCr.value
+        ctx.value = OrderedDict(supplierID = sid, functionID = fid, variant = v, responseErrorSignal = sn0, faultStateSignals = sn1s,
+                p2Min = p2Min, stMin = stMin, nAs = nAs, nCr = nCr, configurableFrames = cf
+        )
 
     def exitSupplier_id(self, ctx):
         ctx.value = ctx.i.value
@@ -95,7 +109,7 @@ class LdfListener(antlr4.ParseTreeListener):
 
     def exitSignal_name(self, ctx):
         ctx.value = ctx.i.value
-        print("signal_name", ctx.value)
+        #print("signal_name", ctx.value)
 
     def exitConfigurable_frames(self, ctx):
         ctx.value = [x.value for x in ctx.frames]
@@ -133,7 +147,7 @@ class LdfListener(antlr4.ParseTreeListener):
     def exitSignal_def(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
-    def exit_Signal_item(self, ctx):
+    def exitSignal_item(self, ctx):
         sname = ctx.sname.value
         ssize = ctx.ssize.value
         initValue = ctx.initValue.value
@@ -149,7 +163,6 @@ class LdfListener(antlr4.ParseTreeListener):
         scalar = ctx.s.value if ctx.s else None
         array = ctx.a.value if ctx.a else None
         ctx.value = OrderedDict(scalar = scalar, array = array)
-        print("init_value:", ctx.value)
 
     def exitInit_value_scalar(self, ctx):
         ctx.value = ctx.i.value
@@ -176,8 +189,8 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = [x.value for x in ctx.items]
 
     def exitSignal_group(self, ctx):
-        sgname = signal_group_name ':'
-        gsize = group_size '{'
+        sgname = ctx.sgname.value
+        gsize = ctx.gsize.value
         items = [x.value for x in ctx.items]
         ctx.value = OrderedDict(signalGroupName = sgname, groupSize = gsize, items = items)
 
@@ -257,7 +270,7 @@ class LdfListener(antlr4.ParseTreeListener):
         sitems = [x.value for x in ctx.sitems]
         ctx.value = OrderedDict(masterID = mid, slaveID = sid, masterSignals = mitems, slaveSignals = sitems)
 
-    def ExitDiag_frame_item(self, ctx):
+    def exitDiag_frame_item(self, ctx):
         sname = ctx.sname.value
         soffs = ctx.soffs.value
         ctx.value = OrderedDict(signalName = sname, signalOffset = soffs)
@@ -362,7 +375,6 @@ class LdfListener(antlr4.ParseTreeListener):
         pass
 
     def exitPhysical_range(self, ctx):
-        #minValue = min_value ',' maxValue = max_value ',' s = scale ',' o = offset (',' t = text_info)?
         minValue = ctx.minValue.value
         maxValue = ctx.maxValue.value
         scale = ctx.scale

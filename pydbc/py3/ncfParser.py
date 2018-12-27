@@ -8,8 +8,8 @@ import sys
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3>")
-        buf.write("\u01d1\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3?")
+        buf.write("\u01d3\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
         buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31")
@@ -50,25 +50,25 @@ def serializedATN():
         buf.write("\36\3\37\3\37\3 \3 \3!\3!\3\"\3\"\3#\3#\3$\3$\3%\3%\3")
         buf.write("%\3%\3%\3%\3%\3%\3%\3%\3%\7%\u01b3\n%\f%\16%\u01b6\13")
         buf.write("%\3%\3%\5%\u01ba\n%\3%\3%\3&\3&\3\'\3\'\3\'\3\'\3\'\3")
-        buf.write("(\3(\3)\3)\3*\3*\5*\u01cb\n*\3+\3+\3,\3,\3,\2\2-\2\4\6")
-        buf.write("\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\66")
-        buf.write("8:<>@BDFHJLNPRTV\2\4\3\2\21\22\3\2%&\2\u01c8\2X\3\2\2")
-        buf.write("\2\4a\3\2\2\2\6e\3\2\2\2\br\3\2\2\2\nt\3\2\2\2\f\u0090")
-        buf.write("\3\2\2\2\16\u0092\3\2\2\2\20\u0094\3\2\2\2\22\u0096\3")
-        buf.write("\2\2\2\24\u00ae\3\2\2\2\26\u00b0\3\2\2\2\30\u0100\3\2")
-        buf.write("\2\2\32\u0102\3\2\2\2\34\u010c\3\2\2\2\36\u0115\3\2\2")
-        buf.write("\2 \u0117\3\2\2\2\"\u0119\3\2\2\2$\u0132\3\2\2\2&\u0140")
-        buf.write("\3\2\2\2(\u0142\3\2\2\2*\u0152\3\2\2\2,\u0154\3\2\2\2")
-        buf.write(".\u0158\3\2\2\2\60\u0165\3\2\2\2\62\u017b\3\2\2\2\64\u017d")
-        buf.write("\3\2\2\2\66\u0186\3\2\2\28\u0195\3\2\2\2:\u0198\3\2\2")
-        buf.write("\2<\u019b\3\2\2\2>\u019d\3\2\2\2@\u019f\3\2\2\2B\u01a1")
-        buf.write("\3\2\2\2D\u01a3\3\2\2\2F\u01a5\3\2\2\2H\u01a7\3\2\2\2")
-        buf.write("J\u01bd\3\2\2\2L\u01bf\3\2\2\2N\u01c4\3\2\2\2P\u01c6\3")
-        buf.write("\2\2\2R\u01ca\3\2\2\2T\u01cc\3\2\2\2V\u01ce\3\2\2\2XY")
-        buf.write("\7\3\2\2YZ\7\4\2\2Z^\5\4\3\2[]\5\6\4\2\\[\3\2\2\2]`\3")
-        buf.write("\2\2\2^\\\3\2\2\2^_\3\2\2\2_\3\3\2\2\2`^\3\2\2\2ab\7\5")
-        buf.write("\2\2bc\7\6\2\2cd\5T+\2d\5\3\2\2\2ef\7\7\2\2fg\5\b\5\2")
-        buf.write("gh\7\b\2\2hi\5\n\6\2ij\5\30\r\2jk\5\32\16\2kl\5\60\31")
+        buf.write("(\3(\5(\u01c7\n(\3)\3)\3*\3*\5*\u01cd\n*\3+\3+\3,\3,\3")
+        buf.write(",\2\2-\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,")
+        buf.write(".\60\62\64\668:<>@BDFHJLNPRTV\2\4\3\2\21\22\3\2%&\2\u01cb")
+        buf.write("\2X\3\2\2\2\4a\3\2\2\2\6e\3\2\2\2\br\3\2\2\2\nt\3\2\2")
+        buf.write("\2\f\u0090\3\2\2\2\16\u0092\3\2\2\2\20\u0094\3\2\2\2\22")
+        buf.write("\u0096\3\2\2\2\24\u00ae\3\2\2\2\26\u00b0\3\2\2\2\30\u0100")
+        buf.write("\3\2\2\2\32\u0102\3\2\2\2\34\u010c\3\2\2\2\36\u0115\3")
+        buf.write("\2\2\2 \u0117\3\2\2\2\"\u0119\3\2\2\2$\u0132\3\2\2\2&")
+        buf.write("\u0140\3\2\2\2(\u0142\3\2\2\2*\u0152\3\2\2\2,\u0154\3")
+        buf.write("\2\2\2.\u0158\3\2\2\2\60\u0165\3\2\2\2\62\u017b\3\2\2")
+        buf.write("\2\64\u017d\3\2\2\2\66\u0186\3\2\2\28\u0195\3\2\2\2:\u0198")
+        buf.write("\3\2\2\2<\u019b\3\2\2\2>\u019d\3\2\2\2@\u019f\3\2\2\2")
+        buf.write("B\u01a1\3\2\2\2D\u01a3\3\2\2\2F\u01a5\3\2\2\2H\u01a7\3")
+        buf.write("\2\2\2J\u01bd\3\2\2\2L\u01bf\3\2\2\2N\u01c6\3\2\2\2P\u01c8")
+        buf.write("\3\2\2\2R\u01cc\3\2\2\2T\u01ce\3\2\2\2V\u01d0\3\2\2\2")
+        buf.write("XY\7\3\2\2YZ\7\4\2\2Z^\5\4\3\2[]\5\6\4\2\\[\3\2\2\2]`")
+        buf.write("\3\2\2\2^\\\3\2\2\2^_\3\2\2\2_\3\3\2\2\2`^\3\2\2\2ab\7")
+        buf.write("\5\2\2bc\7\6\2\2cd\5T+\2d\5\3\2\2\2ef\7\7\2\2fg\5\b\5")
+        buf.write("\2gh\7\b\2\2hi\5\n\6\2ij\5\30\r\2jk\5\32\16\2kl\5\60\31")
         buf.write("\2ln\5H%\2mo\5L\'\2nm\3\2\2\2no\3\2\2\2op\3\2\2\2pq\7")
         buf.write("\t\2\2q\7\3\2\2\2rs\5V,\2s\t\3\2\2\2tu\7\n\2\2uv\7\b\2")
         buf.write("\2vw\7\13\2\2wx\7\6\2\2xy\5\f\7\2yz\7\4\2\2z{\7\f\2\2")
@@ -200,15 +200,16 @@ def serializedATN():
         buf.write("\2\2\2\u01ba\u01bb\3\2\2\2\u01bb\u01bc\7\t\2\2\u01bcI")
         buf.write("\3\2\2\2\u01bd\u01be\5V,\2\u01beK\3\2\2\2\u01bf\u01c0")
         buf.write("\7\67\2\2\u01c0\u01c1\7\b\2\2\u01c1\u01c2\5T+\2\u01c2")
-        buf.write("\u01c3\7\t\2\2\u01c3M\3\2\2\2\u01c4\u01c5\7:\2\2\u01c5")
-        buf.write("O\3\2\2\2\u01c6\u01c7\79\2\2\u01c7Q\3\2\2\2\u01c8\u01cb")
-        buf.write("\5N(\2\u01c9\u01cb\5P)\2\u01ca\u01c8\3\2\2\2\u01ca\u01c9")
-        buf.write("\3\2\2\2\u01cbS\3\2\2\2\u01cc\u01cd\7=\2\2\u01cdU\3\2")
-        buf.write("\2\2\u01ce\u01cf\78\2\2\u01cfW\3\2\2\2\"^n\u009b\u009f")
+        buf.write("\u01c3\7\t\2\2\u01c3M\3\2\2\2\u01c4\u01c7\7:\2\2\u01c5")
+        buf.write("\u01c7\7;\2\2\u01c6\u01c4\3\2\2\2\u01c6\u01c5\3\2\2\2")
+        buf.write("\u01c7O\3\2\2\2\u01c8\u01c9\79\2\2\u01c9Q\3\2\2\2\u01ca")
+        buf.write("\u01cd\5N(\2\u01cb\u01cd\5P)\2\u01cc\u01ca\3\2\2\2\u01cc")
+        buf.write("\u01cb\3\2\2\2\u01cdS\3\2\2\2\u01ce\u01cf\7>\2\2\u01cf")
+        buf.write("U\3\2\2\2\u01d0\u01d1\78\2\2\u01d1W\3\2\2\2#^n\u009b\u009f")
         buf.write("\u00a8\u00ae\u00bc\u00ce\u00d6\u00de\u00e6\u00ef\u00f5")
         buf.write("\u00fc\u0100\u0107\u0111\u0123\u012b\u0130\u013b\u014e")
         buf.write("\u0152\u0160\u016d\u016f\u0176\u0182\u0191\u01b4\u01b9")
-        buf.write("\u01ca")
+        buf.write("\u01c6\u01cc")
         return buf.getvalue()
 
 
@@ -251,7 +252,7 @@ class ncfParser ( Parser ):
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "C_IDENTIFIER", "FLOAT", 
-                      "INT", "WS", "COMMENT", "STRING", "SIGN" ]
+                      "INT", "HEX", "WS", "COMMENT", "STRING", "SIGN" ]
 
     RULE_toplevel = 0
     RULE_language_version = 1
@@ -367,10 +368,11 @@ class ncfParser ( Parser ):
     C_IDENTIFIER=54
     FLOAT=55
     INT=56
-    WS=57
-    COMMENT=58
-    STRING=59
-    SIGN=60
+    HEX=57
+    WS=58
+    COMMENT=59
+    STRING=60
+    SIGN=61
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -1074,7 +1076,7 @@ class ncfParser ( Parser ):
                 self.state = 169
                 self.match(ncfParser.T__6)
                 pass
-            elif token in [ncfParser.FLOAT, ncfParser.INT]:
+            elif token in [ncfParser.FLOAT, ncfParser.INT, ncfParser.HEX]:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 171
                 localctx.br = self.bitrate()
@@ -1227,7 +1229,7 @@ class ncfParser ( Parser ):
                     _la = self._input.LA(1)
 
                 pass
-            elif token in [ncfParser.INT]:
+            elif token in [ncfParser.INT, ncfParser.HEX]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 189
                 localctx._intValue = self.intValue()
@@ -3064,9 +3066,13 @@ class ncfParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
             self.i = None # Token
+            self.h = None # Token
 
         def INT(self):
             return self.getToken(ncfParser.INT, 0)
+
+        def HEX(self):
+            return self.getToken(ncfParser.HEX, 0)
 
         def getRuleIndex(self):
             return ncfParser.RULE_intValue
@@ -3093,9 +3099,22 @@ class ncfParser ( Parser ):
         localctx = ncfParser.IntValueContext(self, self._ctx, self.state)
         self.enterRule(localctx, 76, self.RULE_intValue)
         try:
-            self.enterOuterAlt(localctx, 1)
-            self.state = 450
-            localctx.i = self.match(ncfParser.INT)
+            self.state = 452
+            self._errHandler.sync(self)
+            token = self._input.LA(1)
+            if token in [ncfParser.INT]:
+                self.enterOuterAlt(localctx, 1)
+                self.state = 450
+                localctx.i = self.match(ncfParser.INT)
+                pass
+            elif token in [ncfParser.HEX]:
+                self.enterOuterAlt(localctx, 2)
+                self.state = 451
+                localctx.h = self.match(ncfParser.HEX)
+                pass
+            else:
+                raise NoViableAltException(self)
+
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -3141,7 +3160,7 @@ class ncfParser ( Parser ):
         self.enterRule(localctx, 78, self.RULE_floatValue)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 452
+            self.state = 454
             localctx.f = self.match(ncfParser.FLOAT)
         except RecognitionException as re:
             localctx.exception = re
@@ -3193,17 +3212,17 @@ class ncfParser ( Parser ):
         localctx = ncfParser.NumberContext(self, self._ctx, self.state)
         self.enterRule(localctx, 80, self.RULE_number)
         try:
-            self.state = 456
+            self.state = 458
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [ncfParser.INT]:
+            if token in [ncfParser.INT, ncfParser.HEX]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 454
+                self.state = 456
                 localctx.i = self.intValue()
                 pass
             elif token in [ncfParser.FLOAT]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 455
+                self.state = 457
                 localctx.f = self.floatValue()
                 pass
             else:
@@ -3254,7 +3273,7 @@ class ncfParser ( Parser ):
         self.enterRule(localctx, 82, self.RULE_stringValue)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 458
+            self.state = 460
             localctx.s = self.match(ncfParser.STRING)
         except RecognitionException as re:
             localctx.exception = re
@@ -3301,7 +3320,7 @@ class ncfParser ( Parser ):
         self.enterRule(localctx, 84, self.RULE_identifierValue)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 460
+            self.state = 462
             localctx.i = self.match(ncfParser.C_IDENTIFIER)
         except RecognitionException as re:
             localctx.exception = re
