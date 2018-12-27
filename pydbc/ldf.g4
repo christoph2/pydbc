@@ -146,7 +146,7 @@ node_attribute:
         'LIN_protocol' '=' version = protocol_version ';'
         'configured_NAD' '=' n0 = diag_address ';'
         ('initial_NAD' '=' n1 = diag_address ';')?
-        attrs = attributes_def ';'
+        attrs = attributes_def
     '}'
     ;
 
