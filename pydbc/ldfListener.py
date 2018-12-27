@@ -97,17 +97,29 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = ctx.i.value
         print("signal_name", ctx.value)
 
-    def exitConfigurable_frames_20_def(self, ctx):
-        pass
+    def exitConfigurable_frames(self, ctx):
+        ctx.value = [x.value for x in ctx.frames]
+
+    def exitConfigurable_frame(self, ctx):
+        fname = ctx.fname.value
+        mid = ctx.mid.value if ctx.mid else None
+        ctx.value = OrderedDict(frameName = fname, messageID = mid)
 
     def exitMessage_id(self, ctx):
         ctx.value = ctx.i.value
 
-    def exitConfigurable_frames_21_def(self, ctx):
-        pass
-
     def exitNode_composition_def(self, ctx):
-        pass
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitConfiguration(self, ctx):
+        cname = ctx.cname.value
+        items = [x.value for x in ctx.items]
+        ctx.value = OrderedDict(configurationName = cname, items = items)
+
+    def exitConfiguration_item(self, ctx):
+        cnode = ctx.cnode.value
+        lnodes = [x.value for x in ctx.lnodes]
+        ctx.value = OrderedDict(compositeNode = cnode, logicalNodes = lnodes)
 
     def exitConfiguration_name(self, ctx):
         ctx.value = ctx.i.value
@@ -119,14 +131,16 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = ctx.i.value
 
     def exitSignal_def(self, ctx):
-        #(sname = signal_name ':' ssize = signal_size ',' initValue = init_value ',' pub = published_by (',' sub += subscribed_by)* ';')*
+        ctx.value = [x.value for x in ctx.items]
+
+    def exit_Signal_item(self, ctx):
         sname = ctx.sname.value
         ssize = ctx.ssize.value
         initValue = ctx.initValue.value
         pub = ctx.pub.value
         sub = [x.value for x in ctx.sub]
-        ctx.value = OrderedDict(name = sname, size = ssize, initValue = initValue, pub = pub, sub = sub)
-        print("signal_def:", ctx.value)
+        ctx.value = OrderedDict(name = sname, size = ssize, initValue = initValue, publishedBy = pub, subscribedBy = sub)
+        print("signal_item:", ctx.value)
 
     def exitSignal_size(self, ctx):
         ctx.value = ctx.i.value
@@ -150,22 +164,52 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value =  ctx.i.value
 
     def exitDiagnostic_signal_def(self, ctx):
-        pass
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitDiagnostic_item(self, ctx):
+        name = ctx.name.value
+        size = ctx.size.value
+        initValue = ctx.initValue.value
+        ctx.value = OrderedDict(name = name, size = size, initValue = initValue)
 
     def exitSignal_groups_def(self, ctx):
-        pass
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitSignal_group(self, ctx):
+        sgname = signal_group_name ':'
+        gsize = group_size '{'
+        items = [x.value for x in ctx.items]
+        ctx.value = OrderedDict(signalGroupName = sgname, groupSize = gsize, items = items)
+
+    def exitSignal_group_item(self, ctx):
+        sname = ctx.sname.value
+        goffs = ctx.goffs.value
+        ctx.value = OrderedDict(signalName = sname, groupOffset = goffs)
 
     def exitSignal_group_name(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitGroup_size(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitGroup_offset(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitFrame_def(self, ctx):
-        pass
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitFrame_item(self, ctx):
+        fname = ctx.fname.value
+        fid = ctx.fid.value
+        p = ctx.p.value
+        fsize = ctx.fsize.value
+        items = [x.value for x in ctx.items]
+        ctx.value = OrderedDict(frameName = fname, frameID = fid, publishedBy = p, frameSize = fsize, signals = items)
+
+    def exitFrame_signal(self, ctx):
+        sname = ctx.sname.value
+        soffs = ctx.soffs.value
+        ctx.value = OrderedDict(signalName = sname, signalOffset = soffs)
 
     def exitFrame_name(self, ctx):
         ctx.value = ctx.i.value
@@ -180,14 +224,25 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = ctx.i.value
 
     def exitSporadic_frame_def(self, ctx):
-        pass
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitSporadic_frame_item(self, ctx):
+        name = ctx.sfn.value
+        fnames = [x.value for x in ctx.names]
+        ctx.value = OrderedDict(sporadicFrameName = name, frameNames = fnames)
 
     def exitSporadic_frame_name(self, ctx):
         ctx.value = ctx.i.value
 
     def exitEvent_triggered_frame_def(self, ctx):
-        #(e = event_trig_frm_name ':' c = collision_resolving_schedule_table ',' fid = frame_id names += (',' frame_name ';')* )*
-        pass
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitEvent_triggered_frame_item(self, ctx):
+        e = ctx.e.value
+        c = ctx.c.value
+        fid = ctx.fid.value
+        items = [x.value for x in ctx.items]
+        ctx.value = OrderedDict(frameName = e, frameID = fid, scheduleTable = c, frameNames = items)
 
     def exitEvent_trig_frm_name(self, ctx):
         ctx.value = ctx.i.value
@@ -196,19 +251,29 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = ctx.i.value
 
     def exitDiag_frame_def(self, ctx):
-        m = ctx.m.value
-        #ms = [x.value for x in ctx.ms]
-        s = ctx.s.value
-        #ss = [x.value for x in ctx.ss]
-        #ctx.value = OrderedDict(m = m, ms = ms, s = s, ss = ss)
-        ctx.value = OrderedDict(m = m, s = s)
+        mid = ctx.mid.value
+        sid = ctx.sid.value
+        mitems = [x.value for x in ctx.mitems]
+        sitems = [x.value for x in ctx.sitems]
+        ctx.value = OrderedDict(masterID = mid, slaveID = sid, masterSignals = mitems, slaveSignals = sitems)
 
+    def ExitDiag_frame_item(self, ctx):
+        sname = ctx.sname.value
+        soffs = ctx.soffs.value
+        ctx.value = OrderedDict(signalName = sname, signalOffset = soffs)
 
     def exitSchedule_table_def(self, ctx):
-        pass
-        #items = [x.value for x in ctx.items]
-        #ctx.value = items
-        #(s = schedule_table_name  '{' (c = command 'delay' f = frame_time 'ms' ';')*  '}')*
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitSchedule_table_entry(self, ctx):
+        s = ctx.s.value
+        items = [x.value for x in ctx.items]
+        ctx.value = OrderedDict(name = s, commands = items)
+
+    def exitSchedule_table_command(self, ctx):
+        c = ctx.c.value
+        f = ctx.f.value
+        ctx.value = OrderedDict(command = c, frameTime = f)
 
     def exitSchedule_table_name(self, ctx):
         ctx.value = ctx.i.value
@@ -266,7 +331,15 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = ctx.n.value
 
     def exitSignal_encoding_type_def(self, ctx):
-        encoding_type_name = ctx.s.value
+        items = [x.value for x in ctx.items]
+        ctx.value = items
+
+    def exitSignal_encoding_entry(self, ctx):
+        s = ctx.s.value
+        items = [x.value for x in ctx.items]
+        ctx.value = OrderedDict(name = s, values = items)
+
+    def exitSignal_encoding_value(self, ctx):
         if ctx.l:
             value = ctx.l.value
             vtype = "logical"
@@ -279,7 +352,8 @@ class LdfListener(antlr4.ParseTreeListener):
         elif ctx.a:
             value = ctx.a.name
             vtype = "ascii"
-        ctx.value = OrderedDict(encoding_type_name = encoding_type_name, value = value, type = vtype)
+        ctx.value = OrderedDict(value = value, valueType = vtype)
+
 
     def exitSignal_encoding_type_name(self, ctx):
         ctx.value = ctx.i.value
@@ -323,8 +397,13 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = ctx.s.value
 
     def exitSignal_representation_def(self, ctx):
+        items = [x.value for x in ctx.items]
+        ctx.value = items
+
+    def exitSignal_representation_entry(self, ctx):
+        enc = ctx.enc.value
         names = [x.value for x in ctx.names]
-        ctx.value = OrderedDict(encoding_type = ctx.enc.value, signal_names = names)
+        ctx.value = OrderedDict(name = enc, signalNames = names)
 
     def exitIntValue(self, ctx):
         ctx.value = int(ctx.i.text) if ctx.i else None

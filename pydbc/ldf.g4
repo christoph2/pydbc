@@ -166,7 +166,7 @@ attributes_def:
     ('ST_min' '=' stMin = number 'ms' ';')?
     ('N_As_timeout' '=' nAs = number 'ms' ';')?
     ('N_Cr_timeout' '=' nCr = number 'ms' ';')?
-    cf20 = configurable_frames_20_def | cf21 = configurable_frames_21_def
+    cf = configurable_frames
     ;
 
 supplier_id:
@@ -185,28 +185,34 @@ signal_name:
     i = identifierValue
     ;
 
-configurable_frames_20_def:
+configurable_frames:
     'configurable_frames' '{'
-        (fname = frame_name '=' mid = message_id ';')*
+        (frames += configurable_frame)*
     '}'
+    ;
+
+configurable_frame:
+    fname = frame_name ('=' mid = message_id)? ';' // Note: optional part is required for LIN < 2.1 -- TODO: syn. predicate!
     ;
 
 message_id:
     i = intValue
     ;
 
-configurable_frames_21_def:
-    'configurable_frames' '{'
-        (fnames += frame_name ';')*
+node_composition_def:
+    'composite' '{'
+        (items += configuration)*
     '}'
     ;
 
-node_composition_def:
-    'composite' '{'
-        ('configuration' cname = configuration_name '{'
-            (cnode = composite_node '{' lnodes += logical_node (',' lnodes += logical_node)* ';')*
-        '}')*
+configuration:
+    'configuration' cname = configuration_name '{'
+        (items += configuration_item)*
     '}'
+    ;
+
+configuration_item:
+    cnode = composite_node '{' lnodes += logical_node (',' lnodes += logical_node)* '}'
     ;
 
 configuration_name:
@@ -223,8 +229,12 @@ logical_node:
 
 signal_def:
     'Signals' '{'
-        (sname = signal_name ':' ssize = signal_size ',' initValue = init_value ',' pub = published_by (',' sub += subscribed_by)* ';')*
+        (items += signal_item)*
     '}'
+    ;
+
+signal_item:
+    sname = signal_name ':' ssize = signal_size ',' initValue = init_value ',' pub = published_by (',' sub += subscribed_by)* ';'
     ;
 
 signal_size:
@@ -255,7 +265,7 @@ subscribed_by:
 
 diagnostic_signal_def:
     'Diagnostic_signals' '{'
-        (i10 = identifierValue ':' i11 = intValue ',' i12 = intValue ';')*
+        (items += diagnostic_item)*
 /*
         MasterReqB0: 8, 0 ;
         MasterReqB1: 8, 0 ;
@@ -277,12 +287,24 @@ diagnostic_signal_def:
     '}'
     ;
 
+diagnostic_item:
+    name = identifierValue ':' size = signal_size ',' initValue = init_value ';'
+    ;
+
 signal_groups_def:
     'Signal_groups' '{'
-        (sgname = signal_group_name ':' gsize = group_size '{'
-            (sname = signal_name ',' goffs = group_offset ';')*
-        '}')*
+        (items += signal_group)*
     '}'
+    ;
+
+signal_group:
+    // Signal groups are deprecated.
+    sgname = signal_group_name ':' gsize = group_size '{' (items += signal_group_item)*
+    '}'
+    ;
+
+signal_group_item:
+    sname = signal_name ',' goffs = group_offset ';'
     ;
 
 signal_group_name:
@@ -299,10 +321,16 @@ group_offset:
 
 frame_def:
     'Frames' '{'
-        (fname = frame_name ':' fid = frame_id ',' p = published_by ',' fsize = frame_size '{'
-          (sname = signal_name ',' soffs = signal_offset ';')*
-        '}')*
+        (items += frame_item)*
     '}'
+    ;
+
+frame_item:
+    fname = frame_name ':' fid = frame_id ',' p = published_by ',' fsize = frame_size '{' (items += frame_signal)* '}'
+    ;
+
+frame_signal:
+    sname = signal_name ',' soffs = signal_offset ';'
     ;
 
 frame_name:
@@ -323,8 +351,12 @@ signal_offset:
 
 sporadic_frame_def:
     'Sporadic_frames' '{'
-        (sfn = sporadic_frame_name ':' names += frame_name (',' names += frame_name)* ';')*
+        (items += sporadic_frame_item)*
     '}'
+    ;
+
+sporadic_frame_item:
+    sfn = sporadic_frame_name ':' names += frame_name (',' names += frame_name)* ';'
     ;
 
 sporadic_frame_name:
@@ -333,8 +365,12 @@ sporadic_frame_name:
 
 event_triggered_frame_def:
     'Event_triggered_frames' '{'
-        (e = event_trig_frm_name ':' c = collision_resolving_schedule_table ',' fid = frame_id (',' frame_name ';')* )*
+        (items += event_triggered_frame_item)*
     '}'
+    ;
+
+event_triggered_frame_item:
+    e = event_trig_frm_name ':' c = collision_resolving_schedule_table ',' fid = frame_id (',' items += frame_name ';')*
     ;
 
 event_trig_frm_name:
@@ -347,8 +383,8 @@ collision_resolving_schedule_table:
 
 diag_frame_def:
     'Diagnostic_frames' '{'
-        'MasterReq' ':' m = intValue '{'
-            (i10 = identifierValue ',' i11 = intValue ';')*
+        'MasterReq' ':' mid = intValue '{'
+            (mitems += diag_frame_item)*
 /*
           MasterReqB0, 0;
           MasterReqB1, 8;
@@ -360,8 +396,8 @@ diag_frame_def:
           MasterReqB7, 56;
 */
         '}'
-        'SlaveResp' ':' s = intValue '{'
-            (i20 = identifierValue ',' i21 = intValue ';')*
+        'SlaveResp' ':' sid = intValue '{'
+            (sitems += diag_frame_item)*
 /*
           SlaveRespB0, 0;
           SlaveRespB1, 8;
@@ -376,10 +412,22 @@ diag_frame_def:
     '}'
     ;
 
+diag_frame_item:
+    sname = identifierValue ',' soffs = intValue ';'
+    ;
+
 schedule_table_def:
     'Schedule_tables' '{'
-        (s = schedule_table_name  '{' (c = command 'delay' f = frame_time 'ms' ';')*  '}')*
+        (items += schedule_table_entry)*
     '}'
+    ;
+
+schedule_table_entry:
+    s = schedule_table_name  '{' (items += schedule_table_command)*  '}'
+    ;
+
+schedule_table_command:
+    c = command 'delay' f = frame_time 'ms' ';'
     ;
 
 schedule_table_name:
@@ -388,7 +436,7 @@ schedule_table_name:
 
 command:
       frameName = frame_name
-    |  c = 'MasterReq'
+    | c = 'MasterReq'
     | c = 'SlaveResp'
     | c = 'AssignNAD' '{' nodeName = node_name '}'
     | c = 'ConditionalChangeNAD' '{' nad = intValue ',' id_ = intValue ',' byte_ = intValue ',' mask = intValue ',' inv = intValue ',' new_NAD = intValue'}'
@@ -412,13 +460,20 @@ frame_time:
     n = number
     ;
 
-
 signal_encoding_type_def:
     'Signal_encoding_types' '{'
-        (s = signal_encoding_type_name '{'
-            (l = logical_value | p = physical_range | b = bcd_value | a = ascii_value)*
-        '}')*
+        (items += signal_encoding_entry)*
     '}'
+    ;
+
+signal_encoding_entry:
+    s = signal_encoding_type_name '{'
+        (items += signal_encoding_value)*
+    '}'
+    ;
+
+signal_encoding_value:
+    l = logical_value | p = physical_range | b = bcd_value | a = ascii_value
     ;
 
 signal_encoding_type_name:
@@ -467,10 +522,13 @@ text_info:
 
 signal_representation_def:
     'Signal_representation' '{'
-        ( enc = signal_encoding_type_name ':' names += signal_name (',' names += signal_name)* ';')*
+        (items += signal_representation_entry)*
     '}'
     ;
 
+signal_representation_entry:
+    enc = signal_encoding_type_name ':' names += signal_name (',' names += signal_name)* ';'
+    ;
 
 /*
 **

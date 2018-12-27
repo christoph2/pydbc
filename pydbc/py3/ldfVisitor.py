@@ -59,6 +59,11 @@ class ldfVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ldfParser#node_attribute.
+    def visitNode_attribute(self, ctx:ldfParser.Node_attributeContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ldfParser#protocol_version.
     def visitProtocol_version(self, ctx:ldfParser.Protocol_versionContext):
         return self.visitChildren(ctx)
