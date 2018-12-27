@@ -148,6 +148,7 @@ node_attribute:
         ('initial_NAD' '=' n1 = diag_address ';')?
         attrs = attributes_def ';'
     '}'
+    ;
 
 protocol_version:
     s = stringValue

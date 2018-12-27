@@ -101,7 +101,7 @@ class LdfListener(antlr4.ParseTreeListener):
         pass
 
     def exitMessage_id(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitConfigurable_frames_21_def(self, ctx):
         pass
@@ -110,13 +110,13 @@ class LdfListener(antlr4.ParseTreeListener):
         pass
 
     def exitConfiguration_name(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitComposite_node(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitLogical_node(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitSignal_def(self, ctx):
         #(sname = signal_name ':' ssize = signal_size ',' initValue = init_value ',' pub = published_by (',' sub += subscribed_by)* ';')*
