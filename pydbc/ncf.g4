@@ -99,7 +99,7 @@ node_definition:
         g = general_definition
         d = diagnostic_definition
         f = frame_definition
-        e = encoding_definition
+        e = encoding_definition     // Not 2.0
         s = status_management
         t = free_text_definition?
     '}'
@@ -118,6 +118,18 @@ general_definition:
         'bitrate' '=' br = bitrate_definition ';'
         'sends_wake_up_signal' '=' tf = ('yes' | 'no') ';'
     '}'
+/*
+general {
+    LIN_language_version = <protocol_version> ;
+    supplier = <supplier_id> ;
+    function = <function_id> ;
+    variant = <variant_id> ;
+    bitrate = <bitrate_definition> ;
+    (volt_range = real_or_integer, real_or_integer ;)
+    (temp_range = real_or_integer, real_or_integer ;)
+    (conformance = char_string ;)
+}
+*/
     ;
 
 protocol_version:
@@ -181,6 +193,7 @@ frame_name:
     ;
 
 frame_properties:
+    // message_ID = intValue ';' // 2.0
     'length' '=' l = intValue ';'
     ('min_period' '=' minValue = intValue 'ms' ';')?
     ('max_period' '=' maxValue = intValue 'ms' ';')?
@@ -286,10 +299,9 @@ free_text_definition:
     '}'
     ;
 
-
-
 intValue:
-    i = INT
+      i = INT
+    | h = HEX
     ;
 
 floatValue:
@@ -329,10 +341,16 @@ FLOAT:
     )
     ;
 
-
 INT:
     SIGN? '0'..'9'+
     ;
+
+HEX:
+    '0'('x' | 'X') HEX_DIGIT+
+    ;
+
+fragment
+HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
 
 fragment
 ESC_SEQ:

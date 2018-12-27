@@ -40,7 +40,7 @@ import antlr4
 import colorama
 
 from pydbc import parser
-from pydbc.dbcListener import dbcListener
+from pydbc.dbcListener import DbcListener
 from pydbc.db import CanDatabase
 from pydbc.db.creator import Creator
 from pydbc.db.loader import Loader
@@ -97,7 +97,7 @@ def importFile(name):
     if not execute(cr.createSchema, "creating schema"):
         return
 
-    pa = parser.ParserWrapper('dbc', 'dbcfile', dbcListener)
+    pa = parser.ParserWrapper('dbc', 'dbcfile', DbcListener)
 
     try:
         tree = pa.parseFromFile("{}".format(name), encoding = "utf-8" if ucout else "latin-1", trace = False)

@@ -1,63 +1,101 @@
 
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from pprint import pprint
 
-from antlr4 import *
+import antlr4
 
-
-class ldfListener(ParseTreeListener):
+class LdfListener(antlr4.ParseTreeListener):
 
 
     def exitLin_description_file(self, ctx):
-        pass
+        """
+    cn = channel_name_def?
+    ndef = node_def
+    ncdef = node_composition_def?
+    sdef = signal_def
+    dsdef = diagnostic_signal_def?
+    fdef = frame_def
+    sfdef = sporadic_frame_def?
+    etfdef = event_triggered_frame_def?
+    dffdef = diag_frame_def?
+    nadef = node_attributes_def
+    stdef = schedule_table_def
+    sgdef = signal_groups_def?
+    setdef = signal_encoding_type_def?
+    srdef = signal_representation_def?
+        """
+        self.value = OrderedDict(
+            protocolVersion = ctx.pv.value,
+            languageVersion = ctx.lv.value,
+            speed = ctx.ls.value,
+        )
 
     def exitLin_protocol_version_def(self, ctx):
-        pass
+        ctx.value = ctx.s.value
+        print("protocol_ver", ctx.value)
 
     def exitLin_language_version_def(self, ctx):
-        pass
+        ctx.value = ctx.s.value
+        print("language_ver", ctx.value)
 
     def exitLin_speed_def(self, ctx):
-        pass
+        ctx.value = ctx.n.value
+        print("speed:", ctx.value)
 
     def exitChannel_name_def(self, ctx):
-        pass
+        ctx.value = ctx.i.value
+        print("channel_name", ctx.value)
 
     def exitNode_def(self, ctx):
-        pass
+        mname = ctx.mname.value
+        tb = ctx.tb.value
+        j = ctx.j.value
+        snames = [x.value for x in ctx.snames]
+        ctx.value = OrderedDict(master = mname, timeBase = tb, jitter = j, slaves = snames)
+        print("node_def:", ctx.value)
 
     def exitNode_name(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitTime_base(self, ctx):
-        pass
+        ctx.value = ctx.n.value
 
     def exitJitter(self, ctx):
-        pass
+        ctx.value = ctx.n.value
 
     def exitNode_attributes_def(self, ctx):
-        pass
+        print("node_attr_def", ctx.name.value, ctx.getChildren())
+
+    def exitNode_attribute(self, ctx):
+        name = ctx.name.value
+        version = ctx.version.value
+        n0 = ctx.n0.value
+        n1 = ctx.n1.value
+        attrs = ctx.attrs.value
+        ctx.value = OrderedDict(name = name, version = version, configuredNAD = n0, initialNAD = n1, attrs = attrs)
+        print("node_attribute:", ctx.value)
 
     def exitProtocol_version(self, ctx):
-        pass
+        ctx.value = ctx.s.value
 
     def exitDiag_address(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitAttributes_def(self, ctx):
         pass
 
     def exitSupplier_id(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitFunction_id(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitVariant(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitSignal_name(self, ctx):
-        pass
+        ctx.value = ctx.i.value
+        print("signal_name", ctx.value)
 
     def exitConfigurable_frames_20_def(self, ctx):
         pass
@@ -81,25 +119,35 @@ class ldfListener(ParseTreeListener):
         pass
 
     def exitSignal_def(self, ctx):
-        pass
+        #(sname = signal_name ':' ssize = signal_size ',' initValue = init_value ',' pub = published_by (',' sub += subscribed_by)* ';')*
+        sname = ctx.sname.value
+        ssize = ctx.ssize.value
+        initValue = ctx.initValue.value
+        pub = ctx.pub.value
+        sub = [x.value for x in ctx.sub]
+        ctx.value = OrderedDict(name = sname, size = ssize, initValue = initValue, pub = pub, sub = sub)
+        print("signal_def:", ctx.value)
 
     def exitSignal_size(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitInit_value(self, ctx):
-        pass
+        scalar = ctx.s.value if ctx.s else None
+        array = ctx.a.value if ctx.a else None
+        ctx.value = OrderedDict(scalar = scalar, array = array)
+        print("init_value:", ctx.value)
 
     def exitInit_value_scalar(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitInit_value_array(self, ctx):
-        pass
+        ctx.value = [x.value for x in ctx.vs]
 
     def exitPublished_by(self, ctx):
-        pass
+        ctx.value =  ctx.i.value
 
     def exitSubscribed_by(self, ctx):
-        pass
+        ctx.value =  ctx.i.value
 
     def exitDiagnostic_signal_def(self, ctx):
         pass
@@ -139,6 +187,7 @@ class ldfListener(ParseTreeListener):
 
     def exitEvent_triggered_frame_def(self, ctx):
         #(e = event_trig_frm_name ':' c = collision_resolving_schedule_table ',' fid = frame_id names += (',' frame_name ';')* )*
+        pass
 
     def exitEvent_trig_frm_name(self, ctx):
         ctx.value = ctx.i.value
@@ -148,15 +197,17 @@ class ldfListener(ParseTreeListener):
 
     def exitDiag_frame_def(self, ctx):
         m = ctx.m.value
-        ms = [x.value for x in ctx.ms]
+        #ms = [x.value for x in ctx.ms]
         s = ctx.s.value
-        ss = [x.value for x in ctx.ss]
-        ctx.value = OrderedDict(m = m, ms = ms, s = s, ss = ss)
+        #ss = [x.value for x in ctx.ss]
+        #ctx.value = OrderedDict(m = m, ms = ms, s = s, ss = ss)
+        ctx.value = OrderedDict(m = m, s = s)
 
 
     def exitSchedule_table_def(self, ctx):
-        items = [x.value for x in ctx.items]
-        ctx.value = items
+        pass
+        #items = [x.value for x in ctx.items]
+        #ctx.value = items
         #(s = schedule_table_name  '{' (c = command 'delay' f = frame_time 'ms' ';')*  '}')*
 
     def exitSchedule_table_name(self, ctx):
@@ -237,7 +288,13 @@ class ldfListener(ParseTreeListener):
         pass
 
     def exitPhysical_range(self, ctx):
-        pass
+        #minValue = min_value ',' maxValue = max_value ',' s = scale ',' o = offset (',' t = text_info)?
+        minValue = ctx.minValue.value
+        maxValue = ctx.maxValue.value
+        scale = ctx.scale
+        offset = ctx.offset
+        ctx.value = OrderedDict(min = minValue, max = maxValue, scale = scale, offset = offset)
+        print("pyhs_range: ", ctx.value)
 
     def exitBcd_value(self, ctx):
         pass
@@ -256,9 +313,11 @@ class ldfListener(ParseTreeListener):
 
     def exitScale(self, ctx):
         ctx.value = ctx.n.value
+        print("scale:", ctx.value)
 
     def exitOffset(self, ctx):
         ctx.value = ctx.n.value
+        print("offset:", ctx.value)
 
     def exitText_info(self, ctx):
         ctx.value = ctx.s.value

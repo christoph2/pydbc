@@ -137,14 +137,17 @@ jitter:
 
 node_attributes_def:
     'Node_attributes' '{'
-      (name = node_name '{'
+      (items += node_attribute)*
+    '}'
+    ;
+
+node_attribute:
+      name = node_name '{'
         'LIN_protocol' '=' version = protocol_version ';'
         'configured_NAD' '=' n0 = diag_address ';'
         ('initial_NAD' '=' n1 = diag_address ';')?
         attrs = attributes_def ';'
-    '}')*
     '}'
-    ;
 
 protocol_version:
     s = stringValue
@@ -474,7 +477,8 @@ signal_representation_def:
 **
 */
 intValue:
-    i = INT
+      i = INT
+    | h = HEX
     ;
 
 floatValue:
@@ -518,6 +522,13 @@ FLOAT:
 INT:
     SIGN? '0'..'9'+
     ;
+
+HEX:
+    '0'('x' | 'X') HEX_DIGIT+
+    ;
+
+fragment
+HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
 
 fragment
 ESC_SEQ:

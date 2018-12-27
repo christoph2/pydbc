@@ -31,7 +31,7 @@ __version__ = '0.1.0'
 from collections import OrderedDict
 import re
 
-from antlr4 import *
+import antlr4
 
 ## Attributes
 ##  GenSigStartValue    ==> to set initial value until first message is received.
@@ -60,7 +60,7 @@ def extractAccessType(value):
     else:
         return None
 
-class dbcListener(ParseTreeListener):
+class DbcListener(antlr4.ParseTreeListener):
 
 
     def getList(self, attr):
@@ -345,7 +345,7 @@ class dbcListener(ParseTreeListener):
         elif ctx.mid1:
             mid1 = ctx.mid1.value
             di = OrderedDict(type = 'BO', messageID = mid1)
-        elif ctx.mid2:
+        elif ctx.mid2:  # TODO: There are no signals!!!
             mid2 = ctx.mid2.value
             signalName = ctx.signalName.value
             di = OrderedDict(type = 'SG', messageID = mid2, signalName = signalName)

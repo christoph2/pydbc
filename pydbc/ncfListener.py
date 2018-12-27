@@ -1,35 +1,36 @@
 # Generated from ncf.g4 by ANTLR 4.7
-from antlr4 import *
 
+import antlr4
 
-class ncfListener(ParseTreeListener):
+class NcfListener(antlr4.ParseTreeListener):
 
     def exitToplevel(self, ctx):
-        pass
+        self. value = "hello"
 
     def exitLanguage_version(self, ctx):
-        pass
+        print("language_ver", ctx.s.value)
 
     def exitNode_definition(self, ctx):
-        pass
+        print("node_def", ctx.name.value, ctx.g.value, ctx.d.value, ctx.f.value)
 
     def exitNode_name(self, ctx):
-        pass
+        print("node_name", ctx.i.value)
+        ctx.value = ctx.i.value
 
     def exitGeneral_definition(self, ctx):
-        pass
+        print("gen_def", ctx.pv.value)
 
     def exitProtocol_version(self, ctx):
-        pass
+        ctx.value = ctx.s.value
 
     def exitSupplier_id(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitFunction_id(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitVariant_id(self, ctx):
-        pass
+        ctx.value = ctx.i.value
 
     def exitBitrate_definition(self, ctx):
         pass
@@ -41,16 +42,16 @@ class ncfListener(ParseTreeListener):
         pass
 
     def exitFrame_definition(self, ctx):
-        pass
+        print("frame_def", ctx.frames)
 
     def exitSingle_frame(self, ctx):
-        pass
+        print("single_frame", ctx.d)
 
     def exitFrame_kind(self, ctx):
-        pass
+        print("frame_kind")
 
     def exitFrame_name(self, ctx):
-        pass
+        print("frame_name")
 
     def exitFrame_properties(self, ctx):
         pass
