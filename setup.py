@@ -33,9 +33,10 @@ setup(
                 'vndb_importer = pydbc.scripts.vndb_importer:main'
         ],
     },
-    data_files = [
-        ('cgen/templates', glob('cgen/templates/*.tmpl')),
-    ],
+    include_package_data = True,
+    package_data = {
+        "templates": glob('cgen/templates/*.tmpl'),
+    },
     test_suite="pydbc.tests"
 )
 
