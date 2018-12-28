@@ -161,8 +161,7 @@ bitrate:
 diagnostic_definition:
     'diagnostic' '{'
         'NAD' '=' //(nads += intValue (',' nads += intValue)*) | (nads += intValue 'to' nads += intValue) ';'
-            lhs = intValue ('to' rhs = intValue) | (',' nads += intValue)*
-        ';' ;
+            lhs = intValue ('to' rhs = intValue) | (',' nads += intValue)* ';'
         'diagnostic_class' '=' dc = intValue ';'
         ('P2_min' '=' p2Min = number 'ms' ';')?
         ('ST_min' '=' stMin = number 'ms' ';')?
