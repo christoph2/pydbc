@@ -57,7 +57,12 @@ class NcfListener(antlr4.ParseTreeListener):
         pass
 
     def exitSignal_definition(self, ctx):
-        pass
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitSignal_definition(self, ctx):
+        n = ctx.n.value
+        p = ctx.p.value
+        ctx.value = OrderedDict(name = n, properties = p)
 
     def exitSignal_name(self, ctx):
         pass
@@ -75,7 +80,26 @@ class NcfListener(antlr4.ParseTreeListener):
         pass
 
     def exitEncoding_definition(self, ctx):
-        pass
+        ctx.value = [x.value for x in ctx.items]
+
+    def exitEncoding_definition_entry(self, ctx):
+        name = ctx.name.value
+        items = [x.value for x in ctx.items]
+
+    def exitEncoding_definition_value(self, ctx):
+        if ctx.l:
+            value = ctx.l.value
+            vtype = "logical"
+        elif ctx.p:
+            value = ctx.p.value
+            vtype = "range"
+        elif ctx.b:
+            value = ctx.b.value
+            vtype = "bcd"
+        elif ctx.a:
+            value = ctx.a.name
+            vtype = "ascii"
+        ctx.value = OrderedDict(value = value, valueType = vtype)
 
     def exitEncoding_name(self, ctx):
         pass

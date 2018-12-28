@@ -160,7 +160,9 @@ bitrate:
 
 diagnostic_definition:
     'diagnostic' '{'
-        'NAD' '=' (nads += intValue (',' nads += intValue)*) | (nads += intValue 'to' nads += intValue) ';'
+        'NAD' '=' //(nads += intValue (',' nads += intValue)*) | (nads += intValue 'to' nads += intValue) ';'
+            lhs = intValue ('to' rhs = intValue) | (',' nads += intValue)*
+        ';' ;
         'diagnostic_class' '=' dc = intValue ';'
         ('P2_min' '=' p2Min = number 'ms' ';')?
         ('ST_min' '=' stMin = number 'ms' ';')?
@@ -202,8 +204,12 @@ frame_properties:
 
 signal_definition:
     'signals' '{'
-        (n = signal_name '{' p = signal_properties '}')*
+        (items += signal_definition_entry)*
     '}'
+    ;
+
+signal_definition_entry:
+    n = signal_name '{' p = signal_properties '}'
     ;
 
 signal_name:
@@ -234,8 +240,16 @@ init_value_array:
 
 encoding_definition:
     'encoding' '{'
-        (encoding_name '{' (l = logical_value | p = physical_range | b = bcd_value | a = ascii_value)* '}')*
+        (items += encoding_definition_entry)*
     '}'
+    ;
+
+encoding_definition_entry:
+    name = encoding_name '{' (items += encoding_definition_value)* '}'
+    ;
+
+encoding_definition_value:
+    l = logical_value | p = physical_range | b = bcd_value | a = ascii_value
     ;
 
 encoding_name:
