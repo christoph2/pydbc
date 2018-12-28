@@ -1,4 +1,32 @@
-# Generated from ncf.g4 by ANTLR 4.7
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+__copyright__ = """
+   pySART - Simplified AUTOSAR-Toolkit for Python.
+
+   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+
+   All Rights Reserved
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+   s. FLOSS-EXCEPTION.txt
+"""
+__author__  = 'Christoph Schueler'
+__version__ = '0.1.0'
+
 
 import antlr4
 
@@ -82,7 +110,7 @@ class NcfListener(antlr4.ParseTreeListener):
 
     def exitSingle_frame(self, ctx):
         n = ctx.n.value
-        p = ctx.p.value
+        p = ctx.p.value if ctx.p else None
         s = ctx.s.value if ctx.s else None
         ctx.value = dict(name = n, properties = p, signal = s)
 
@@ -95,19 +123,18 @@ class NcfListener(antlr4.ParseTreeListener):
         ctx.value = name
 
     def exitFrame_properties(self, ctx):
-        """
-    'length' '=' l = intValue ';'
-    ('min_period' '=' minValue = intValue 'ms' ';')?
-    ('max_period' '=' maxValue = intValue 'ms' ';')?
-    ('event_triggered_frame' '=' etf = identifierValue)?
-        """
+        l = ctx.l.value
+        minValue = ctx.minValue.value if ctx.minValue else None
+        maxValue = ctx.maxValue.value if ctx.maxValue else None
+        etf = ctx.etf.value if ctx.etf else None
+        ctx.value = dict(length = l, minPeriod = minValue, maxPeriod = maxValue, eventTriggeredFrame = etf)
 
     def exitSignal_definition(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
-    def exitSignal_definition(self, ctx):
+    def exitSignal_definition_entry(self, ctx):
         n = ctx.n.value
-        p = ctx.p.value
+        p = ctx.p.value if ctx.p else None
         ctx.value = dict(name = n, properties = p)
 
     def exitSignal_name(self, ctx):
@@ -117,20 +144,20 @@ class NcfListener(antlr4.ParseTreeListener):
     def exitSignal_properties(self, ctx):
         init = ctx.init.value
         s = ctx.s.value
-        o = ctx.o.value
+        o = ctx.o.value if ctx.o else None
         e = ctx.e.value if ctx.e else None
-        ctx.value = dic(initValue = init, size = s, offset = o, encoding = e)
+        ctx.value = dict(initValue = init, size = s, offset = o, encoding = e)
 
     def exitInit_value(self, ctx):
         scalar = ctx.s.value if ctx.s else None
         array = ctx.a.value if ctx.a else None
-        ctx.value = OrderedDict(scalar = scalar, array = array)
+        ctx.value = dict(scalar = scalar, array = array)
 
     def exitInit_value_scalar(self, ctx):
         ctx.value = ctx.i.value
 
     def exitInit_value_array(self, ctx):
-        ctx.value = [x.value for x in ctx.vs]
+        ctx.value = [x.value for x in ctx.values]
 
     def exitEncoding_definition(self, ctx):
         ctx.value = [x.value for x in ctx.items]
