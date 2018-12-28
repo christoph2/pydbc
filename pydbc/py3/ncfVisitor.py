@@ -99,6 +99,11 @@ class ncfVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ncfParser#signal_definition_entry.
+    def visitSignal_definition_entry(self, ctx:ncfParser.Signal_definition_entryContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ncfParser#signal_name.
     def visitSignal_name(self, ctx:ncfParser.Signal_nameContext):
         return self.visitChildren(ctx)
@@ -126,6 +131,16 @@ class ncfVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ncfParser#encoding_definition.
     def visitEncoding_definition(self, ctx:ncfParser.Encoding_definitionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ncfParser#encoding_definition_entry.
+    def visitEncoding_definition_entry(self, ctx:ncfParser.Encoding_definition_entryContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ncfParser#encoding_definition_value.
+    def visitEncoding_definition_value(self, ctx:ncfParser.Encoding_definition_valueContext):
         return self.visitChildren(ctx)
 
 
