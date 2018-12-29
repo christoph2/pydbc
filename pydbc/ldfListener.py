@@ -46,14 +46,14 @@ class LdfListener(antlr4.ParseTreeListener):
             signals = ctx.sdef.value,
             diagnosticSignals = ctx.dsdef.value if ctx.dsdef else None,
             frames = ctx.fdef.value,
-            sporadicFrames = ctx.sfdef.value if ctx.sfdef else None,
-            eventTriggeredFrames = ctx.etfdef.value if ctx.etfdef else None,
-            diagnosticFrames = ctx.dffdef.value if ctx.dffdef else None,
+            sporadicFrames = ctx.sfdef.value if ctx.sfdef else [],
+            eventTriggeredFrames = ctx.etfdef.value if ctx.etfdef else [],
+            diagnosticFrames = ctx.dffdef.value if ctx.dffdef else [],
             nodeAttributes = ctx.nadef.value,
             scheduleTables = ctx.stdef.value,
-            signalGroups = ctx.sgdef.value if ctx.sgdef else None,
-            signalEncodings = ctx.setdef.value if ctx.setdef else None,
-            signalRepresentations = ctx.srdef.value if ctx.srdef else None,
+            signalGroups = ctx.sgdef.value if ctx.sgdef else [],
+            signalEncodings = ctx.setdef.value if ctx.setdef else [],
+            signalRepresentations = ctx.srdef.value if ctx.srdef else [],
         )
 
     def exitLin_protocol_version_def(self, ctx):
@@ -108,8 +108,8 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = ctx.i.value
 
     def exitAttributes_def(self, ctx):
-        sid = ctx.sid.value
-        fid = ctx.fid.value
+        sid = ctx.sid.value if ctx.sid else None
+        fid = ctx.fid.value if ctx.fid else None
         v = ctx.v.value if ctx.v else None
         sn0 = ctx.sn0.value if ctx.sn0 else None
         sn1s = [x.value for x in ctx.sn1s]
