@@ -38,6 +38,7 @@ class LdfListener(antlr4.ParseTreeListener):
         self.value = dict(
             protocolVersion = ctx.pv.value,
             languageVersion = ctx.lv.value,
+	    fileRevision = ctx.fr.value if ctx.fr else None,
             speed = ctx.ls.value,
             channelName = ctx.cn.value if ctx.cn else None,
             nodes = ctx.ndef.value,
@@ -60,9 +61,14 @@ class LdfListener(antlr4.ParseTreeListener):
 
     def exitLin_language_version_def(self, ctx):
         ctx.value = ctx.s.value
+        print("Language-Ver:", ctx.value)
+
+    def exitLin_file_revision_def(self, ctx):
+        ctx.value = ctx.s.value
+        print("File_Revision:", ctx.value)
 
     def exitLin_speed_def(self, ctx):
-        ctx.value = ctx.n.value
+        ctx.value = ctx.n.value if ctx.n else None
 
     def exitChannel_name_def(self, ctx):
         ctx.value = ctx.i.value
@@ -90,9 +96,9 @@ class LdfListener(antlr4.ParseTreeListener):
     def exitNode_attribute(self, ctx):
         name = ctx.name.value
         version = ctx.version.value
-        n0 = ctx.n0.value
-        n1 = ctx.n1.value
-        attrs = ctx.attrs.value
+        n0 = ctx.n0.value if ctx.n0 else None
+        n1 = ctx.n1.value if ctx.n1 else None
+        attrs = ctx.attrs.value if ctx.attrs else None
         ctx.value = dict(name = name, version = version, configuredNAD = n0, initialNAD = n1, attrs = attrs)
 
     def exitProtocol_version(self, ctx):
@@ -105,13 +111,13 @@ class LdfListener(antlr4.ParseTreeListener):
         sid = ctx.sid.value
         fid = ctx.fid.value
         v = ctx.v.value if ctx.v else None
-        sn0 = ctx.sn0.value
+        sn0 = ctx.sn0.value if ctx.sn0 else None
         sn1s = [x.value for x in ctx.sn1s]
-        cf = ctx.cf.value
-        p2Min = ctx.p2Min.value
-        stMin = ctx.stMin.value
-        nAs = ctx.nAs.value
-        nCr = ctx.nCr.value
+        cf = ctx.cf.value if ctx.cf else None
+        p2Min = ctx.p2Min.value if ctx.p2Min else None
+        stMin = ctx.stMin.value if ctx.stMin else None
+        nAs = ctx.nAs.value if ctx.nAs else None
+        nCr = ctx.nCr.value if ctx.nCr else None
         ctx.value = dict(supplierID = sid, functionID = fid, variant = v, responseErrorSignal = sn0, faultStateSignals = sn1s,
                 p2Min = p2Min, stMin = stMin, nAs = nAs, nCr = nCr, configurableFrames = cf
         )
@@ -311,7 +317,7 @@ class LdfListener(antlr4.ParseTreeListener):
         if ctx.frameName:
             cmd = ctx.frameName.value
         else:
-            cmd = ctx.c.value
+            cmd = ctx.c.text
         if cmd == 'AssignNAD':
             nodeName = ctx.nodeName.value
         elif cmd == 'ConditionalChangeNAD':
@@ -333,7 +339,7 @@ class LdfListener(antlr4.ParseTreeListener):
         elif cmd == 'AssignFrameIdRange':
             nodeName = ctx.nodeName.value
             frameIndex = ctx.frameIndex.value
-            pids = [p.value for p in ctx.p]
+            pids = [p.value for p in ctx.pids]
         elif cmd == 'FreeFormat':
             d1 = ctx.d1.value
             d2 = ctx.d2.value
@@ -376,10 +382,10 @@ class LdfListener(antlr4.ParseTreeListener):
             value = ctx.p.value
             vtype = "range"
         elif ctx.b:
-            value = ctx.b.value
+            value = None
             vtype = "bcd"
         elif ctx.a:
-            value = ctx.a.name
+            value = None
             vtype = "ascii"
         ctx.value = dict(value = value, valueType = vtype)
 
@@ -388,7 +394,9 @@ class LdfListener(antlr4.ParseTreeListener):
         ctx.value = ctx.i.value
 
     def exitLogical_value(self, ctx):
-        pass
+        s = ctx.s.value
+        t = ctx.t.value if ctx.t else None
+        ctx.value = dict(signalValue = s, text = t)
 
     def exitPhysical_range(self, ctx):
         minValue = ctx.minValue.value

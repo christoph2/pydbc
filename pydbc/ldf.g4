@@ -83,6 +83,7 @@ lin_description_file:
     'LIN_description_file' ';'
     pv = lin_protocol_version_def
     lv = lin_language_version_def
+	fr = lin_file_revision_def?
     ls = lin_speed_def
     cn = channel_name_def?
     ndef = node_def
@@ -107,6 +108,11 @@ lin_protocol_version_def:
 lin_language_version_def:
     'LIN_language_version' '=' s = stringValue ';'
     ;
+
+lin_file_revision_def:
+	'LDF_file_revision' '=' s = stringValue ';' 	// ISO17987
+	;
+
 
 lin_speed_def:
     'LIN_speed' '=' n = number 'kbps' ';'
@@ -159,8 +165,8 @@ diag_address:
     ;
 
 attributes_def:
-    'product_id' '=' sid = supplier_id ',' fid = function_id (',' v = variant)? ';'
-    'response_error' '=' sn0 = signal_name ';'
+    ('product_id' '=' sid = supplier_id ',' fid = function_id (',' v = variant)? ';')? // Mandatory for LIN >= 2.2.
+    ('response_error' '=' sn0 = signal_name ';')? // Mandatory for LIN >= 2.2.
     ('fault_state_signals' '=' sn1s += signal_name (',' sn1s += signal_name)* ';')?
     ('P2_min' '=' p2Min = number 'ms' ';')?
     ('ST_min' '=' stMin = number 'ms' ';')?
@@ -370,7 +376,7 @@ event_triggered_frame_def:
     ;
 
 event_triggered_frame_item:
-    e = event_trig_frm_name ':' c = collision_resolving_schedule_table ',' fid = frame_id (',' items += frame_name ';')*
+    e = event_trig_frm_name ':' c = collision_resolving_schedule_table ',' fid = frame_id (',' items += frame_name)* ';'
     ;
 
 event_trig_frm_name:

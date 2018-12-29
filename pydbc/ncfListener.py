@@ -38,16 +38,16 @@ class NcfListener(antlr4.ParseTreeListener):
         self.value = dict(version = v, nodes = nodes)
 
     def exitLanguage_version(self, ctx):
-        s = ctx.s.value
+        s = ctx.s.value if ctx.s else None
         ctx.value = s
 
     def exitNode_definition(self, ctx):
         name = ctx.name.value
-        g = ctx.g.value
-        d = ctx.d.value
-        f = ctx.f.value
-        e = ctx.e.value
-        s = ctx.s.value
+        g = ctx.g.value if ctx.g else None
+        d = ctx.d.value if ctx.d else None
+        f = ctx.f.value if ctx.d else None
+        e = ctx.e.value if ctx.e else None
+        s = ctx.s.value if ctx.s else None
         t = ctx.t.value if ctx.t else None
         ctx.value = dict(name = name, general = g, diagnostic = d, frames= f, encodings = e, status = s, freeText = t)
 
@@ -167,7 +167,7 @@ class NcfListener(antlr4.ParseTreeListener):
         items = [x.value for x in ctx.items]
         ctx.value = dict(name = name, values = items)
 
-    def exitEncoding_definition_value(self, ctx):
+    def exitSignal_encoding_value(self, ctx):
         if ctx.l:
             value = ctx.l.value
             vtype = "logical"
@@ -175,20 +175,20 @@ class NcfListener(antlr4.ParseTreeListener):
             value = ctx.p.value
             vtype = "range"
         elif ctx.b:
-            value = ctx.b.value
+            value = None
             vtype = "bcd"
         elif ctx.a:
-            value = ctx.a.name
+            value = None
             vtype = "ascii"
         ctx.value = dict(value = value, valueType = vtype)
 
-    def exitEncoding_name(self, ctx):
+    def exitSignal_encoding_type_name(self, ctx):
         ctx.value = ctx.i.value
 
     def exitLogical_value(self, ctx):
         s = ctx.s.value
         t = ctx.t.value if ctx.t else None
-        ctx.value = dict(signal = s, text = t)
+        ctx.value = dict(signalValue = s, text = t)
 
     def exitPhysical_range(self, ctx):
         #'physical_value' ',' minValue = min_value ',' maxValue = max_value ',' s = scale ',' o = offset (',' t = text_info)? ';'
