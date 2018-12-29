@@ -24,6 +24,11 @@ class ldfVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ldfParser#lin_file_revision_def.
+    def visitLin_file_revision_def(self, ctx:ldfParser.Lin_file_revision_defContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ldfParser#lin_speed_def.
     def visitLin_speed_def(self, ctx:ldfParser.Lin_speed_defContext):
         return self.visitChildren(ctx)

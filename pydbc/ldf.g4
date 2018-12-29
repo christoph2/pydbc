@@ -172,7 +172,7 @@ attributes_def:
     ('ST_min' '=' stMin = number 'ms' ';')?
     ('N_As_timeout' '=' nAs = number 'ms' ';')?
     ('N_Cr_timeout' '=' nCr = number 'ms' ';')?
-    cf = configurable_frames
+    cf = configurable_frames?
     ;
 
 supplier_id:
