@@ -99,7 +99,7 @@ node_definition:
         g = general_definition
         d = diagnostic_definition
         f = frame_definition
-        e = encoding_definition     // Not 2.0
+        e = encoding_definition?     // Not 2.0
         s = status_management
         t = free_text_definition?
     '}'
@@ -116,20 +116,11 @@ general_definition:
         'function' '=' fun = function_id ';'
         'variant' '=' var = variant_id ';'
         'bitrate' '=' br = bitrate_definition ';'
-        'sends_wake_up_signal' '=' tf = ('yes' | 'no') ';'
+        ('sends_wake_up_signal' '=' tf = ('yes' | 'no') ';')? // Not 2.0
+		('volt_range' '=' vfrom = number ',' vto = number ';')? // optional in 2.0
+		('temp_range' '=' tfrom = number ',' tto = number ';')? // optional in 2.0
+		('conformance' '=' conf = stringValue ';')? // optional in 2.0
     '}'
-/*
-general {
-    LIN_language_version = <protocol_version> ;
-    supplier = <supplier_id> ;
-    function = <function_id> ;
-    variant = <variant_id> ;
-    bitrate = <bitrate_definition> ;
-    (volt_range = real_or_integer, real_or_integer ;)
-    (temp_range = real_or_integer, real_or_integer ;)
-    (conformance = char_string ;)
-}
-*/
     ;
 
 protocol_version:
@@ -160,12 +151,12 @@ bitrate:
 
 diagnostic_definition:
     'diagnostic' '{'
-        'NAD' '=' lhs = intValue (('to' rhs = intValue) | (',' nads += intValue)*) ';'
-        'diagnostic_class' '=' dc = intValue ';'
+        'NAD' '=' lhs = intValue (('to' rhs = intValue) | (',' nads += intValue)*) ';' // Range (to) new in 2.2
+        ('diagnostic_class' '=' dc = intValue ';')? // Required in 2.2
         ('P2_min' '=' p2Min = number 'ms' ';')?
         ('ST_min' '=' stMin = number 'ms' ';')?
-        ('N_As_timeout' '=' nAs = number 'ms' ';')?
-        ('N_Cr_timeout' '=' nCr = number 'ms' ';')?
+        ('N_As_timeout' '=' nAs = number 'ms' ';')? // New in 2.2
+        ('N_Cr_timeout' '=' nCr = number 'ms' ';')? // New in 2.2
         ('support_sid' '{' sids += intValue (',' sids += intValue)* '}' ';')?
         ('max_message_length' '=' mml = intValue ';')?
     '}'
@@ -193,7 +184,7 @@ frame_name:
     ;
 
 frame_properties:
-    // message_ID = intValue ';' // 2.0
+    // message_ID = intValue ';' // Required in 2.0
     'length' '=' l = intValue ';'
     ('min_period' '=' minValue = intValue 'ms' ';')?
     ('max_period' '=' maxValue = intValue 'ms' ';')?
@@ -297,7 +288,7 @@ text_info:
 status_management:
     'status_management' '{'
         'response_error' '=' r = identifierValue ';'
-        ('fault_state_signals' '=' values += identifierValue (',' values += identifierValue)* ';')?
+        ('fault_state_signals' '=' values += identifierValue (',' values += identifierValue)* ';')? // New in 2.2
     '}'
     ;
 

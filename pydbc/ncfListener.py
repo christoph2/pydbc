@@ -61,7 +61,15 @@ class NcfListener(antlr4.ParseTreeListener):
         var = ctx.var.value
         br = ctx.br.value
         tf = True if ctx.tf.text == "yes" else False
-        ctx.value = dict(protocolVersion = pv, supplier = sup, function = fun, variant = var, bitrate = br, wakeupSignal = tf)
+        vfrom = ctx.vfrom.value if ctx.vfrom else None
+        vto = ctx.vto.value if ctx.vto else None
+        tfrom = ctx.tfrom.value if ctx.tfrom else None
+        tto = ctx.tto.value if ctx.tto else None
+        conf = ctx.conf.value if ctx.conf else None
+        ctx.value = dict(
+            protocolVersion = pv, supplier = sup, function = fun, variant = var, bitrate = br, wakeupSignal = tf,
+            voltageFrom = vfrom, voltageTo = vto, temperatureFrom = tfrom, temperatureTo = tto, conformance = conf,
+        )
 
     def exitProtocol_version(self, ctx):
         ctx.value = ctx.s.value
