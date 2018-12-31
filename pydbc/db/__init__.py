@@ -47,7 +47,7 @@ PAGE_SIZE = mmap.PAGESIZE
 DB_EXTENSION = "vndb"
 
 def regexer(expr, value):
-    return re.search(expr, value, re.UNICODE) is not None
+    return re.match(expr, value, re.UNICODE) is not None
 
 def calculateCacheSize(value):
     return -(value // PAGE_SIZE)
@@ -183,7 +183,8 @@ class CanDatabase(object):
     def fetchFromTable(self, cur, tname, columns = None, where = None, orderBy = None):
         whereClause = "" if not where else "WHERE {}".format(where)
         orderByClause = "ORDER BY rowid" if not orderBy else "ORDER BY {}".format(orderBy)
-        result = cur.execute("""SELECT * FROM {} {} {}""".format(tname, whereClause, orderByClause), [])
+        columnsClause = columns if columns else "*"
+        result = cur.execute("""SELECT {} FROM {} {} {}""".format(columnsClause, tname, whereClause, orderByClause), [])
         while True:
             row = cur.fetchone()
             if row is None:
