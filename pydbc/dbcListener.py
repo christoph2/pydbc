@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -28,7 +28,6 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 
-from collections import OrderedDict
 import re
 
 import antlr4
@@ -70,7 +69,7 @@ class DbcListener(antlr4.ParseTreeListener):
         return attr().getText() if attr() else ''
 
     def exitDbcfile(self, ctx):
-        self.value = OrderedDict(
+        self.value = dict(
             version = ctx.version().value,
             newSymbols = ctx.newSymbols().value,
             bitTiming = ctx.bitTiming().value,
@@ -98,7 +97,7 @@ class DbcListener(antlr4.ParseTreeListener):
 
     def exitMessageTransmitter(self, ctx):
         transmitters = ctx.tx.value
-        ctx.value = OrderedDict(messageID = ctx.messageID.value, transmitters = transmitters)
+        ctx.value = dict(messageID = ctx.messageID.value, transmitters = transmitters)
 
     def exitSignalExtendedValueTypeList(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -107,19 +106,19 @@ class DbcListener(antlr4.ParseTreeListener):
         messageID = ctx.messageID.value
         signalName = ctx.signalName.value
         valType = ctx.valType.value  # TODO: Validate ('0' | '1' | '2' | '3')
-        ctx.value = OrderedDict(messageID = messageID, signalName = signalName, valueType = valType)
+        ctx.value = dict(messageID = messageID, signalName = signalName, valueType = valType)
 
     def exitMessages(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
     def exitMessage(self, ctx):
-        ctx.value = OrderedDict(messageID = ctx.messageID.value, name = ctx.messageName.value, dlc = ctx.messageSize.value,
+        ctx.value = dict(messageID = ctx.messageID.value, name = ctx.messageName.value, dlc = ctx.messageSize.value,
             transmitter = ctx.transmt.text if ctx.transmt else None, signals = [x.value for x in ctx.sgs]
         )
 
     def exitSignal(self, ctx):
         # TODO: Check signals for multiple multiplexors!
-        ctx.value = OrderedDict(name = ctx.signalName.value, startBit = ctx.startBit.value, signalSize = ctx.signalSize.value,
+        ctx.value = dict(name = ctx.signalName.value, startBit = ctx.startBit.value, signalSize = ctx.signalSize.value,
             byteOrder = ctx.byteOrder.value, sign = -1 if ctx.sign.text == '-' else +1, factor = ctx.factor.value, offset = ctx.offset.value,
             minimum = ctx.minimum.value, maximum = ctx.maximum.value, unit = ctx.unit.value, receiver = ctx.rcv.value,
             multiplexerIndicator = ctx.mind.value if ctx.mind else None
@@ -142,7 +141,7 @@ class DbcListener(antlr4.ParseTreeListener):
         ctx.value = [x.value for x in ctx.items]
 
     def exitValueTable(self, ctx):
-        ctx.value = OrderedDict(name = ctx.name.value, description = [x.value for x in ctx.desc])
+        ctx.value = dict(name = ctx.name.value, description = [x.value for x in ctx.desc])
 
     def exitValueDescription(self, ctx):
         ctx.value = (ctx.name.value, ctx.val.value, )
@@ -151,7 +150,7 @@ class DbcListener(antlr4.ParseTreeListener):
         ctx.value = [x.value for x in ctx.ids]
 
     def exitBitTiming(self, ctx):
-        ctx.value = OrderedDict(baudrate = ctx.baudrate.value if ctx.baudrate else None,
+        ctx.value = dict(baudrate = ctx.baudrate.value if ctx.baudrate else None,
             btr1 = ctx.btr1.value if ctx.btr1 else None,
             btr2 = ctx.btr2.value if ctx.btr2 else None
         )
@@ -170,13 +169,13 @@ class DbcListener(antlr4.ParseTreeListener):
         if ctx.messageID:
             messageID = ctx.messageID.value
             signalName = ctx.signalName.value
-            di = OrderedDict(messageID = messageID, signalName = signalName)
+            di = dict(messageID = messageID, signalName = signalName)
             tp = "SG"
         else:
             envVarName = ctx.envVarName.value
-            di = OrderedDict(envVarName = envVarName)
+            di = dict(envVarName = envVarName)
             tp = "EV"
-        ctx.value = OrderedDict(type = tp, description = items, **di)
+        ctx.value = dict(type = tp, description = items, **di)
 
     def exitEnvironmentVariables(self, ctx):
         ctx.value = [x.value for x in ctx.evs]
@@ -184,7 +183,7 @@ class DbcListener(antlr4.ParseTreeListener):
     def exitEnvironmentVariable(self, ctx):
         accessType = extractAccessType(ctx.DUMMY_NODE_VECTOR().getText())
 
-        ctx.value = OrderedDict(name = ctx.name.value, varType = ctx.varType.value, minimum = ctx.minimum.value,
+        ctx.value = dict(name = ctx.name.value, varType = ctx.varType.value, minimum = ctx.minimum.value,
             maximum = ctx.maximum.value, unit = ctx.unit.value, initialValue = ctx.initialValue.value, envId = ctx.envId.value,
             accessType = accessType, accessNodes = ctx.accNodes.value
         )
@@ -197,13 +196,13 @@ class DbcListener(antlr4.ParseTreeListener):
         ctx.value = [x.value for x in ctx.evars]
 
     def exitEnvironmentVariableData(self, ctx):
-        ctx.value = OrderedDict(name = ctx.varname.value, value = ctx.value.value)
+        ctx.value = dict(name = ctx.varname.value, value = ctx.value.value)
 
     def exitSignalTypes(self, ctx):
         ctx.value =[x.value for x in ctx.sigTypes]
 
     def exitSignalType(self, ctx):
-        ctx.value = OrderedDict(name = ctx.signalTypeName.value, size = ctx.signalSize.value, byteOrder = ctx.byteOrder.value,
+        ctx.value = dict(name = ctx.signalTypeName.value, size = ctx.signalSize.value, byteOrder = ctx.byteOrder.value,
             valueType = ctx.valueType.value, factor = ctx.factor.value, offset = ctx.offset.value, minimum = ctx.minimum.value,
             maximum = ctx.maximum.value, unit = ctx.unit.value, defaultValue = ctx.defaultValue.value, valTable = ctx.valTable.value,
         )
@@ -229,7 +228,7 @@ class DbcListener(antlr4.ParseTreeListener):
         else:
             tp = "NETWORK"
             key = None
-        ctx.value = OrderedDict(type = tp, key = key, comment = comment)
+        ctx.value = dict(type = tp, key = key, comment = comment)
 
     def exitAttributeDefinitions(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -238,7 +237,7 @@ class DbcListener(antlr4.ParseTreeListener):
         objectType = ctx.objectType.text if ctx.objectType else None
         attributeName = ctx.attrName.value
         attributeValue = ctx.attrValue.value
-        ctx.value = OrderedDict(type = objectType, name = attributeName, value = attributeValue)
+        ctx.value = dict(type = objectType, name = attributeName, value = attributeValue)
 
     def exitCustomAttributeDefinitions(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -247,7 +246,7 @@ class DbcListener(antlr4.ParseTreeListener):
         objectType = ctx.objectType.text if ctx.objectType else None
         attributeName = ctx.attrName.value
         attributeValue = ctx.attrValue.value
-        ctx.value = OrderedDict(type = objectType, name = attributeName, value = attributeValue)
+        ctx.value = dict(type = objectType, name = attributeName, value = attributeValue)
 
     def exitAttributeValueType(self, ctx):
         if ctx.i00:
@@ -267,7 +266,7 @@ class DbcListener(antlr4.ParseTreeListener):
             efirst = [ctx.efirst.value]
             eitems = [x.value for x in ctx.eitems]
             value = efirst + eitems
-        ctx.value = OrderedDict(type = tp, value = value)
+        ctx.value = dict(type = tp, value = value)
 
     def exitAttributeDefaults(self, ctx):
         defaults = {}
@@ -308,31 +307,31 @@ class DbcListener(antlr4.ParseTreeListener):
         if ctx.nodeName:
             nodeName = ctx.nodeName.value
             buValue = ctx.buValue.value
-            di = OrderedDict(type = 'BU', nodeName = nodeName, value = buValue)
+            di = dict(type = 'BU', nodeName = nodeName, value = buValue)
         elif ctx.mid1:
             mid1 = ctx.mid1.value
             boValue = ctx.boValue.value
-            di = OrderedDict(type = 'BO', messageID = mid1, value = boValue)
+            di = dict(type = 'BO', messageID = mid1, value = boValue)
         elif ctx.mid2:
             mid2 = ctx.mid2.value
             signalName = ctx.signalName.value
             sgValue = ctx.sgValue.value
-            di = OrderedDict(type = 'SG', messageID = mid2, signalName = signalName, value = sgValue)
+            di = dict(type = 'SG', messageID = mid2, signalName = signalName, value = sgValue)
         elif ctx.evName:
             evName = ctx.evName.value
             evValue = ctx.evValue.value
-            di = OrderedDict(type = 'EV', envVarname = evName, value = evValue)
+            di = dict(type = 'EV', envVarname = evName, value = evValue)
         else:
             evValue = ctx.attrValue.value
             evName = None
-            di = OrderedDict(type = "NETWORK", value = evValue)
-        ctx.value = OrderedDict(name = attributeName, **di)
+            di = dict(type = "NETWORK", value = evValue)
+        ctx.value = dict(name = attributeName, **di)
 
     def exitCategoryDefinitions(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
     def exitCategoryDefinition(self, ctx):
-        ctx.value = OrderedDict(name = ctx.name.value, category = ctx.cat.value, value = ctx.num.value)
+        ctx.value = dict(name = ctx.name.value, category = ctx.cat.value, value = ctx.num.value)
 
     def exitCategories(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -341,18 +340,14 @@ class DbcListener(antlr4.ParseTreeListener):
         category = ctx.cat.value
         if ctx.nodeName:
             nodeName = ctx.nodeName.value
-            di = OrderedDict(type = 'BU', nodeName = nodeName)
+            di = dict(type = 'BU', nodeName = nodeName)
         elif ctx.mid1:
             mid1 = ctx.mid1.value
-            di = OrderedDict(type = 'BO', messageID = mid1)
-        elif ctx.mid2:  # TODO: There are no signals!!!
-            mid2 = ctx.mid2.value
-            signalName = ctx.signalName.value
-            di = OrderedDict(type = 'SG', messageID = mid2, signalName = signalName)
+            di = dict(type = 'BO', messageID = mid1)
         elif ctx.evName:
             evName = ctx.evName.value
-            di = OrderedDict(type = 'EV', envVarname = evName)
-        ctx.value = OrderedDict(category = category, **di)
+            di = dict(type = 'EV', envVarname = evName)
+        ctx.value = dict(category = category, **di)
 
     def exitIntValue(self, ctx):
         ctx.value = int(ctx.i.text) if ctx.i else None

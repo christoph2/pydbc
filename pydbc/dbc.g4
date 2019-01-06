@@ -1,7 +1,7 @@
 /*
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -256,17 +256,12 @@ customAttributeValues:
     (items += customAttributeValueForObject)*
     ;
 
-// BA_ "NWM-Stationsadresse" BU_ Console 26;
-// BA_ "GenMsgAutoGenSnd" BO_ 1540 0;
-
-// BA_REL_ "AttrNodeTx" BU_BO_REL_ Motor 1 "foo";
-
 customAttributeValueForObject:
       'BA_REL' attributeName = stringValue (
           attributeValue
-        | ('BU_BO_REL_' nodeName = identifierValue buValue = attributeValue cmValue = stringValue)
-        | ('BU_SG_REL_' mid2 = intValue signalName = identifierValue sgValue = attributeValue)
-        | ('BU_EV_REL_' evName = identifierValue evValue = attributeValue)
+        | (attrType = 'BU_BO_REL_' nodeName = identifierValue nodeAddress = intValue attrValue = attributeValue)
+        | (attrType = 'BU_SG_REL_' nodeName = identifierValue 'SG_' messageID = intValue signalName = identifierValue attrValue = attributeValue)
+        | (attrType = 'BU_EV_REL_' evName = identifierValue evValue = attributeValue)  // ???
       ) ';'
     ;
 
@@ -286,7 +281,6 @@ categories:
 category:
     'CAT_'  (('BU_' nodeName = identifierValue)
         | ('BO_' mid1 = intValue )
-        | ('SG_' mid2 = intValue signalName = identifierValue)
         | ('EV_' evName = identifierValue))
        cat = intValue
     ';'
