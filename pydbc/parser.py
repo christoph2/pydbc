@@ -52,9 +52,36 @@ def dump(tree, level = 0):
     indent(level)
     print(")")
 
+
+class BaseListener(antlr4.ParseTreeListener):
+    value = []
+
+
+    def getList(self, attr):
+        return [x for x in attr()] if attr() else []
+
+    def getTerminal(self, attr):
+        return attr().getText() if attr() else ''
+
+    def exitIntValue(self, ctx):
+        ctx.value = int(ctx.i.text) if ctx.i else None
+
+    def exitFloatValue(self, ctx):
+        ctx.value = float(ctx.f.text) if ctx.f else None
+
+    def exitNumber(self, ctx):
+        ctx.value = ctx.i.value if ctx.i else ctx.f.value
+
+    def exitStringValue(self, ctx):
+        ctx.value = ctx.s.text.strip('"') if ctx.s else None
+
+    def exitIdentifierValue(self, ctx):
+        ctx.value = ctx.i.text if ctx.i else None
+
+
 class ParserWrapper(object):
 
-    def __init__(self, grammarName, startSymbol, listener):
+    def __init__(self, grammarName, startSymbol, listener = None):
         self.grammarName = grammarName
         self.startSymbol = startSymbol
         self.lexerModule, self.lexerClass = self._load('Lexer')
@@ -76,10 +103,13 @@ class ParserWrapper(object):
         meth = getattr(parser, self.startSymbol)
         self._syntaxErrors = parser._syntaxErrors
         tree = meth()
-        listener = self.listener()
-        walker = antlr4.ParseTreeWalker()
-        walker.walk(listener, tree)
-        return listener.value
+        if self.listener:
+            listener = self.listener()
+            walker = antlr4.ParseTreeWalker()
+            walker.walk(listener, tree)
+            return listener.value
+        else:
+            return tree
 
     def parseFromFile(self, fileName, encoding = 'latin-1', trace = False):
         return self.parse(ParserWrapper.stringStream(fileName, encoding), trace)
