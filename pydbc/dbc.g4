@@ -35,6 +35,10 @@ dbcfile:
     environmentVariables        // EV_
     environmentVariablesData    // ENVVAR_DATA_
     signalTypes                 // SGTYPE_
+                                // SGTYPE_VAL_
+                                // BA_DEF_SGTYPE_
+                                // BA_SGTYPE_
+                                // SIG_TYPE_REF_
     comments                    // CM_
     attributeDefinitions        // BA_DEF_
     customAttributeDefinitions  // BA_DEF_REL_
@@ -43,7 +47,7 @@ dbcfile:
     attributeValues             // BA_
     customAttributeValues       // BA_REL_
     valueDescriptions           // VAL_
-
+    signalGroups                // SIG_GROUP_
     categoryDefinitions         // CAT_DEF_
     categories                  // CAT_
     //filter
@@ -258,11 +262,20 @@ customAttributeValues:
 
 customAttributeValueForObject:
       'BA_REL' attributeName = stringValue (
-          attributeValue
-        | (attrType = 'BU_BO_REL_' nodeName = identifierValue nodeAddress = intValue attrValue = attributeValue)
+        (  attrType = 'BU_BO_REL_' nodeName = identifierValue nodeAddress = intValue attrValue = attributeValue)
         | (attrType = 'BU_SG_REL_' nodeName = identifierValue 'SG_' messageID = intValue signalName = identifierValue attrValue = attributeValue)
         | (attrType = 'BU_EV_REL_' evName = identifierValue evValue = attributeValue)  // ???
       ) ';'
+    ;
+
+signalGroups:
+    (items += signalGroup)*
+    ;
+
+signalGroup:
+    'SIG_GROUP_' messageID = intValue groupName = identifierValue gvalue = intValue ':'
+    (signals += identifierValue)*
+    ';'
     ;
 
 categoryDefinitions:

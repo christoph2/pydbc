@@ -86,9 +86,11 @@ class DbcListener(antlr4.ParseTreeListener):
             attributeDefaults = ctx.attributeDefaults().value,
             customAttributeDefaults = ctx.customAttributeDefaults().value,
             attributeValues = ctx.attributeValues().value,
+            customAttributeValues = ctx.customAttributeValues().value,
             valueDescriptions = ctx.valueDescriptions().value,
             categoryDefinitions = ctx.categoryDefinitions().value,
             categories = ctx.categories().value,
+            signalGroups = ctx.signalGroups().value,
             signalExtendedValueTypeList = ctx.signalExtendedValueTypeList().value
         )
 
@@ -326,6 +328,25 @@ class DbcListener(antlr4.ParseTreeListener):
             evName = None
             di = dict(type = "NETWORK", value = evValue)
         ctx.value = dict(name = attributeName, **di)
+
+    def exitCustomAttributeValues(self, ctx):
+        print("CustomAttributeValues", ctx.items)
+
+    def exitCustomAttributeValueForObject(self, ctx):
+        print("customAttributeValueForObject", ctx.attrType.value)
+
+    def exitSignalGroups(self, ctx):
+        items = [x.value for x in ctx.items]
+        print("SignalGroups", items)
+        ctx.value = items
+
+    def exitSignalGroup(self, ctx):
+        messageID = ctx.messageID.value
+        groupName = ctx.groupName.value
+        gvalue = ctx.gvalue.value
+        signals = [x.value for x in ctx.signals]
+        ctx.value = dict(messageID = messageID, groupName = groupName, gvalue = gvalue, signals = signals)
+
 
     def exitCategoryDefinitions(self, ctx):
         ctx.value = [x.value for x in ctx.items]
