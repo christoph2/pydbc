@@ -30,7 +30,7 @@ __version__ = '0.1.0'
 
 import re
 
-import antlr4
+from pydbc import parser
 
 ## Attributes
 ##  GenSigStartValue    ==> to set initial value until first message is received.
@@ -59,14 +59,9 @@ def extractAccessType(value):
     else:
         return None
 
-class DbcListener(antlr4.ParseTreeListener):
 
+class DbcListener(parser.BaseListener):
 
-    def getList(self, attr):
-        return [x for x in attr()] if attr() else []
-
-    def getTerminal(self, attr):
-        return attr().getText() if attr() else ''
 
     def exitDbcfile(self, ctx):
         self.value = dict(
@@ -289,7 +284,6 @@ class DbcListener(antlr4.ParseTreeListener):
             defaults[name] = value
         ctx.value = defaults
 
-
     def exitCustomAttributeDefault(self, ctx):
         name = ctx.n.value
         value = ctx.v.value
@@ -331,6 +325,8 @@ class DbcListener(antlr4.ParseTreeListener):
 
     def exitCustomAttributeValues(self, ctx):
         print("CustomAttributeValues", ctx.items)
+        items = [x.value for x in ctx.items]
+        ctx.value = items
 
     def exitCustomAttributeValueForObject(self, ctx):
         print("customAttributeValueForObject", ctx.attrType.value)
@@ -369,19 +365,4 @@ class DbcListener(antlr4.ParseTreeListener):
             evName = ctx.evName.value
             di = dict(type = 'EV', envVarname = evName)
         ctx.value = dict(category = category, **di)
-
-    def exitIntValue(self, ctx):
-        ctx.value = int(ctx.i.text) if ctx.i else None
-
-    def exitFloatValue(self, ctx):
-        ctx.value = float(ctx.f.text) if ctx.f else None
-
-    def exitNumber(self, ctx):
-        ctx.value = ctx.i.value if ctx.i else ctx.f.value
-
-    def exitStringValue(self, ctx):
-        ctx.value = ctx.s.text.strip('"') if ctx.s else None
-
-    def exitIdentifierValue(self, ctx):
-        ctx.value = ctx.i.text if ctx.i else None
 

@@ -224,6 +224,16 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by dbcParser#signalGroups.
+    def visitSignalGroups(self, ctx:dbcParser.SignalGroupsContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by dbcParser#signalGroup.
+    def visitSignalGroup(self, ctx:dbcParser.SignalGroupContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by dbcParser#categoryDefinitions.
     def visitCategoryDefinitions(self, ctx:dbcParser.CategoryDefinitionsContext):
         return self.visitChildren(ctx)

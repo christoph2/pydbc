@@ -395,6 +395,24 @@ class dbcListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by dbcParser#signalGroups.
+    def enterSignalGroups(self, ctx:dbcParser.SignalGroupsContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#signalGroups.
+    def exitSignalGroups(self, ctx:dbcParser.SignalGroupsContext):
+        pass
+
+
+    # Enter a parse tree produced by dbcParser#signalGroup.
+    def enterSignalGroup(self, ctx:dbcParser.SignalGroupContext):
+        pass
+
+    # Exit a parse tree produced by dbcParser#signalGroup.
+    def exitSignalGroup(self, ctx:dbcParser.SignalGroupContext):
+        pass
+
+
     # Enter a parse tree produced by dbcParser#categoryDefinitions.
     def enterCategoryDefinitions(self, ctx:dbcParser.CategoryDefinitionsContext):
         pass

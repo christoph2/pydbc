@@ -64,7 +64,10 @@ class BaseListener(antlr4.ParseTreeListener):
         return attr().getText() if attr() else ''
 
     def exitIntValue(self, ctx):
-        ctx.value = int(ctx.i.text) if ctx.i else None
+        if ctx.i:
+            ctx.value = int(ctx.i.text, 10)
+        elif ctx.h:
+            ctx.value = int(ctx.h.text, 16)
 
     def exitFloatValue(self, ctx):
         ctx.value = float(ctx.f.text) if ctx.f else None

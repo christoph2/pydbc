@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -29,16 +29,15 @@ __version__ = '0.1.0'
 
 from collections import namedtuple
 
-import antlr4
+from pydbc import parser
 
-class LdfListener(antlr4.ParseTreeListener):
-
+class LdfListener(parser.BaseListener):
 
     def exitLin_description_file(self, ctx):
         self.value = dict(
             protocolVersion = ctx.pv.value,
             languageVersion = ctx.lv.value,
-	    fileRevision = ctx.fr.value if ctx.fr else None,
+            fileRevision = ctx.fr.value if ctx.fr else None,
             speed = ctx.ls.value,
             channelName = ctx.cn.value if ctx.cn else None,
             nodes = ctx.ndef.value,
@@ -438,21 +437,4 @@ class LdfListener(antlr4.ParseTreeListener):
         names = [x.value for x in ctx.names]
         ctx.value = dict(name = enc, signalNames = names)
 
-    def exitIntValue(self, ctx):
-        if ctx.i:
-            ctx.value = int(ctx.i.text, 10)
-        elif ctx.h:
-            ctx.value = int(ctx.h.text, 16)
-
-    def exitFloatValue(self, ctx):
-        ctx.value = float(ctx.f.text) if ctx.f else None
-
-    def exitNumber(self, ctx):
-        ctx.value = ctx.i.value if ctx.i else ctx.f.value
-
-    def exitStringValue(self, ctx):
-        ctx.value = ctx.s.text.strip('"') if ctx.s else None
-
-    def exitIdentifierValue(self, ctx):
-        ctx.value = ctx.i.text if ctx.i else None
 
