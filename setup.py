@@ -28,8 +28,8 @@ setup(
     url = 'https://www.github.com/Christoph2/pydbc',
     packages = find_packages(),
     install_requires = INSTALL_REQUIRES,
-    setup_requires=["pytest-runner"],
-    tests_require=["pytest"],
+#    setup_requires=["pytest-runner"],
+    tests_require=["pytest", "pytest-runner"],
     entry_points = {
         'console_scripts': [
                 'vndb_importer = pydbc.scripts.vndb_importer:main'
