@@ -1,9 +1,8 @@
 #!/bin/env/python
 
-from distutils.core import setup, Extension
 import os
 import sys
-from setuptools import find_packages
+from setuptools import find_packages, setup, Extension
 from glob import glob
 
 ANTLR_VERSION = '4.7.2'
