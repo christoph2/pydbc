@@ -261,7 +261,7 @@ customAttributeValues:
     ;
 
 customAttributeValueForObject:
-      'BA_REL' attributeName = stringValue (
+      'BA_REL_' attributeName = stringValue (
         (  attrType = 'BU_BO_REL_' nodeName = identifierValue nodeAddress = intValue attrValue = attributeValue)
         | (attrType = 'BU_SG_REL_' nodeName = identifierValue 'SG_' messageID = intValue signalName = identifierValue attrValue = attributeValue)
         | (attrType = 'BU_EV_REL_' evName = identifierValue evValue = attributeValue)  // ???
