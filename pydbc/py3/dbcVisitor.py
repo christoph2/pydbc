@@ -164,13 +164,13 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by dbcParser#customAttributeDefinitions.
-    def visitCustomAttributeDefinitions(self, ctx:dbcParser.CustomAttributeDefinitionsContext):
+    # Visit a parse tree produced by dbcParser#relativeAttributeDefinitions.
+    def visitRelativeAttributeDefinitions(self, ctx:dbcParser.RelativeAttributeDefinitionsContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by dbcParser#customAttributeDefinition.
-    def visitCustomAttributeDefinition(self, ctx:dbcParser.CustomAttributeDefinitionContext):
+    # Visit a parse tree produced by dbcParser#relativeAttributeDefinition.
+    def visitRelativeAttributeDefinition(self, ctx:dbcParser.RelativeAttributeDefinitionContext):
         return self.visitChildren(ctx)
 
 
@@ -189,13 +189,13 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by dbcParser#customAttributeDefaults.
-    def visitCustomAttributeDefaults(self, ctx:dbcParser.CustomAttributeDefaultsContext):
+    # Visit a parse tree produced by dbcParser#relativeAttributeDefaults.
+    def visitRelativeAttributeDefaults(self, ctx:dbcParser.RelativeAttributeDefaultsContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by dbcParser#customAttributeDefault.
-    def visitCustomAttributeDefault(self, ctx:dbcParser.CustomAttributeDefaultContext):
+    # Visit a parse tree produced by dbcParser#relativeAttributeDefault.
+    def visitRelativeAttributeDefault(self, ctx:dbcParser.RelativeAttributeDefaultContext):
         return self.visitChildren(ctx)
 
 
@@ -214,13 +214,13 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by dbcParser#customAttributeValues.
-    def visitCustomAttributeValues(self, ctx:dbcParser.CustomAttributeValuesContext):
+    # Visit a parse tree produced by dbcParser#relativeAttributeValues.
+    def visitRelativeAttributeValues(self, ctx:dbcParser.RelativeAttributeValuesContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by dbcParser#customAttributeValueForObject.
-    def visitCustomAttributeValueForObject(self, ctx:dbcParser.CustomAttributeValueForObjectContext):
+    # Visit a parse tree produced by dbcParser#relativeAttributeValueForObject.
+    def visitRelativeAttributeValueForObject(self, ctx:dbcParser.RelativeAttributeValueForObjectContext):
         return self.visitChildren(ctx)
 
 

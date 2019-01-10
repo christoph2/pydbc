@@ -324,12 +324,29 @@ class DbcListener(parser.BaseListener):
         ctx.value = dict(name = attributeName, **di)
 
     def exitRelativeAttributeValues(self, ctx):
-        print("RelativeAttributeValues", ctx.items)
         items = [x.value for x in ctx.items]
+        print("RelativeAttributeValues", items)
         ctx.value = items
 
     def exitRelativeAttributeValueForObject(self, ctx):
-        print("relativeAttributeValueForObject", ctx.attrType.value)
+        attrType = ctx.attrType.text
+        attributeName = ctx.attributeName.value
+        if attrType == "BU_BO_REL_":
+            nodeName = ctx.nodeName.value
+            nodeAddress = ctx.nodeAddress.value
+            parent = dict(nodeName = nodeName, nodeAddress = nodeAddress)
+            attrValue = ctx.attrValue.value
+        elif attrType == "BU_SG_REL_":
+            nodeName = ctx.nodeName.value
+            messageID = ctx.messageID.value
+            signalName = ctx.signalName.value
+            parent = dict(nodeName = nodeName, messageID = messageID, signalName = signalName)
+            attrValue = ctx.attrValue.value
+        elif attrType == "BU_EV_REL_":
+            evName = ctx.evName.value
+            parent = dict(evName = evName)
+            attrValue = ctx.attrValue.value
+        ctx.value = dict(attributeName = attributeName, attributeValue = attrValue, parent = parent)
 
     def exitSignalGroups(self, ctx):
         items = [x.value for x in ctx.items]

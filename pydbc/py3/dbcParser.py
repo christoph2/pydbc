@@ -8,7 +8,7 @@ import sys
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3;")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3:")
         buf.write("\u0248\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
@@ -100,19 +100,19 @@ def serializedATN():
         buf.write("\u009f\3\2\2\2\u00a1\u00a2\3\2\2\2\u00a2\r\3\2\2\2\u00a3")
         buf.write("\u00a1\3\2\2\2\u00a4\u00a5\7\7\2\2\u00a5\u00a6\5d\63\2")
         buf.write("\u00a6\u00a7\5l\67\2\u00a7\u00a8\7\4\2\2\u00a8\u00a9\5")
-        buf.write("d\63\2\u00a9\u00ad\7\66\2\2\u00aa\u00ac\5\20\t\2\u00ab")
+        buf.write("d\63\2\u00a9\u00ad\7\65\2\2\u00aa\u00ac\5\20\t\2\u00ab")
         buf.write("\u00aa\3\2\2\2\u00ac\u00af\3\2\2\2\u00ad\u00ab\3\2\2\2")
         buf.write("\u00ad\u00ae\3\2\2\2\u00ae\17\3\2\2\2\u00af\u00ad\3\2")
         buf.write("\2\2\u00b0\u00b1\7\b\2\2\u00b1\u00b3\5l\67\2\u00b2\u00b4")
         buf.write("\5\26\f\2\u00b3\u00b2\3\2\2\2\u00b3\u00b4\3\2\2\2\u00b4")
         buf.write("\u00b5\3\2\2\2\u00b5\u00b6\7\4\2\2\u00b6\u00b7\5d\63\2")
         buf.write("\u00b7\u00b8\7\t\2\2\u00b8\u00b9\5d\63\2\u00b9\u00ba\7")
-        buf.write("\n\2\2\u00ba\u00bb\5d\63\2\u00bb\u00bc\7;\2\2\u00bc\u00bd")
+        buf.write("\n\2\2\u00ba\u00bb\5d\63\2\u00bb\u00bc\7:\2\2\u00bc\u00bd")
         buf.write("\7\13\2\2\u00bd\u00be\5h\65\2\u00be\u00bf\7\f\2\2\u00bf")
         buf.write("\u00c0\5h\65\2\u00c0\u00c1\7\r\2\2\u00c1\u00c2\7\16\2")
         buf.write("\2\u00c2\u00c3\5h\65\2\u00c3\u00c4\7\t\2\2\u00c4\u00c5")
         buf.write("\5h\65\2\u00c5\u00c6\7\17\2\2\u00c6\u00c7\5j\66\2\u00c7")
-        buf.write("\u00c8\5\22\n\2\u00c8\21\3\2\2\2\u00c9\u00ce\7\66\2\2")
+        buf.write("\u00c8\5\22\n\2\u00c8\21\3\2\2\2\u00c9\u00ce\7\65\2\2")
         buf.write("\u00ca\u00cb\7\f\2\2\u00cb\u00cd\5l\67\2\u00cc\u00ca\3")
         buf.write("\2\2\2\u00cd\u00d0\3\2\2\2\u00ce\u00cc\3\2\2\2\u00ce\u00cf")
         buf.write("\3\2\2\2\u00cf\23\3\2\2\2\u00d0\u00ce\3\2\2\2\u00d1\u00d6")
@@ -156,7 +156,7 @@ def serializedATN():
         buf.write("\u012e\7\4\2\2\u012e\u012f\5d\63\2\u012f\u0130\7\16\2")
         buf.write("\2\u0130\u0131\5h\65\2\u0131\u0132\7\t\2\2\u0132\u0133")
         buf.write("\5h\65\2\u0133\u0134\7\17\2\2\u0134\u0135\5j\66\2\u0135")
-        buf.write("\u0136\5h\65\2\u0136\u0137\5d\63\2\u0137\u0138\7\65\2")
+        buf.write("\u0136\5h\65\2\u0136\u0137\5d\63\2\u0137\u0138\7\64\2")
         buf.write("\2\u0138\u0139\5.\30\2\u0139\u013a\7\5\2\2\u013a-\3\2")
         buf.write("\2\2\u013b\u0140\5l\67\2\u013c\u013d\7\f\2\2\u013d\u013f")
         buf.write("\5l\67\2\u013e\u013c\3\2\2\2\u013f\u0142\3\2\2\2\u0140")
@@ -171,7 +171,7 @@ def serializedATN():
         buf.write("\2\2\2\u0154\u0152\3\2\2\2\u0155\u0156\7\37\2\2\u0156")
         buf.write("\u0157\5l\67\2\u0157\u0158\7\4\2\2\u0158\u0159\5h\65\2")
         buf.write("\u0159\u015a\7\n\2\2\u015a\u015b\5d\63\2\u015b\u015c\7")
-        buf.write(";\2\2\u015c\u015d\7\13\2\2\u015d\u015e\5h\65\2\u015e\u015f")
+        buf.write(":\2\2\u015c\u015d\7\13\2\2\u015d\u015e\5h\65\2\u015e\u015f")
         buf.write("\7\f\2\2\u015f\u0160\5h\65\2\u0160\u0161\7\r\2\2\u0161")
         buf.write("\u0162\7\16\2\2\u0162\u0163\5h\65\2\u0163\u0164\7\t\2")
         buf.write("\2\u0164\u0165\5h\65\2\u0165\u0166\7\17\2\2\u0166\u0167")
@@ -233,7 +233,7 @@ def serializedATN():
         buf.write("\2\2\2\u01eb\u01ec\3\2\2\2\u01ec\u01ed\7\5\2\2\u01edS")
         buf.write("\3\2\2\2\u01ee\u01f0\5V,\2\u01ef\u01ee\3\2\2\2\u01f0\u01f3")
         buf.write("\3\2\2\2\u01f1\u01ef\3\2\2\2\u01f1\u01f2\3\2\2\2\u01f2")
-        buf.write("U\3\2\2\2\u01f3\u01f1\3\2\2\2\u01f4\u01f5\7\64\2\2\u01f5")
+        buf.write("U\3\2\2\2\u01f3\u01f1\3\2\2\2\u01f4\u01f5\7\'\2\2\u01f5")
         buf.write("\u0206\5j\66\2\u01f6\u01f7\7+\2\2\u01f7\u01f8\5l\67\2")
         buf.write("\u01f8\u01f9\5d\63\2\u01f9\u01fa\5N(\2\u01fa\u0207\3\2")
         buf.write("\2\2\u01fb\u01fc\7)\2\2\u01fc\u01fd\5l\67\2\u01fd\u01fe")
@@ -262,10 +262,10 @@ def serializedATN():
         buf.write("\u0237\5l\67\2\u0236\u0230\3\2\2\2\u0236\u0232\3\2\2\2")
         buf.write("\u0236\u0234\3\2\2\2\u0237\u0238\3\2\2\2\u0238\u0239\5")
         buf.write("d\63\2\u0239\u023a\7\5\2\2\u023ac\3\2\2\2\u023b\u023c")
-        buf.write("\78\2\2\u023ce\3\2\2\2\u023d\u023e\7\67\2\2\u023eg\3\2")
-        buf.write("\2\2\u023f\u0242\5d\63\2\u0240\u0242\5f\64\2\u0241\u023f")
+        buf.write("\7\67\2\2\u023ce\3\2\2\2\u023d\u023e\7\66\2\2\u023eg\3")
+        buf.write("\2\2\2\u023f\u0242\5d\63\2\u0240\u0242\5f\64\2\u0241\u023f")
         buf.write("\3\2\2\2\u0241\u0240\3\2\2\2\u0242i\3\2\2\2\u0243\u0244")
-        buf.write("\7:\2\2\u0244k\3\2\2\2\u0245\u0246\7\66\2\2\u0246m\3\2")
+        buf.write("\79\2\2\u0244k\3\2\2\2\u0245\u0246\7\65\2\2\u0246m\3\2")
         buf.write("\2\2+\u0088\u0094\u00a1\u00ad\u00b3\u00ce\u00d6\u00de")
         buf.write("\u00e6\u00f3\u00fe\u0105\u010e\u0117\u011e\u0121\u0128")
         buf.write("\u0140\u0146\u0152\u016f\u017d\u0185\u018a\u0193\u0198")
@@ -294,8 +294,7 @@ class dbcParser ( Parser ):
                      "'SIG_GROUP_'", "'SIGTYPE_VALTYPE_'", "'BA_DEF_REL_'", 
                      "'BA_REL_'", "'BA_DEF_DEF_REL_'", "'BU_SG_REL_'", "'BU_EV_REL_'", 
                      "'BU_BO_REL_'", "'SG_MUL_VAL_'", "'VERSION'", "'EV_'", 
-                     "'INT'", "'HEX'", "'FLOAT'", "'STRING'", "'ENUM'", 
-                     "'BA_REL'" ]
+                     "'INT'", "'HEX'", "'FLOAT'", "'STRING'", "'ENUM'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
@@ -309,8 +308,8 @@ class dbcParser ( Parser ):
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "<INVALID>", "<INVALID>", "<INVALID>", "DUMMY_NODE_VECTOR", 
-                      "C_IDENTIFIER", "FLOAT", "INT", "WS", "STRING", "SIGN" ]
+                      "<INVALID>", "<INVALID>", "DUMMY_NODE_VECTOR", "C_IDENTIFIER", 
+                      "FLOAT", "INT", "WS", "STRING", "SIGN" ]
 
     RULE_dbcfile = 0
     RULE_messageTransmitters = 1
@@ -343,18 +342,18 @@ class dbcParser ( Parser ):
     RULE_comment = 28
     RULE_attributeDefinitions = 29
     RULE_attributeDefinition = 30
-    RULE_customAttributeDefinitions = 31
-    RULE_customAttributeDefinition = 32
+    RULE_relativeAttributeDefinitions = 31
+    RULE_relativeAttributeDefinition = 32
     RULE_attributeValueType = 33
     RULE_attributeDefaults = 34
     RULE_attributeDefault = 35
-    RULE_customAttributeDefaults = 36
-    RULE_customAttributeDefault = 37
+    RULE_relativeAttributeDefaults = 36
+    RULE_relativeAttributeDefault = 37
     RULE_attributeValue = 38
     RULE_attributeValues = 39
     RULE_attributeValueForObject = 40
-    RULE_customAttributeValues = 41
-    RULE_customAttributeValueForObject = 42
+    RULE_relativeAttributeValues = 41
+    RULE_relativeAttributeValueForObject = 42
     RULE_signalGroups = 43
     RULE_signalGroup = 44
     RULE_categoryDefinitions = 45
@@ -376,14 +375,15 @@ class dbcParser ( Parser ):
                    "environmentVariables", "environmentVariable", "accessNodes", 
                    "environmentVariablesData", "environmentVariableData", 
                    "signalTypes", "signalType", "comments", "comment", "attributeDefinitions", 
-                   "attributeDefinition", "customAttributeDefinitions", 
-                   "customAttributeDefinition", "attributeValueType", "attributeDefaults", 
-                   "attributeDefault", "customAttributeDefaults", "customAttributeDefault", 
-                   "attributeValue", "attributeValues", "attributeValueForObject", 
-                   "customAttributeValues", "customAttributeValueForObject", 
-                   "signalGroups", "signalGroup", "categoryDefinitions", 
-                   "categoryDefinition", "categories", "category", "intValue", 
-                   "floatValue", "number", "stringValue", "identifierValue" ]
+                   "attributeDefinition", "relativeAttributeDefinitions", 
+                   "relativeAttributeDefinition", "attributeValueType", 
+                   "attributeDefaults", "attributeDefault", "relativeAttributeDefaults", 
+                   "relativeAttributeDefault", "attributeValue", "attributeValues", 
+                   "attributeValueForObject", "relativeAttributeValues", 
+                   "relativeAttributeValueForObject", "signalGroups", "signalGroup", 
+                   "categoryDefinitions", "categoryDefinition", "categories", 
+                   "category", "intValue", "floatValue", "number", "stringValue", 
+                   "identifierValue" ]
 
     EOF = Token.EOF
     T__0=1
@@ -435,14 +435,13 @@ class dbcParser ( Parser ):
     T__46=47
     T__47=48
     T__48=49
-    T__49=50
-    DUMMY_NODE_VECTOR=51
-    C_IDENTIFIER=52
-    FLOAT=53
-    INT=54
-    WS=55
-    STRING=56
-    SIGN=57
+    DUMMY_NODE_VECTOR=50
+    C_IDENTIFIER=51
+    FLOAT=52
+    INT=53
+    WS=54
+    STRING=55
+    SIGN=56
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -507,24 +506,24 @@ class dbcParser ( Parser ):
             return self.getTypedRuleContext(dbcParser.AttributeDefinitionsContext,0)
 
 
-        def customAttributeDefinitions(self):
-            return self.getTypedRuleContext(dbcParser.CustomAttributeDefinitionsContext,0)
+        def relativeAttributeDefinitions(self):
+            return self.getTypedRuleContext(dbcParser.RelativeAttributeDefinitionsContext,0)
 
 
         def attributeDefaults(self):
             return self.getTypedRuleContext(dbcParser.AttributeDefaultsContext,0)
 
 
-        def customAttributeDefaults(self):
-            return self.getTypedRuleContext(dbcParser.CustomAttributeDefaultsContext,0)
+        def relativeAttributeDefaults(self):
+            return self.getTypedRuleContext(dbcParser.RelativeAttributeDefaultsContext,0)
 
 
         def attributeValues(self):
             return self.getTypedRuleContext(dbcParser.AttributeValuesContext,0)
 
 
-        def customAttributeValues(self):
-            return self.getTypedRuleContext(dbcParser.CustomAttributeValuesContext,0)
+        def relativeAttributeValues(self):
+            return self.getTypedRuleContext(dbcParser.RelativeAttributeValuesContext,0)
 
 
         def valueDescriptions(self):
@@ -598,15 +597,15 @@ class dbcParser ( Parser ):
             self.state = 119
             self.attributeDefinitions()
             self.state = 120
-            self.customAttributeDefinitions()
+            self.relativeAttributeDefinitions()
             self.state = 121
             self.attributeDefaults()
             self.state = 122
-            self.customAttributeDefaults()
+            self.relativeAttributeDefaults()
             self.state = 123
             self.attributeValues()
             self.state = 124
-            self.customAttributeValues()
+            self.relativeAttributeValues()
             self.state = 125
             self.valueDescriptions()
             self.state = 126
@@ -2834,45 +2833,45 @@ class dbcParser ( Parser ):
         return localctx
 
 
-    class CustomAttributeDefinitionsContext(ParserRuleContext):
+    class RelativeAttributeDefinitionsContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
-            self._customAttributeDefinition = None # CustomAttributeDefinitionContext
-            self.items = list() # of CustomAttributeDefinitionContexts
+            self._relativeAttributeDefinition = None # RelativeAttributeDefinitionContext
+            self.items = list() # of RelativeAttributeDefinitionContexts
 
-        def customAttributeDefinition(self, i:int=None):
+        def relativeAttributeDefinition(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(dbcParser.CustomAttributeDefinitionContext)
+                return self.getTypedRuleContexts(dbcParser.RelativeAttributeDefinitionContext)
             else:
-                return self.getTypedRuleContext(dbcParser.CustomAttributeDefinitionContext,i)
+                return self.getTypedRuleContext(dbcParser.RelativeAttributeDefinitionContext,i)
 
 
         def getRuleIndex(self):
-            return dbcParser.RULE_customAttributeDefinitions
+            return dbcParser.RULE_relativeAttributeDefinitions
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterCustomAttributeDefinitions" ):
-                listener.enterCustomAttributeDefinitions(self)
+            if hasattr( listener, "enterRelativeAttributeDefinitions" ):
+                listener.enterRelativeAttributeDefinitions(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitCustomAttributeDefinitions" ):
-                listener.exitCustomAttributeDefinitions(self)
+            if hasattr( listener, "exitRelativeAttributeDefinitions" ):
+                listener.exitRelativeAttributeDefinitions(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitCustomAttributeDefinitions" ):
-                return visitor.visitCustomAttributeDefinitions(self)
+            if hasattr( visitor, "visitRelativeAttributeDefinitions" ):
+                return visitor.visitRelativeAttributeDefinitions(self)
             else:
                 return visitor.visitChildren(self)
 
 
 
 
-    def customAttributeDefinitions(self):
+    def relativeAttributeDefinitions(self):
 
-        localctx = dbcParser.CustomAttributeDefinitionsContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 62, self.RULE_customAttributeDefinitions)
+        localctx = dbcParser.RelativeAttributeDefinitionsContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 62, self.RULE_relativeAttributeDefinitions)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
@@ -2881,8 +2880,8 @@ class dbcParser ( Parser ):
             _la = self._input.LA(1)
             while _la==dbcParser.T__35:
                 self.state = 398
-                localctx._customAttributeDefinition = self.customAttributeDefinition()
-                localctx.items.append(localctx._customAttributeDefinition)
+                localctx._relativeAttributeDefinition = self.relativeAttributeDefinition()
+                localctx.items.append(localctx._relativeAttributeDefinition)
                 self.state = 403
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
@@ -2896,7 +2895,7 @@ class dbcParser ( Parser ):
         return localctx
 
 
-    class CustomAttributeDefinitionContext(ParserRuleContext):
+    class RelativeAttributeDefinitionContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2914,29 +2913,29 @@ class dbcParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return dbcParser.RULE_customAttributeDefinition
+            return dbcParser.RULE_relativeAttributeDefinition
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterCustomAttributeDefinition" ):
-                listener.enterCustomAttributeDefinition(self)
+            if hasattr( listener, "enterRelativeAttributeDefinition" ):
+                listener.enterRelativeAttributeDefinition(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitCustomAttributeDefinition" ):
-                listener.exitCustomAttributeDefinition(self)
+            if hasattr( listener, "exitRelativeAttributeDefinition" ):
+                listener.exitRelativeAttributeDefinition(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitCustomAttributeDefinition" ):
-                return visitor.visitCustomAttributeDefinition(self)
+            if hasattr( visitor, "visitRelativeAttributeDefinition" ):
+                return visitor.visitRelativeAttributeDefinition(self)
             else:
                 return visitor.visitChildren(self)
 
 
 
 
-    def customAttributeDefinition(self):
+    def relativeAttributeDefinition(self):
 
-        localctx = dbcParser.CustomAttributeDefinitionContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 64, self.RULE_customAttributeDefinition)
+        localctx = dbcParser.RelativeAttributeDefinitionContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 64, self.RULE_relativeAttributeDefinition)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
@@ -3222,45 +3221,45 @@ class dbcParser ( Parser ):
         return localctx
 
 
-    class CustomAttributeDefaultsContext(ParserRuleContext):
+    class RelativeAttributeDefaultsContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
-            self._customAttributeDefault = None # CustomAttributeDefaultContext
-            self.items = list() # of CustomAttributeDefaultContexts
+            self._relativeAttributeDefault = None # RelativeAttributeDefaultContext
+            self.items = list() # of RelativeAttributeDefaultContexts
 
-        def customAttributeDefault(self, i:int=None):
+        def relativeAttributeDefault(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(dbcParser.CustomAttributeDefaultContext)
+                return self.getTypedRuleContexts(dbcParser.RelativeAttributeDefaultContext)
             else:
-                return self.getTypedRuleContext(dbcParser.CustomAttributeDefaultContext,i)
+                return self.getTypedRuleContext(dbcParser.RelativeAttributeDefaultContext,i)
 
 
         def getRuleIndex(self):
-            return dbcParser.RULE_customAttributeDefaults
+            return dbcParser.RULE_relativeAttributeDefaults
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterCustomAttributeDefaults" ):
-                listener.enterCustomAttributeDefaults(self)
+            if hasattr( listener, "enterRelativeAttributeDefaults" ):
+                listener.enterRelativeAttributeDefaults(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitCustomAttributeDefaults" ):
-                listener.exitCustomAttributeDefaults(self)
+            if hasattr( listener, "exitRelativeAttributeDefaults" ):
+                listener.exitRelativeAttributeDefaults(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitCustomAttributeDefaults" ):
-                return visitor.visitCustomAttributeDefaults(self)
+            if hasattr( visitor, "visitRelativeAttributeDefaults" ):
+                return visitor.visitRelativeAttributeDefaults(self)
             else:
                 return visitor.visitChildren(self)
 
 
 
 
-    def customAttributeDefaults(self):
+    def relativeAttributeDefaults(self):
 
-        localctx = dbcParser.CustomAttributeDefaultsContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 72, self.RULE_customAttributeDefaults)
+        localctx = dbcParser.RelativeAttributeDefaultsContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 72, self.RULE_relativeAttributeDefaults)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
@@ -3269,8 +3268,8 @@ class dbcParser ( Parser ):
             _la = self._input.LA(1)
             while _la==dbcParser.T__37:
                 self.state = 447
-                localctx._customAttributeDefault = self.customAttributeDefault()
-                localctx.items.append(localctx._customAttributeDefault)
+                localctx._relativeAttributeDefault = self.relativeAttributeDefault()
+                localctx.items.append(localctx._relativeAttributeDefault)
                 self.state = 452
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
@@ -3284,7 +3283,7 @@ class dbcParser ( Parser ):
         return localctx
 
 
-    class CustomAttributeDefaultContext(ParserRuleContext):
+    class RelativeAttributeDefaultContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3301,29 +3300,29 @@ class dbcParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return dbcParser.RULE_customAttributeDefault
+            return dbcParser.RULE_relativeAttributeDefault
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterCustomAttributeDefault" ):
-                listener.enterCustomAttributeDefault(self)
+            if hasattr( listener, "enterRelativeAttributeDefault" ):
+                listener.enterRelativeAttributeDefault(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitCustomAttributeDefault" ):
-                listener.exitCustomAttributeDefault(self)
+            if hasattr( listener, "exitRelativeAttributeDefault" ):
+                listener.exitRelativeAttributeDefault(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitCustomAttributeDefault" ):
-                return visitor.visitCustomAttributeDefault(self)
+            if hasattr( visitor, "visitRelativeAttributeDefault" ):
+                return visitor.visitRelativeAttributeDefault(self)
             else:
                 return visitor.visitChildren(self)
 
 
 
 
-    def customAttributeDefault(self):
+    def relativeAttributeDefault(self):
 
-        localctx = dbcParser.CustomAttributeDefaultContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 74, self.RULE_customAttributeDefault)
+        localctx = dbcParser.RelativeAttributeDefaultContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 74, self.RULE_relativeAttributeDefault)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 453
@@ -3589,55 +3588,55 @@ class dbcParser ( Parser ):
         return localctx
 
 
-    class CustomAttributeValuesContext(ParserRuleContext):
+    class RelativeAttributeValuesContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
-            self._customAttributeValueForObject = None # CustomAttributeValueForObjectContext
-            self.items = list() # of CustomAttributeValueForObjectContexts
+            self._relativeAttributeValueForObject = None # RelativeAttributeValueForObjectContext
+            self.items = list() # of RelativeAttributeValueForObjectContexts
 
-        def customAttributeValueForObject(self, i:int=None):
+        def relativeAttributeValueForObject(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(dbcParser.CustomAttributeValueForObjectContext)
+                return self.getTypedRuleContexts(dbcParser.RelativeAttributeValueForObjectContext)
             else:
-                return self.getTypedRuleContext(dbcParser.CustomAttributeValueForObjectContext,i)
+                return self.getTypedRuleContext(dbcParser.RelativeAttributeValueForObjectContext,i)
 
 
         def getRuleIndex(self):
-            return dbcParser.RULE_customAttributeValues
+            return dbcParser.RULE_relativeAttributeValues
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterCustomAttributeValues" ):
-                listener.enterCustomAttributeValues(self)
+            if hasattr( listener, "enterRelativeAttributeValues" ):
+                listener.enterRelativeAttributeValues(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitCustomAttributeValues" ):
-                listener.exitCustomAttributeValues(self)
+            if hasattr( listener, "exitRelativeAttributeValues" ):
+                listener.exitRelativeAttributeValues(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitCustomAttributeValues" ):
-                return visitor.visitCustomAttributeValues(self)
+            if hasattr( visitor, "visitRelativeAttributeValues" ):
+                return visitor.visitRelativeAttributeValues(self)
             else:
                 return visitor.visitChildren(self)
 
 
 
 
-    def customAttributeValues(self):
+    def relativeAttributeValues(self):
 
-        localctx = dbcParser.CustomAttributeValuesContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 82, self.RULE_customAttributeValues)
+        localctx = dbcParser.RelativeAttributeValuesContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 82, self.RULE_relativeAttributeValues)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 495
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==dbcParser.T__49:
+            while _la==dbcParser.T__36:
                 self.state = 492
-                localctx._customAttributeValueForObject = self.customAttributeValueForObject()
-                localctx.items.append(localctx._customAttributeValueForObject)
+                localctx._relativeAttributeValueForObject = self.relativeAttributeValueForObject()
+                localctx.items.append(localctx._relativeAttributeValueForObject)
                 self.state = 497
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
@@ -3651,7 +3650,7 @@ class dbcParser ( Parser ):
         return localctx
 
 
-    class CustomAttributeValueForObjectContext(ParserRuleContext):
+    class RelativeAttributeValueForObjectContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3686,33 +3685,33 @@ class dbcParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return dbcParser.RULE_customAttributeValueForObject
+            return dbcParser.RULE_relativeAttributeValueForObject
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterCustomAttributeValueForObject" ):
-                listener.enterCustomAttributeValueForObject(self)
+            if hasattr( listener, "enterRelativeAttributeValueForObject" ):
+                listener.enterRelativeAttributeValueForObject(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitCustomAttributeValueForObject" ):
-                listener.exitCustomAttributeValueForObject(self)
+            if hasattr( listener, "exitRelativeAttributeValueForObject" ):
+                listener.exitRelativeAttributeValueForObject(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitCustomAttributeValueForObject" ):
-                return visitor.visitCustomAttributeValueForObject(self)
+            if hasattr( visitor, "visitRelativeAttributeValueForObject" ):
+                return visitor.visitRelativeAttributeValueForObject(self)
             else:
                 return visitor.visitChildren(self)
 
 
 
 
-    def customAttributeValueForObject(self):
+    def relativeAttributeValueForObject(self):
 
-        localctx = dbcParser.CustomAttributeValueForObjectContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 84, self.RULE_customAttributeValueForObject)
+        localctx = dbcParser.RelativeAttributeValueForObjectContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 84, self.RULE_relativeAttributeValueForObject)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 498
-            self.match(dbcParser.T__49)
+            self.match(dbcParser.T__36)
             self.state = 499
             localctx.attributeName = self.stringValue()
             self.state = 516

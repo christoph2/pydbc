@@ -287,21 +287,21 @@ class dbcListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#customAttributeDefinitions.
-    def enterCustomAttributeDefinitions(self, ctx:dbcParser.CustomAttributeDefinitionsContext):
+    # Enter a parse tree produced by dbcParser#relativeAttributeDefinitions.
+    def enterRelativeAttributeDefinitions(self, ctx:dbcParser.RelativeAttributeDefinitionsContext):
         pass
 
-    # Exit a parse tree produced by dbcParser#customAttributeDefinitions.
-    def exitCustomAttributeDefinitions(self, ctx:dbcParser.CustomAttributeDefinitionsContext):
+    # Exit a parse tree produced by dbcParser#relativeAttributeDefinitions.
+    def exitRelativeAttributeDefinitions(self, ctx:dbcParser.RelativeAttributeDefinitionsContext):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#customAttributeDefinition.
-    def enterCustomAttributeDefinition(self, ctx:dbcParser.CustomAttributeDefinitionContext):
+    # Enter a parse tree produced by dbcParser#relativeAttributeDefinition.
+    def enterRelativeAttributeDefinition(self, ctx:dbcParser.RelativeAttributeDefinitionContext):
         pass
 
-    # Exit a parse tree produced by dbcParser#customAttributeDefinition.
-    def exitCustomAttributeDefinition(self, ctx:dbcParser.CustomAttributeDefinitionContext):
+    # Exit a parse tree produced by dbcParser#relativeAttributeDefinition.
+    def exitRelativeAttributeDefinition(self, ctx:dbcParser.RelativeAttributeDefinitionContext):
         pass
 
 
@@ -332,21 +332,21 @@ class dbcListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#customAttributeDefaults.
-    def enterCustomAttributeDefaults(self, ctx:dbcParser.CustomAttributeDefaultsContext):
+    # Enter a parse tree produced by dbcParser#relativeAttributeDefaults.
+    def enterRelativeAttributeDefaults(self, ctx:dbcParser.RelativeAttributeDefaultsContext):
         pass
 
-    # Exit a parse tree produced by dbcParser#customAttributeDefaults.
-    def exitCustomAttributeDefaults(self, ctx:dbcParser.CustomAttributeDefaultsContext):
+    # Exit a parse tree produced by dbcParser#relativeAttributeDefaults.
+    def exitRelativeAttributeDefaults(self, ctx:dbcParser.RelativeAttributeDefaultsContext):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#customAttributeDefault.
-    def enterCustomAttributeDefault(self, ctx:dbcParser.CustomAttributeDefaultContext):
+    # Enter a parse tree produced by dbcParser#relativeAttributeDefault.
+    def enterRelativeAttributeDefault(self, ctx:dbcParser.RelativeAttributeDefaultContext):
         pass
 
-    # Exit a parse tree produced by dbcParser#customAttributeDefault.
-    def exitCustomAttributeDefault(self, ctx:dbcParser.CustomAttributeDefaultContext):
+    # Exit a parse tree produced by dbcParser#relativeAttributeDefault.
+    def exitRelativeAttributeDefault(self, ctx:dbcParser.RelativeAttributeDefaultContext):
         pass
 
 
@@ -377,21 +377,21 @@ class dbcListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#customAttributeValues.
-    def enterCustomAttributeValues(self, ctx:dbcParser.CustomAttributeValuesContext):
+    # Enter a parse tree produced by dbcParser#relativeAttributeValues.
+    def enterRelativeAttributeValues(self, ctx:dbcParser.RelativeAttributeValuesContext):
         pass
 
-    # Exit a parse tree produced by dbcParser#customAttributeValues.
-    def exitCustomAttributeValues(self, ctx:dbcParser.CustomAttributeValuesContext):
+    # Exit a parse tree produced by dbcParser#relativeAttributeValues.
+    def exitRelativeAttributeValues(self, ctx:dbcParser.RelativeAttributeValuesContext):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#customAttributeValueForObject.
-    def enterCustomAttributeValueForObject(self, ctx:dbcParser.CustomAttributeValueForObjectContext):
+    # Enter a parse tree produced by dbcParser#relativeAttributeValueForObject.
+    def enterRelativeAttributeValueForObject(self, ctx:dbcParser.RelativeAttributeValueForObjectContext):
         pass
 
-    # Exit a parse tree produced by dbcParser#customAttributeValueForObject.
-    def exitCustomAttributeValueForObject(self, ctx:dbcParser.CustomAttributeValueForObjectContext):
+    # Exit a parse tree produced by dbcParser#relativeAttributeValueForObject.
+    def exitRelativeAttributeValueForObject(self, ctx:dbcParser.RelativeAttributeValueForObjectContext):
         pass
 
 
