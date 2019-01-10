@@ -77,11 +77,11 @@ class DbcListener(parser.BaseListener):
             signalTypes = ctx.signalTypes().value,
             comments = ctx.comments().value,
             attributeDefinitions = ctx.attributeDefinitions().value,
-            customAttributeDefinitions = ctx.customAttributeDefinitions().value,
+            relativeAttributeDefinitions = ctx.relativeAttributeDefinitions().value,
             attributeDefaults = ctx.attributeDefaults().value,
-            customAttributeDefaults = ctx.customAttributeDefaults().value,
+            relativeAttributeDefaults = ctx.relativeAttributeDefaults().value,
             attributeValues = ctx.attributeValues().value,
-            customAttributeValues = ctx.customAttributeValues().value,
+            relativeAttributeValues = ctx.relativeAttributeValues().value,
             valueDescriptions = ctx.valueDescriptions().value,
             categoryDefinitions = ctx.categoryDefinitions().value,
             categories = ctx.categories().value,
@@ -236,10 +236,10 @@ class DbcListener(parser.BaseListener):
         attributeValue = ctx.attrValue.value
         ctx.value = dict(type = objectType, name = attributeName, value = attributeValue)
 
-    def exitCustomAttributeDefinitions(self, ctx):
+    def exitRelativeAttributeDefinitions(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
-    def exitCustomAttributeDefinition(self, ctx):
+    def exitRelativeAttributeDefinition(self, ctx):
         objectType = ctx.objectType.text if ctx.objectType else None
         attributeName = ctx.attrName.value
         attributeValue = ctx.attrValue.value
@@ -277,14 +277,14 @@ class DbcListener(parser.BaseListener):
         value = ctx.v.value
         ctx.value = (name, value)
 
-    def exitCustomAttributeDefaults(self, ctx):
+    def exitRelativeAttributeDefaults(self, ctx):
         defaults = {}
         for item in ctx.items:
             name, value = item.value
             defaults[name] = value
         ctx.value = defaults
 
-    def exitCustomAttributeDefault(self, ctx):
+    def exitRelativeAttributeDefault(self, ctx):
         name = ctx.n.value
         value = ctx.v.value
         ctx.value = (name, value)
@@ -323,13 +323,13 @@ class DbcListener(parser.BaseListener):
             di = dict(type = "NETWORK", value = evValue)
         ctx.value = dict(name = attributeName, **di)
 
-    def exitCustomAttributeValues(self, ctx):
-        print("CustomAttributeValues", ctx.items)
+    def exitRelativeAttributeValues(self, ctx):
+        print("RelativeAttributeValues", ctx.items)
         items = [x.value for x in ctx.items]
         ctx.value = items
 
-    def exitCustomAttributeValueForObject(self, ctx):
-        print("customAttributeValueForObject", ctx.attrType.value)
+    def exitRelativeAttributeValueForObject(self, ctx):
+        print("relativeAttributeValueForObject", ctx.attrType.value)
 
     def exitSignalGroups(self, ctx):
         items = [x.value for x in ctx.items]

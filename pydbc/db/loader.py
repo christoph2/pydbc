@@ -108,6 +108,9 @@ class Loader(object):
         defaults = tree['attributeDefaults']
         self.insertAttributeDefinitions(cur, tree['attributeDefinitions'], defaults)
         self.insertAttributes(cur, tree['attributeValues'])
+        defaults = tree['relativeAttributeDefaults']
+
+        self.insertRelativeAttributeDefinitions(cur, tree['relativeAttributeDefinitions'], defaults)
         self.insertCategoryDefinitions(cur, tree['categoryDefinitions'])
         self.insertCategoryValues(cur, tree['categories'])
         self.db.commitTransaction()
@@ -243,6 +246,11 @@ class Loader(object):
                 objType = CategoryType.ENV_VAR
                 rid = self.queries.fetchEnvVarId(envVarname)
             self.db.insertStatement(cur, "Category_Value", "Object_ID,Category_Definition,Objecttype", rid, catId, objType)
+
+
+    def insertRelativeAttributeDefinitions(self, cur, attrs, defaults):
+        print("C-A-D: {}\n\n{}".format(attrs, defaults))
+
 
     def insertAttributeDefinitions(self, cur, attrs, defaults):
         for attr in attrs:

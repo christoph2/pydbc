@@ -25,31 +25,31 @@
 grammar dbc;
 
 dbcfile:
-    version                     // VERSION
-    newSymbols                  // NS_
-    bitTiming                   // BS_
-    nodes                       // BU_
-    valueTables                 // VAL_TABLE_
-    messages                    // BO_
-    messageTransmitters         // BO_TX_BU_
-    environmentVariables        // EV_
-    environmentVariablesData    // ENVVAR_DATA_
-    signalTypes                 // SGTYPE_
-                                // SGTYPE_VAL_
-                                // BA_DEF_SGTYPE_
-                                // BA_SGTYPE_
-                                // SIG_TYPE_REF_
-    comments                    // CM_
-    attributeDefinitions        // BA_DEF_
-    customAttributeDefinitions  // BA_DEF_REL_
-    attributeDefaults           // BA_DEF_DEF_
-    customAttributeDefaults     // BA_DEF_DEF_REL_
-    attributeValues             // BA_
-    customAttributeValues       // BA_REL_
-    valueDescriptions           // VAL_
-    signalGroups                // SIG_GROUP_
-    categoryDefinitions         // CAT_DEF_
-    categories                  // CAT_
+    version                         // VERSION
+    newSymbols                      // NS_
+    bitTiming                       // BS_
+    nodes                           // BU_
+    valueTables                     // VAL_TABLE_
+    messages                        // BO_
+    messageTransmitters             // BO_TX_BU_
+    environmentVariables            // EV_
+    environmentVariablesData        // ENVVAR_DATA_
+    signalTypes                     // SGTYPE_
+                                    // SGTYPE_VAL_
+                                    // BA_DEF_SGTYPE_
+                                    // BA_SGTYPE_
+                                    // SIG_TYPE_REF_
+    comments                        // CM_
+    attributeDefinitions            // BA_DEF_
+    relativeAttributeDefinitions    // BA_DEF_REL_
+    attributeDefaults               // BA_DEF_DEF_
+    relativeAttributeDefaults       // BA_DEF_DEF_REL_
+    attributeValues                 // BA_
+    relativeAttributeValues         // BA_REL_
+    valueDescriptions               // VAL_
+    signalGroups                    // SIG_GROUP_
+    categoryDefinitions             // CAT_DEF_
+    categories                      // CAT_
     //filter
     //signalTypeRefs
     //signalGroups
@@ -204,11 +204,11 @@ attributeDefinition:
     'BA_DEF_' objectType = ('BU_' | 'BO_' | 'SG_' | 'EV_')?   attrName = stringValue  attrValue = attributeValueType ';'
     ;
 
-customAttributeDefinitions:
-    (items += customAttributeDefinition)*
+relativeAttributeDefinitions:
+    (items += relativeAttributeDefinition)*
     ;
 
-customAttributeDefinition:
+relativeAttributeDefinition:
     'BA_DEF_REL_' objectType = ('BU_SG_REL_'| 'BU_EV_REL_'| 'BU_BO_REL_')?   attrName = stringValue  attrValue = attributeValueType ';'
     ;
 
@@ -228,11 +228,11 @@ attributeDefault:
     'BA_DEF_DEF_' n = stringValue v = attributeValue ';'
     ;
 
-customAttributeDefaults:
-    (items += customAttributeDefault)*
+relativeAttributeDefaults:
+    (items += relativeAttributeDefault)*
     ;
 
-customAttributeDefault:
+relativeAttributeDefault:
     'BA_DEF_DEF_REL_' n = stringValue v = attributeValue ';'
     ;
 
@@ -256,11 +256,11 @@ attributeValueForObject:
     ;
 
 ///
-customAttributeValues:
-    (items += customAttributeValueForObject)*
+relativeAttributeValues:
+    (items += relativeAttributeValueForObject)*
     ;
 
-customAttributeValueForObject:
+relativeAttributeValueForObject:
       'BA_REL_' attributeName = stringValue (
         (  attrType = 'BU_BO_REL_' nodeName = identifierValue nodeAddress = intValue attrValue = attributeValue)
         | (attrType = 'BU_SG_REL_' nodeName = identifierValue 'SG_' messageID = intValue signalName = identifierValue attrValue = attributeValue)
