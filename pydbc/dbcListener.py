@@ -302,51 +302,55 @@ class DbcListener(parser.BaseListener):
         attributeName = ctx.attributeName.value
         if ctx.nodeName:
             nodeName = ctx.nodeName.value
-            buValue = ctx.buValue.value
-            di = dict(type = 'BU', nodeName = nodeName, value = buValue)
+            attrValue = ctx.buValue.value
+            di = dict(attributeType = 'BU', nodeName = nodeName)
         elif ctx.mid1:
             mid1 = ctx.mid1.value
-            boValue = ctx.boValue.value
-            di = dict(type = 'BO', messageID = mid1, value = boValue)
+            attrValue = ctx.boValue.value
+            di = dict(attributeType = 'BO', messageID = mid1)
         elif ctx.mid2:
             mid2 = ctx.mid2.value
             signalName = ctx.signalName.value
-            sgValue = ctx.sgValue.value
-            di = dict(type = 'SG', messageID = mid2, signalName = signalName, value = sgValue)
+            attrValue = ctx.sgValue.value
+            di = dict(attributeType = 'SG', messageID = mid2, signalName = signalName)
         elif ctx.evName:
             evName = ctx.evName.value
-            evValue = ctx.evValue.value
-            di = dict(type = 'EV', envVarname = evName, value = evValue)
+            attrValue = ctx.evValue.value
+            di = dict(attributeType = 'EV', envVarname = evName)
         else:
-            evValue = ctx.attrValue.value
             evName = None
-            di = dict(type = "NETWORK", value = evValue)
-        ctx.value = dict(name = attributeName, **di)
+            attrValue = ctx.attrValue.value
+            di = dict(attributeType = "NETWORK")
+        ctx.value = dict(name = attributeName, attributeValue = attrValue, **di)
 
     def exitRelativeAttributeValues(self, ctx):
         items = [x.value for x in ctx.items]
-        print("RelativeAttributeValues", items)
         ctx.value = items
 
     def exitRelativeAttributeValueForObject(self, ctx):
         attrType = ctx.attrType.text
         attributeName = ctx.attributeName.value
+        nodeName = ctx.nodeName.value
         if attrType == "BU_BO_REL_":
-            nodeName = ctx.nodeName.value
             nodeAddress = ctx.nodeAddress.value
-            parent = dict(nodeName = nodeName, nodeAddress = nodeAddress)
+            attributeType = "REL_NODE"
+            parent = dict(nodeAddress = nodeAddress)
             attrValue = ctx.attrValue.value
         elif attrType == "BU_SG_REL_":
-            nodeName = ctx.nodeName.value
             messageID = ctx.messageID.value
             signalName = ctx.signalName.value
+            attributeType = "REL_SIGNAL"
             parent = dict(nodeName = nodeName, messageID = messageID, signalName = signalName)
             attrValue = ctx.attrValue.value
         elif attrType == "BU_EV_REL_":
             evName = ctx.evName.value
+            attributeType = "REL_ENV_VAR"
             parent = dict(evName = evName)
             attrValue = ctx.attrValue.value
-        ctx.value = dict(attributeName = attributeName, attributeValue = attrValue, parent = parent)
+        ctx.value = dict(
+            attributeType = attributeType, attributeName = attributeName, attributeValue = attrValue,
+            nodeName = nodeName, parent = parent
+        )
 
     def exitSignalGroups(self, ctx):
         items = [x.value for x in ctx.items]
