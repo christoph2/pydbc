@@ -88,7 +88,11 @@ EV_ ${comment['k0']} "${comment['comment']}";
 %endif
 %endfor
 %for attr in db.attributeDefinitions():
+%if attr['Objecttype'] in (0, 1, 2, 3, 4):
 BA_DEF_ \
+%else:
+BA_DEF_REL_ \
+%endif
 %if attr['Objecttype'] == 0:
 BU_ \
 %elif attr['Objecttype'] == 1:
@@ -97,6 +101,12 @@ BO_ \
 SG_ \
 %elif attr['Objecttype'] == 3:
 EV_ \
+%elif attr['Objecttype'] == 5:
+BU_BO_REL_ \
+%elif attr['Objecttype'] == 6:
+BU_SG_REL_ \
+%elif attr['Objecttype'] == 7:
+BU_EV_REL_ \
 %endif
  "${attr['Name']}" \
 %if attr['Valuetype'] == 0:
@@ -114,9 +124,19 @@ ENUM  ${','.join(['"{}"'.format(n) for n in attr['Enumvalues'].split(";")])}\
 %endfor
 %for attr in db.attributeDefinitions():
 %if attr['Default_Number'] is not None:
-BA_DEF_DEF_  "${attr['Name']}" ${"{:.14G}".format(attr['Default_Number'])};
+%if attr['Objecttype'] in (0, 1, 2, 3, 4):
+BA_DEF_DEF_  \
+%else:
+BA_DEF_DEF_REL_ \
+%endif
+"${attr['Name']}" ${"{:.14G}".format(attr['Default_Number'])};
 %elif attr['Default_String'] is not None:
-BA_DEF_DEF_  "${attr['Name']}" "${attr['Default_String']}";
+%if attr['Objecttype'] in (0, 1, 2, 3, 4):
+BA_DEF_DEF_  \
+%else:
+BA_DEF_DEF_REL_ \
+%endif
+"${attr['Name']}" "${attr['Default_String']}";
 %endif
 %endfor
 %for attr in db.attributeValues():

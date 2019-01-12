@@ -340,13 +340,13 @@ class DbcListener(parser.BaseListener):
             messageID = ctx.messageID.value
             signalName = ctx.signalName.value
             attributeType = "REL_SIGNAL"
-            parent = dict(nodeName = nodeName, messageID = messageID, signalName = signalName)
+            parent = dict(messageID = messageID, signalName = signalName)
             attrValue = ctx.attrValue.value
         elif attrType == "BU_EV_REL_":
             evName = ctx.evName.value
             attributeType = "REL_ENV_VAR"
             parent = dict(evName = evName)
-            attrValue = ctx.attrValue.value
+            attrValue = ctx.evValue.value if ctx.evValue else "???"
         ctx.value = dict(
             attributeType = attributeType, attributeName = attributeName, attributeValue = attrValue,
             nodeName = nodeName, parent = parent
