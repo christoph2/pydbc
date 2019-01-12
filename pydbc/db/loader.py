@@ -346,30 +346,40 @@ class Loader(object):
             )
 
     def insertRelativeAttributes(self, cur, attrs):
-        '''
-            CREATE TABLE IF NOT EXISTS AttributeRel_Value (
-                Object_ID INTEGER NOT NULL DEFAULT 0,
-                Attribute_Definition INTEGER NOT NULL DEFAULT 0,
-                Num_Value FLOAT8 DEFAULT 0,
-                String_Value TEXT,
-                Opt_Object_ID_1 INTEGER DEFAULT 0,
-                Opt_Object_ID_2 INTEGER DEFAULT 0,
-                BLOB_Value BLOB,
-                PRIMARY KEY(Object_ID,Attribute_Definition,Opt_Object_ID_1,Opt_Object_ID_2),
-                FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID) ON UPDATE CASCADE ON DELETE RESTRICT
-            );
-
-            {'attributeName': 'GenSigTimeoutTime', 'attributeType': 'REL_SIGNAL', 'attributeValue': 1000,
-                'parent': {'nodeName': 'Bcu', 'signalName': 'Ucell60', 'messageID': 288},
-            }
-        '''
         for attr in attrs:
             attributeName = attr['attributeName']
             attributeValue = attr['attributeValue']
             attrributeType = self.getAttributeType(attr['attributeType'])
             aid = self.queries.fetchAttributeId(attr['attributeName'])
-            print(attr)
-            #rid = self.getSignalByName(cur, attr['messageID'], attr['signalName'])
+            nodeId = self.queries.fetchNodeId(attr['nodeName'])
+            parent = attr['parent']
+            optOid1 = nodeId
+            optOid2 = None
+            stringValue = None
+            numValue = None
+            value = attr['attributeValue']
+            if isinstance(value, str):
+                stringValue = value
+            else:
+                numValue = value
+            if attrributeType == AttributeType.REL_SIGNAL:
+                messageID = parent['messageID']
+                optOid2 = messageID
+                rid = self.getSignalByName(cur, messageID, parent['signalName'])
+                #print("\t\tREL-SIGNAL!!!", parent)
+            elif attrributeType == AttributeType.REL_ENV_VAR:
+                evName = parent['evName']
+                rid = self.queries.fetchEnvVarId(evName)
+                #print("\t\tREL-ENV-VAR!!!", parent)
+            elif attrributeType == AttributeType.REL_NODE:
+                messageID = parent['messageID']
+                optOid2 = messageID
+                rid = self.queries.fetchMessageIdById(messageID)
+                #print("\t\tREL-NODE!!!", parent)
+            self.db.insertStatement(cur, "AttributeRel_Value",
+                """Object_ID, Attribute_Definition, Num_Value, String_Value, Opt_Object_ID_1, Opt_Object_ID_2""",
+                rid, aid, numValue, stringValue, optOid1, optOid2
+            )
 
     def insertNodes(self, cur, nodes):
         nodeSet = set()

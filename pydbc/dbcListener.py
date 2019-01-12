@@ -332,9 +332,9 @@ class DbcListener(parser.BaseListener):
         attributeName = ctx.attributeName.value
         nodeName = ctx.nodeName.value
         if attrType == "BU_BO_REL_":
-            nodeAddress = ctx.nodeAddress.value
+            messageID = ctx.nodeAddress.value
             attributeType = "REL_NODE"
-            parent = dict(nodeAddress = nodeAddress)
+            parent = dict(messageID = messageID)
             attrValue = ctx.attrValue.value
         elif attrType == "BU_SG_REL_":
             messageID = ctx.messageID.value
