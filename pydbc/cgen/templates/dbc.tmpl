@@ -167,6 +167,42 @@ ${int(attr['Num_Value'])}\
 %endif
 ;
 %endfor
+%for attr in db.relativeAttributeValues():
+<% attrDef = list(db.attributeDefintion(attr['Attribute_Definition']))[0] %>\
+BA_REL_ "${attrDef['Name']}" \
+%if attrDef['Objecttype'] == 5:
+BU_BO_REL_ \
+%elif attrDef['Objecttype'] == 6:
+BU_SG_REL_ \
+%elif attrDef['Objecttype'] == 7:
+BU_EV_REL_ \
+%endif
+${db.fetchNodenameByRid(attr['Opt_Object_ID_1'])} \
+%if attrDef['Objecttype'] == 6:
+SG_ \
+%endif
+%if attrDef['Objecttype'] in (5, 6):
+${attr['Opt_Object_ID_2']} \
+%endif
+%if attrDef['Objecttype'] == 6:
+<% signal = db.fetchSignalByRid(attr['Object_ID']) %>\
+${signal['Name']} \
+%elif attrDef['Objecttype'] == 7:
+${db.fetchEnvvarNameByRid(attr['Object_ID'])} \
+%endif
+%if attrDef['Valuetype'] == 0:
+${int(attr['Num_Value'])}\
+%elif attrDef['Valuetype'] == 1:
+${int(attr['Num_Value'])}\
+%elif attrDef['Valuetype'] == 2:
+${"{:.14G}".format(attr['Num_Value'])}\
+%elif attrDef['Valuetype'] == 3:
+"${attr['String_Value']}"\
+%elif attrDef['Valuetype'] == 4:
+${int(attr['Num_Value'])}\
+%endif
+;
+%endfor
 %for vt in db.valueTablesLocal():
 VAL_ \
 %if vt['Object_Type'] == 0:

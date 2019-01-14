@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -204,6 +204,10 @@ class Queries:
         cur = self.getCursor()
         yield from self.db.fetchFromTable(cur, "Attribute_Value")
 
+    def relativeAttributeValues(self):
+        cur = self.getCursor()
+        yield from self.db.fetchFromTable(cur, "AttributeRel_Value")
+
     def environmentVariables(self):
         cur = self.getCursor()
         yield from self.db.fetchFromTable(cur, "EnvVar")
@@ -256,9 +260,10 @@ class Queries:
         rows = cur.fetchall()
         if rows:
             messages = {r[0]:r[1] for r in rows}
+            key ="({})".format(','.join([str(k) for k in messages.keys()]))
             stmt = """SELECT node, message, name FROM Node_TxMessage AS t1, Node AS t2 WHERE t1.Node = t2.rid
                 AND message IN {};
-            """.format(tuple(messages.keys()))
+            """.format(key)
             cur.execute(stmt)
             items = cur.fetchall()
             for kr, item in itertools.groupby(items, lambda n: n[1]):
