@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -309,11 +309,31 @@ SCHEMA = ('''
         FOREIGN KEY(Signal) REFERENCES Signal(RID) ON UPDATE CASCADE ON DELETE CASCADE
     );
 ''', '''
+    CREATE TABLE IF NOT EXISTS Signal_Group(
+        RID INTEGER NOT NULL DEFAULT 0,
+        Name VARCHAR(255) NOT NULL,
+        Value INTEGER NOT NULL DEFAULT 0,
+        Message INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY(RID),
+        UNIQUE(Message, Name),
+        FOREIGN KEY(Message) REFERENCES Message(RID) ON UPDATE CASCADE ON DELETE CASCADE
+    );
+''', '''
+    CREATE TABLE IF NOT EXISTS Signal_Group_Signal(
+        Signal_Group INTEGER NOT NULL DEFAULT 0,
+        Message INTEGER NOT NULL DEFAULT 0,
+        Signal INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY(Signal_Group, Message, Signal),
+        FOREIGN KEY(Signal_Group) REFERENCES Signal_Group(RID) ON UPDATE CASCADE ON DELETE CASCADE,
+        FOREIGN KEY(Message) REFERENCES Message(RID) ON UPDATE CASCADE ON DELETE CASCADE,
+        FOREIGN KEY(Signal) REFERENCES Signal(RID) ON UPDATE CASCADE ON DELETE CASCADE
+    );
+''', '''
     CREATE TABLE IF NOT EXISTS Object_Valuetable (
         Object_Type INTEGER NOT NULL DEFAULT 0,
         Object_RID INTEGER NOT NULL DEFAULT 0,
         Valuetable INTEGER NOT NULL DEFAULT 0,
-        PRIMARY KEY(Object_Type,Object_RID),
+        PRIMARY KEY(Object_Type, Object_RID),
         FOREIGN KEY(Valuetable) REFERENCES Valuetable(RID) ON UPDATE CASCADE ON DELETE CASCADE
     );
 ''', '''

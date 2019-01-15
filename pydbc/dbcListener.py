@@ -354,7 +354,6 @@ class DbcListener(parser.BaseListener):
 
     def exitSignalGroups(self, ctx):
         items = [x.value for x in ctx.items]
-        print("SignalGroups", items)
         ctx.value = items
 
     def exitSignalGroup(self, ctx):

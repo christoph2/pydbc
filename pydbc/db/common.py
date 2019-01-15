@@ -92,6 +92,14 @@ class Queries:
         result = cur.fetchone()
         return self.db.createDictFromRow(result, cur.description)
 
+    def fetchMessageSignalByMessageIDandSignalName(self, messageID, signalName):
+        cur = self.getCursor()
+        cur.execute("""SELECT  t2.Message, t2.Signal FROM Message AS t1, Message_Signal AS t2, Signal AS t3 WHERE
+            t1.Message_Id = {} AND t2.Message = t1.RID AND t2.Signal = t3.RID AND t3.Name = '{}'
+        """.format(messageID, signalName))
+        result = cur.fetchone()
+        return result
+
     def fetchSignalReceivers(self, messageId, signalId):
         cur = self.getCursor()
         cur.execute("SELECT (SELECT name FROM Node WHERE RID=node) FROM Node_RxSignal WHERE message=? and signal=?", [messageId, signalId])

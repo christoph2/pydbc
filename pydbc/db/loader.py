@@ -110,9 +110,8 @@ class Loader(object):
         self.insertAttributes(cur, tree['attributeValues'])
         defaults = tree['relativeAttributeDefaults']
         self.insertAttributeDefinitions(cur, tree['relativeAttributeDefinitions'], defaults)
-
         self.insertRelativeAttributes(cur, tree['relativeAttributeValues'])
-
+        self.insertSignalGroups(cur, tree['signalGroups'])
         self.insertCategoryDefinitions(cur, tree['categoryDefinitions'])
         self.insertCategoryValues(cur, tree['categories'])
         self.db.commitTransaction()
@@ -366,20 +365,32 @@ class Loader(object):
                 messageID = parent['messageID']
                 optOid2 = messageID
                 rid = self.getSignalByName(cur, messageID, parent['signalName'])
-                #print("\t\tREL-SIGNAL!!!", parent)
             elif attrributeType == AttributeType.REL_ENV_VAR:
                 evName = parent['evName']
                 rid = self.queries.fetchEnvVarId(evName)
-                #print("\t\tREL-ENV-VAR!!!", parent)
             elif attrributeType == AttributeType.REL_NODE:
                 messageID = parent['messageID']
                 optOid2 = messageID
                 rid = self.queries.fetchMessageIdById(messageID)
-                #print("\t\tREL-NODE!!!", parent)
             self.db.insertStatement(cur, "AttributeRel_Value",
                 """Object_ID, Attribute_Definition, Num_Value, String_Value, Opt_Object_ID_1, Opt_Object_ID_2""",
                 rid, aid, numValue, stringValue, optOid1, optOid2
             )
+
+    def insertSignalGroups(self, cur, signalGroups):
+        for group in signalGroups:
+            print("SG", group)
+            messageID = group['messageID']
+            gValue = group['gvalue']
+            signalNames = group['signals']
+            groupName = group['groupName']
+            rid = self.queries.fetchMessageIdById(messageID)
+            self.db.insertStatement(cur, "Signal_Group", "Name, Value, Message", groupName, gValue, rid)
+            sgrid = cur.lastrowid
+            for signalName in signalNames:
+                mrid, srid =  self.queries.fetchMessageSignalByMessageIDandSignalName(messageID, signalName)
+                print("\t\tSIG:", mrid, srid, signalName)
+                self.db.insertStatement(cur, "Signal_Group_Signal", "Signal_Group, Message, Signal", sgrid, mrid, srid)
 
     def insertNodes(self, cur, nodes):
         nodeSet = set()
