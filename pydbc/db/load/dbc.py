@@ -43,15 +43,6 @@ class Comments:
         self.ev = {}
         self.nw = None
 
-##
-##    def __del__(self):
-##        from pprint import pprint
-##        pprint(self.bu)
-##        pprint(self.bo)
-##        pprint(self.sg)
-##        pprint(self.ev)
-##
-
     def addNode(self, key, value):
         self.bu[key] = value
 
@@ -83,7 +74,7 @@ class Comments:
         return self.nw
 
 
-class Loader(object):
+class DbcLoader(object):
 
     def __init__(self, db, queryClass):
         self.db = db
@@ -221,7 +212,6 @@ class Loader(object):
         for item in data:
             name = item['name']
             value = item['value']
-            #print(name, value)
             self.db.insertStatement(cur, "EnvironmentVariablesData", "name, value", name, value)
 
     def insertCategoryDefinitions(self, cur, catagories):
@@ -379,7 +369,6 @@ class Loader(object):
 
     def insertSignalGroups(self, cur, signalGroups):
         for group in signalGroups:
-            print("SG", group)
             messageID = group['messageID']
             gValue = group['gvalue']
             signalNames = group['signals']
@@ -389,7 +378,6 @@ class Loader(object):
             sgrid = cur.lastrowid
             for signalName in signalNames:
                 mrid, srid =  self.queries.fetchMessageSignalByMessageIDandSignalName(messageID, signalName)
-                print("\t\tSIG:", mrid, srid, signalName)
                 self.db.insertStatement(cur, "Signal_Group_Signal", "Signal_Group, Message, Signal", sgrid, mrid, srid)
 
     def insertNodes(self, cur, nodes):

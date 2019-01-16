@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-    ( C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+    ( C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -43,7 +43,7 @@ from pydbc import parser
 from pydbc.dbcListener import DbcListener
 from pydbc.db import CanDatabase
 from pydbc.db.creator import Creator
-from pydbc.db.loader import Loader
+from pydbc.db.load.dbc import DbcLoader
 from pydbc.template import renderTemplateFromText
 
 from pydbc.db.common import Queries
@@ -108,7 +108,7 @@ def importFile(name):
 
     #print("Finished ANTLR parsing.", flush = True)
 
-    loader = Loader(db, Queries)
+    loader = DbcLoader(db, Queries)
 
     if not execute(loader.insertValues, "inserting values", tree):
         return
