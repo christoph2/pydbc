@@ -29,9 +29,8 @@ __version__ = '0.1.0'
 
 import itertools
 
-from pydbc.logger import Logger
 from pydbc.types import AttributeType, ValueType, CategoryType
-
+from . import BaseLoader
 
 class Comments:
     """This class contains the comments found in .dbc files.
@@ -74,13 +73,11 @@ class Comments:
         return self.nw
 
 
-class DbcLoader(object):
+class DbcLoader(BaseLoader):
 
     def __init__(self, db, queryClass):
-        self.db = db
+        super(DbcLoader, self).__init__(db, queryClass)
         self.comments = Comments()
-        self.queries = queryClass(db)
-        self.logger = Logger(__name__)
 
     def insertValues(self, tree):
         cur = self.db.getCursor()

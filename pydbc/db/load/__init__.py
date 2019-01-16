@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2017 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -24,9 +24,19 @@ __copyright__ = """
 
    s. FLOSS-EXCEPTION.txt
 """
+
 __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
-#import pkg_resources
-#pkg_resources.declare_namespace(__name__)
+
+
+from pydbc.logger import Logger
+
+class BaseLoader(object):
+
+    def __init__(self, db, queryClass):
+        self.db = db
+        self.queries = queryClass(db)
+        self.logger = Logger(__name__)
+
 
