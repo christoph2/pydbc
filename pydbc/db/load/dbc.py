@@ -30,7 +30,7 @@ __version__ = '0.1.0'
 import itertools
 
 from pydbc.types import AttributeType, ValueType, CategoryType
-from . import BaseLoader
+from .base import BaseLoader
 
 class Comments:
     """This class contains the comments found in .dbc files.
@@ -79,9 +79,7 @@ class DbcLoader(BaseLoader):
         super(DbcLoader, self).__init__(db, queryClass)
         self.comments = Comments()
 
-    def insertValues(self, tree):
-        cur = self.db.getCursor()
-        self.db.beginTransaction()
+    def _insertValues(self, cur, tree):
         self.insertVersion(cur, tree['version'])
         self.insertEnvironmentVariablesData(cur, tree['environmentVariablesData'])
         self.insertComments(cur, tree['comments'])
@@ -102,7 +100,6 @@ class DbcLoader(BaseLoader):
         self.insertSignalGroups(cur, tree['signalGroups'])
         self.insertCategoryDefinitions(cur, tree['categoryDefinitions'])
         self.insertCategoryValues(cur, tree['categories'])
-        self.db.commitTransaction()
 
     def processExtendedSignalValueTypes(self, cur, valueTypes):
         keyFunc = lambda k: k['messageID']

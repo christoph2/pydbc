@@ -28,6 +28,19 @@ __copyright__ = """
 __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
-from .dbc import DbcLoader
-from .ldf import LdfLoader
+
+from pydbc.logger import Logger
+
+class BaseLoader(object):
+
+    def __init__(self, db, queryClass):
+        self.db = db
+        self.queries = queryClass(db)
+        self.logger = Logger(__name__)
+
+    def insertValues(self, tree):
+        cur = self.db.getCursor()
+        self.db.beginTransaction()
+        self._insertValues(cur, tree)
+        self.db.commitTransaction()
 
