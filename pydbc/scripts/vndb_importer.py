@@ -30,66 +30,56 @@ __version__ = '0.1.0'
 import argparse
 
 import io
-import os
+import pathlib
 from pprint import pprint
 import pkgutil
 import sqlite3
 import sys
 
 import antlr4
-import colorama
 
 from pydbc import parser
 from pydbc.dbcListener import DbcListener
+from pydbc.ldfListener import LdfListener
+
 from pydbc.db import CanDatabase
 from pydbc.db.creator import Creator
-from pydbc.db.load.dbc import DbcLoader
+from pydbc.db.load import (DbcLoader, LdfLoader)
 from pydbc.template import renderTemplateFromText
-
 from pydbc.db.common import Queries
+from .hilighter import makeHilighter
 
 
 template = pkgutil.get_data("pydbc", "cgen/templates/dbc.tmpl")
 
-def coloredText(color, msg):
-    return "{}{}".format(color, msg)
-
-def errorText(msg):
-    return coloredText(colorama.Fore.RED, msg)
-
-def successText(msg):
-    return coloredText(colorama.Fore.GREEN, msg)
-
-def progressText(msg):
-    return coloredText(colorama.Fore.BLUE, msg)
-
-def resetColorStyle():
-    print(colorama.Style.RESET_ALL, end = "", flush = True)
+hl = makeHilighter(None)
 
 def execute(fun, name, *args):
     try:
         fun(*args)
     except Exception as e:
-        msg = errorText("   Exiting import function due to exception while {}".format(name))
+        msg = hl.errorText("   Exiting import function due to exception while {}".format(name))
         if not isinstance(e, sqlite3.DatabaseError):
             msg += ": {}".format(str(e))
         print("{}\n".format(msg), flush = True)
         print(str(e))
-        resetColorStyle()
         #sys.exit(1)
         return False
     else:
         return True
 
-def importFile(name):
+def importFile(pth):
     global ucout
 
-    pth, fname = os.path.split(name)
-    fnbase, fnext = os.path.splitext(fname)
+
+    fname = pth.parts[-1]
+    fnbase = pth.stem
+    fnext = pth.suffix
+    print("PTH-ABS:", pth.parent, fname, )
+
     db = CanDatabase(r"{}.vndb".format(fnbase))
 
-    print(progressText("Processing file '{}'...").format(name), flush = True)
-    resetColorStyle()
+    print(hl.progressText("Processing file '{}'...").format(fname), flush = True)
 
     cr = Creator(db)
     if not execute(cr.dropTables, "dropping tables"):
@@ -100,10 +90,9 @@ def importFile(name):
     pa = parser.ParserWrapper('dbc', 'dbcfile', DbcListener)
 
     try:
-        tree = pa.parseFromFile("{}".format(name), encoding = "utf-8" if ucout else "latin-1", trace = False)
+        tree = pa.parseFromFile("{}".format(pth.absolute()), encoding = "utf-8" if ucout else "latin-1", trace = False)
     except Exception as e:
-        print(errorText("   Exiting import function due to exception while parsing: {}\n".format(str(e))), flush = True)
-        resetColorStyle()
+        print(hl.errorText("   Exiting import function due to exception while parsing: {}\n".format(str(e))), flush = True)
         return
 
     #print("Finished ANTLR parsing.", flush = True)
@@ -127,8 +116,7 @@ def importFile(name):
     with io.open("{}.render".format(fnbase), "w", encoding = "utf-8" if ucout else "latin-1", newline = "\r\n") as outf:
         outf.write(res)
 
-    print(successText("OK, done.\n"), flush = True)
-    resetColorStyle()
+    print(hl.successText("OK, done.\n"), flush = True)
     #print("-" * 80, flush = True)
 
 ucout = False
@@ -146,10 +134,10 @@ def main():
     parser.add_argument("-w", help = "Format output for Windows console.", dest = "winout", action = "store_true")
     parser.add_argument("-u", help = "Generate UTF-8 encoded output (otherwise Latin-1).", dest = "ucout", action = "store_true")
     args = parser.parse_args()
-    colorama.init(convert = args.winout, strip = False)
     ucout = args.ucout
-    for name in args.dbcfile:
-        importFile(name)
+    for arg in args.dbcfile:
+        for pth in pathlib.Path().glob(arg):
+            importFile(pth)
 
 if __name__ == '__main__':
     main()
