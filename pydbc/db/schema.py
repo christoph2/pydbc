@@ -52,6 +52,8 @@ TABLES = (
     "Node_TxMessage",
     "Node_TxSig",
     "Message",
+    "Signal_Group_Signal",
+    "Signal_Group",
     "Signal",
     "Attribute_Value",
     "AttributeRel_Value",

@@ -363,7 +363,6 @@ class DbcListener(parser.BaseListener):
         signals = [x.value for x in ctx.signals]
         ctx.value = dict(messageID = messageID, groupName = groupName, gvalue = gvalue, signals = signals)
 
-
     def exitCategoryDefinitions(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 

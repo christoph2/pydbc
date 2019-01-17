@@ -1,6 +1,5 @@
 
-
-from pydbc import parser
+from pydbc.parser import BaseListener, Parser
 
 SG0 = """SIG_GROUP_ 288 Switches 1 : WindowSwitch DoorSwitch;"""
 
@@ -13,36 +12,8 @@ SIG_GROUP_ 2316304896 Voltages 1 : Voltage_2 Voltage_1 Voltage_0;
 SIG_GROUP_ 2316304896 Coulomb_Count 1 : CC_low CC_high;
 """
 
-class MyListener(parser.BaseListener):
 
-    def exitSignalGroups(self, ctx):
-        items = [x.value for x in ctx.items]
-        ctx.value = items
-        self.value = ctx.value
-
-    def exitSignalGroup(self, ctx):
-        messageID = ctx.messageID.value
-        groupName = ctx.groupName.value
-        gvalue = ctx.gvalue.value
-        signals = [x.value for x in ctx.signals]
-        ctx.value = dict(messageID = messageID, groupName = groupName, gvalue = gvalue, signals = signals)
-
-class ParserTestCase(parser.BaseListener):
-
-    def __init__(self, grammar, startSymbol, listener, *args):
-        super(ParserTestCase, self).__init__()
-        parser.BaseListener.__init__(self)
-        self.pw = parser.ParserWrapper(grammar, startSymbol, listener)
-
-    def parse(self, data):
-        return self.pw.parseFromString(data)
-
-
-class SignalGroups(ParserTestCase):
-
-    def __init__(self):
-        print("*** SignalGroups c-tor")
-        super(SignalGroups, self).__init__("dbc", "signalGroups", MyListener)
+class SignalGroups(BaseListener):
 
     def exitSignalGroups(self, ctx):
         items = [x.value for x in ctx.items]
@@ -57,8 +28,8 @@ class SignalGroups(ParserTestCase):
         ctx.value = dict(messageID = messageID, groupName = groupName, gvalue = gvalue, signals = signals)
 
 def test_signal_groups():
-    tsg = SignalGroups()
-    res = tsg.parse(SG0)
+    tsg = Parser("dbc", "signalGroups", SignalGroups)
+    res = tsg.parseFromString(SG0)
     print(res)
     assert len(res) == 1
     res = res[0]

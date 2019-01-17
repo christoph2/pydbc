@@ -68,14 +68,24 @@ def execute(fun, name, *args):
     else:
         return True
 
+
+class Importer: pass
+
+
+class DbcImporter(Importer):
+    pass
+
+
+class LdfImporter(Importer):
+    pass
+
+
 def importFile(pth):
     global ucout
-
 
     fname = pth.parts[-1]
     fnbase = pth.stem
     fnext = pth.suffix
-    print("PTH-ABS:", pth.parent, fname, )
 
     db = CanDatabase(r"{}.vndb".format(fnbase))
 
@@ -95,7 +105,7 @@ def importFile(pth):
         print(hl.errorText("   Exiting import function due to exception while parsing: {}\n".format(str(e))), flush = True)
         return
 
-    #print("Finished ANTLR parsing.", flush = True)
+    print("Finished ANTLR parsing.", flush = True)
 
     loader = DbcLoader(db, Queries)
 

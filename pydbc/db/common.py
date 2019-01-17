@@ -100,9 +100,29 @@ class Queries:
         result = cur.fetchone()
         return result
 
+    def fetchSignalGroups(self):
+        cur = self.getCursor()
+        cur.execute("""SELECT t1.RID, t1.Name, t1.Value,
+            (SELECT t2.Message_Id FROM Message AS t2 WHERE t2.RID = t1.Message) AS Message_Id FROM Signal_Group as t1
+        """)
+        while True:
+            row = cur.fetchone()
+            #print("HELLO SG:", row)
+            if row is None:
+                return
+            else:
+                result = self.db.createDictFromRow(row, cur.description)
+                cur2 = self.getCursor()
+                rid = row[0]
+                res2 = cur2.execute("""SELECT (SELECT t2.Name FROM Signal AS t2 WHERE t2.RID = t1.signal) AS Name
+                FROM Signal_Group_Signal AS t1 WHERE t1.Signal_Group = {}""".format(rid))
+                signals = [s[0] for s in cur2.fetchall()]
+                result.update(Signals = signals)
+                yield result
+
     def fetchSignalReceivers(self, messageId, signalId):
         cur = self.getCursor()
-        cur.execute("SELECT (SELECT name FROM Node WHERE RID=node) FROM Node_RxSignal WHERE message=? and signal=?", [messageId, signalId])
+        cur.execute("SELECT (SELECT name FROM Node WHERE RID = node) FROM Node_RxSignal WHERE message=? and signal=?", [messageId, signalId])
         result = [x[0] for x in cur.fetchall()]
         return result
 

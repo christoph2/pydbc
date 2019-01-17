@@ -215,6 +215,9 @@ ${int(desc['Value'])} "${desc['Value_Description']}" \
 %endfor
 ;
 %endfor
+%for sigGroup in db.fetchSignalGroups():
+SIG_GROUP_ ${sigGroup['Message_Id']} ${sigGroup['Name']} ${sigGroup['Value']} : ${' '.join(sigGroup['Signals'])};
+%endfor
 <% signalValueTypes = db.fetchExtendedSignalValueTypes() %>\
 %if signalValueTypes:
 %for item in signalValueTypes:

@@ -32,12 +32,13 @@ import itertools
 from pydbc.types import AttributeType, ValueType, CategoryType
 from .base import BaseLoader
 
+from pprint import pprint
+
 class LdfLoader(BaseLoader):
 
     def __init__(self, db, queryClass):
-        super(DbcLoader, self).__init__(db, queryClass)
-        self.comments = Comments()
+        super(LdfLoader, self).__init__(db, queryClass)
 
     def _insertValues(self, cur, tree):
-        print(tree)
+        pprint(tree)
 
