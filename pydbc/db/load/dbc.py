@@ -32,6 +32,21 @@ import itertools
 from pydbc.types import AttributeType, ValueType, CategoryType
 from .base import BaseLoader
 
+"""
+FIBEX elements              CANdb object type
+---------------------------------------------
+CLUSTER, CHANNEL            Network
+ECU, CONTROLLER, CONNECTOR  Network Node
+FRAME, FRAME-TRIGGERING     Message
+SIGNAL, SIGNAL-INSTANCE     Message Signals
+
+The following information has no equivalent description in CANdb:
+- PDUs and Functions aren't used in CANdb.
+- Controller  information  isn't  used  in  CANdb  databases.  This  information  may  be stored as node attributes.
+- CAN  remote  frames  aren't  stored  in  CANdb  databases.  This  information  isn't generated during export and
+  will be ignored during import.
+"""
+
 class Comments:
     """This class contains the comments found in .dbc files.
     """

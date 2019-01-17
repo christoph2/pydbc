@@ -400,8 +400,8 @@ class LdfListener(parser.BaseListener):
     def exitPhysical_range(self, ctx):
         minValue = ctx.minValue.value
         maxValue = ctx.maxValue.value
-        scale = ctx.scale
-        offset = ctx.offset
+        scale = ctx.scale.value if ctx.scale else None
+        offset = ctx.offset.value
         ctx.value = dict(min = minValue, max = maxValue, scale = scale, offset = offset)
 
     def exitBcd_value(self, ctx):
@@ -420,6 +420,8 @@ class LdfListener(parser.BaseListener):
         ctx.value = ctx.i.value
 
     def exitScale(self, ctx):
+        print("SCALE:", ctx.n.value)
+        #print("SCALE#2:", ctx.n)
         ctx.value = ctx.n.value
 
     def exitOffset(self, ctx):

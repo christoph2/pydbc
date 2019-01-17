@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -68,12 +68,20 @@ class BaseListener(antlr4.ParseTreeListener):
             ctx.value = int(ctx.i.text, 10)
         elif ctx.h:
             ctx.value = int(ctx.h.text, 16)
+        else:
+            ctx.value = None
 
     def exitFloatValue(self, ctx):
         ctx.value = float(ctx.f.text) if ctx.f else None
 
     def exitNumber(self, ctx):
-        ctx.value = ctx.i.value if ctx.i else ctx.f.value
+        if ctx.i:
+            value = ctx.i.value
+        elif ctx.f:
+            value = ctx.f.value
+        else:
+            value = None
+        ctx.value = value
 
     def exitStringValue(self, ctx):
         ctx.value = ctx.s.text.strip('"') if ctx.s else None
@@ -83,7 +91,8 @@ class BaseListener(antlr4.ParseTreeListener):
 
 
 class ParserWrapper(object):
-
+    """
+    """
     def __init__(self, grammarName, startSymbol, listener = None):
         self.grammarName = grammarName
         self.startSymbol = startSymbol
@@ -117,8 +126,8 @@ class ParserWrapper(object):
     def parseFromFile(self, fileName, encoding = 'latin-1', trace = False):
         return self.parse(ParserWrapper.stringStream(fileName, encoding), trace)
 
-    def parseFromString(self, buffer, encoding = 'latin-1', trace = False):
-        return self.parse(antlr4.InputStream(buffer), trace)
+    def parseFromString(self, buf, encoding = 'latin-1', trace = False):
+        return self.parse(antlr4.InputStream(buf), trace)
 
     @staticmethod
     def stringStream(fname, encoding = 'latin-1'):
@@ -128,4 +137,18 @@ class ParserWrapper(object):
         return self._syntaxErrors
 
     numberOfSyntaxErrors = property(_getNumberOfSyntaxErrors)
+
+
+class Parser:
+    """
+    """
+
+    def __init__(self, grammar, startSymbol, listener):
+        self.pw = ParserWrapper(grammar, startSymbol, listener)
+
+    def parseFromString(self, buf, encoding = 'latin-1', trace = False):
+        return self.pw.parseFromString(buf, encoding, trace)
+
+    def parseFromFile(self,  fileName, encoding = 'latin-1', trace = False):
+        return self.pw.parseFromString(fileName, encoding, trace)
 
