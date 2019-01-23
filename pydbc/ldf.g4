@@ -135,10 +135,10 @@ node_attributes_def:
     ;
 
 node_attribute:
-      name = node_name '{'
-        'LIN_protocol' '=' version = protocol_version ';'
-        'configured_NAD' '=' n0 = diag_address ';'
-        ('initial_NAD' '=' n1 = diag_address ';')?
+      name = identifierValue '{'
+        'LIN_protocol' '=' version = stringValue ';'
+        'configured_NAD' '=' n0 = intValue ';'
+        ('initial_NAD' '=' n1 = intValue ';')?
         attrs = attributes_def
     '}'
     ;
@@ -162,7 +162,7 @@ configurable_frames:
     ;
 
 configurable_frame:
-    fname = identifierValue ('=' mid = message_id)? ';' // Note: optional part is required for LIN < 2.1 -- TODO: syn. predicate!
+    fname = identifierValue ('=' mid = intValue)? ';' // Note: optional part is required for LIN < 2.1 -- TODO: syn. predicate!
     ;
 
 node_composition_def:
@@ -188,7 +188,7 @@ signal_def:
     ;
 
 signal_item:
-    sname = signal_name ':' ssize = intValue ',' initValue = init_value ',' pub = identifierValue (',' sub += identifierValue)* ';'
+    sname = identifierValue ':' ssize = intValue ',' initValue = init_value ',' pub = identifierValue (',' sub += identifierValue)* ';'
     ;
 
 init_value:
@@ -230,7 +230,7 @@ diagnostic_signal_def:
     ;
 
 diagnostic_item:
-    name = identifierValue ':' size = signal_size ',' initValue = init_value ';'
+    name = identifierValue ':' size = init_value ',' initValue = init_value ';'
     ;
 
 signal_groups_def:
@@ -246,7 +246,7 @@ signal_group:
     ;
 
 signal_group_item:
-    sname = signal_name ',' goffs = intValue ';'
+    sname = identifierValue ',' goffs = intValue ';'
     ;
 
 frame_def:
@@ -260,7 +260,7 @@ frame_item:
     ;
 
 frame_signal:
-    sname = signal_name ',' soffs = intValue ';'
+    sname = identifierValue ',' soffs = intValue ';'
     ;
 
 sporadic_frame_def:
@@ -329,7 +329,7 @@ schedule_table_entry:
     ;
 
 schedule_table_command:
-    c = command 'delay' f = frame_time 'ms' ';'
+    c = command 'delay' f = number 'ms' ';'
     ;
 
 command:
@@ -385,7 +385,7 @@ signal_representation_def:
     ;
 
 signal_representation_entry:
-    enc = signal_encoding_type_name ':' names += signal_name (',' names += signal_name)* ';'
+    enc = identifierValue ':' names += identifierValue (',' names += identifierValue)* ';'
     ;
 
 /*
