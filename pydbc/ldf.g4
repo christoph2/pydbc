@@ -393,8 +393,10 @@ signal_representation_entry:
 **  Lexer.
 **
 */
+
 intValue:
     i = INT
+    | h = HEX
     ;
 
 floatValue:
@@ -438,6 +440,13 @@ FLOAT:
 INT:
     SIGN? '0'..'9'+
     ;
+
+HEX:
+    '0'('x' | 'X') HEX_DIGIT+
+    ;
+
+fragment
+HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
 
 fragment
 ESC_SEQ:

@@ -302,8 +302,10 @@ free_text_definition:
     '}'
     ;
 
+
+
 intValue:
-      i = INT
+    i = INT
     | h = HEX
     ;
 
@@ -343,6 +345,7 @@ FLOAT:
     | ('0'..'9')+ EXPONENT
     )
     ;
+
 
 INT:
     SIGN? '0'..'9'+

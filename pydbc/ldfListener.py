@@ -308,8 +308,8 @@ class LdfListener(parser.BaseListener):
         maxValue = ctx.maxValue.value
         #scale = ctx.scale.value if ctx.scale else None
         #offset = ctx.offset.value
-        scale = ctx.scale
-        offset = ctx.offset
+        scale = ctx.s.value
+        offset = ctx.o.value
         ctx.value = dict(min = minValue, max = maxValue, scale = scale, offset = offset)
 
     def exitBcd_value(self, ctx):
