@@ -2,7 +2,7 @@
 /*
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -83,7 +83,7 @@ lin_description_file:
     'LIN_description_file' ';'
     pv = lin_protocol_version_def
     lv = lin_language_version_def
-	fr = lin_file_revision_def?
+    fr = lin_file_revision_def?
     ls = lin_speed_def
     cn = channel_name_def?
     ndef = node_def
@@ -110,9 +110,8 @@ lin_language_version_def:
     ;
 
 lin_file_revision_def:
-	'LDF_file_revision' '=' s = stringValue ';' 	// ISO17987
-	;
-
+    'LDF_file_revision' '=' s = stringValue ';' // ISO17987
+    ;
 
 lin_speed_def:
     'LIN_speed' '=' n = number 'kbps' ';'
@@ -124,21 +123,9 @@ channel_name_def:
 
 node_def:
     'Nodes' '{'
-        'Master' ':' mname = node_name ',' tb = time_base 'ms' ',' j = jitter 'ms' ';'
-        'Slaves' ':' snames += node_name (',' snames += node_name)* ';'
+        'Master' ':' mname = identifierValue ',' tb = number 'ms' ',' j = number 'ms' ';'
+        'Slaves' ':' snames += identifierValue (',' snames += identifierValue)* ';'
     '}'
-    ;
-
-node_name:
-    i = identifierValue
-    ;
-
-time_base:
-    n = number
-    ;
-
-jitter:
-    n = number
     ;
 
 node_attributes_def:
@@ -156,18 +143,10 @@ node_attribute:
     '}'
     ;
 
-protocol_version:
-    s = stringValue
-    ;
-
-diag_address:
-    i = intValue
-    ;
-
 attributes_def:
-    ('product_id' '=' sid = supplier_id ',' fid = function_id (',' v = variant)? ';')? // Mandatory for LIN >= 2.2.
-    ('response_error' '=' sn0 = signal_name ';')? // Mandatory for LIN >= 2.2.
-    ('fault_state_signals' '=' sn1s += signal_name (',' sn1s += signal_name)* ';')?
+    'product_id' '=' sid = intValue ',' fid = intValue (',' v = intValue)? ';'
+    'response_error' '=' sn0 = identifierValue ';'
+    ('fault_state_signals' '=' sn1s += identifierValue (',' sn1s += identifierValue)* ';')?
     ('P2_min' '=' p2Min = number 'ms' ';')?
     ('ST_min' '=' stMin = number 'ms' ';')?
     ('N_As_timeout' '=' nAs = number 'ms' ';')?
@@ -175,21 +154,6 @@ attributes_def:
     cf = configurable_frames?
     ;
 
-supplier_id:
-    i = intValue
-    ;
-
-function_id:
-    i = intValue
-    ;
-
-variant:
-    i = intValue
-    ;
-
-signal_name:
-    i = identifierValue
-    ;
 
 configurable_frames:
     'configurable_frames' '{'
@@ -198,11 +162,7 @@ configurable_frames:
     ;
 
 configurable_frame:
-    fname = frame_name ('=' mid = message_id)? ';' // Note: optional part is required for LIN < 2.1 -- TODO: syn. predicate!
-    ;
-
-message_id:
-    i = intValue
+    fname = identifierValue ('=' mid = message_id)? ';' // Note: optional part is required for LIN < 2.1 -- TODO: syn. predicate!
     ;
 
 node_composition_def:
@@ -212,25 +172,13 @@ node_composition_def:
     ;
 
 configuration:
-    'configuration' cname = configuration_name '{'
+    'configuration' cname = identifierValue '{'
         (items += configuration_item)*
     '}'
     ;
 
 configuration_item:
-    cnode = composite_node '{' lnodes += logical_node (',' lnodes += logical_node)* '}'
-    ;
-
-configuration_name:
-    i = identifierValue
-    ;
-
-composite_node:
-    i = identifierValue
-    ;
-
-logical_node:
-    i = identifierValue
+    cnode = identifierValue '{' lnodes += identifierValue (',' lnodes += identifierValue)* '}'
     ;
 
 signal_def:
@@ -240,11 +188,7 @@ signal_def:
     ;
 
 signal_item:
-    sname = signal_name ':' ssize = signal_size ',' initValue = init_value ',' pub = published_by (',' sub += subscribed_by)* ';'
-    ;
-
-signal_size:
-    i = intValue
+    sname = signal_name ':' ssize = intValue ',' initValue = init_value ',' pub = identifierValue (',' sub += identifierValue)* ';'
     ;
 
 init_value:
@@ -259,14 +203,6 @@ init_value_array:
     '{'
         vs += intValue (',' vs += intValue)*
     '}'
-    ;
-
-published_by:
-    i = identifierValue
-    ;
-
-subscribed_by:
-    i = identifierValue
     ;
 
 diagnostic_signal_def:
@@ -305,24 +241,12 @@ signal_groups_def:
 
 signal_group:
     // Signal groups are deprecated.
-    sgname = signal_group_name ':' gsize = group_size '{' (items += signal_group_item)*
+    sgname = identifierValue ':' gsize = intValue '{' (items += signal_group_item)*
     '}'
     ;
 
 signal_group_item:
-    sname = signal_name ',' goffs = group_offset ';'
-    ;
-
-signal_group_name:
-    i = identifierValue
-    ;
-
-group_size:
-    i = intValue
-    ;
-
-group_offset:
-    i = intValue
+    sname = signal_name ',' goffs = intValue ';'
     ;
 
 frame_def:
@@ -332,27 +256,11 @@ frame_def:
     ;
 
 frame_item:
-    fname = frame_name ':' fid = frame_id ',' p = published_by ',' fsize = frame_size '{' (items += frame_signal)* '}'
+    fname = identifierValue ':' fid = intValue ',' p = identifierValue ',' fsize = intValue '{' (items += frame_signal)* '}'
     ;
 
 frame_signal:
-    sname = signal_name ',' soffs = signal_offset ';'
-    ;
-
-frame_name:
-    i = identifierValue
-    ;
-
-frame_id:
-    i = intValue
-    ;
-
-frame_size:
-    i = intValue
-    ;
-
-signal_offset:
-    i = intValue
+    sname = signal_name ',' soffs = intValue ';'
     ;
 
 sporadic_frame_def:
@@ -362,11 +270,7 @@ sporadic_frame_def:
     ;
 
 sporadic_frame_item:
-    sfn = sporadic_frame_name ':' names += frame_name (',' names += frame_name)* ';'
-    ;
-
-sporadic_frame_name:
-    i = identifierValue
+    sfn = identifierValue ':' names += identifierValue (',' names += identifierValue)* ';'
     ;
 
 event_triggered_frame_def:
@@ -376,15 +280,7 @@ event_triggered_frame_def:
     ;
 
 event_triggered_frame_item:
-    e = event_trig_frm_name ':' c = collision_resolving_schedule_table ',' fid = frame_id (',' items += frame_name)* ';'
-    ;
-
-event_trig_frm_name:
-    i = identifierValue
-    ;
-
-collision_resolving_schedule_table:
-    i = identifierValue
+    e = identifierValue ':' c = identifierValue ',' fid = intValue (',' items += identifierValue)* ';'
     ;
 
 diag_frame_def:
@@ -429,41 +325,25 @@ schedule_table_def:
     ;
 
 schedule_table_entry:
-    s = schedule_table_name  '{' (items += schedule_table_command)*  '}'
+    s = identifierValue  '{' (items += schedule_table_command)*  '}'
     ;
 
 schedule_table_command:
     c = command 'delay' f = frame_time 'ms' ';'
     ;
 
-schedule_table_name:
-    i = identifierValue
-    ;
-
 command:
-      frameName = frame_name
-    | c = 'MasterReq'
+      frameName = identifierValue
+    |  c = 'MasterReq'
     | c = 'SlaveResp'
-    | c = 'AssignNAD' '{' nodeName = node_name '}'
+    | c = 'AssignNAD' '{' nodeName = identifierValue '}'
     | c = 'ConditionalChangeNAD' '{' nad = intValue ',' id_ = intValue ',' byte_ = intValue ',' mask = intValue ',' inv = intValue ',' new_NAD = intValue'}'
-    | c = 'DataDump'  '{' nodeName = node_name ',' d1 = intValue ',' d2 = intValue ',' d3 = intValue ',' d4 = intValue ',' d5 = intValue'}'
-    | c = 'SaveConfiguration' '{' nodeName = node_name '}'
-    | c = 'AssignFrameIdRange' '{' nodeName = node_name ',' frameIndex = frame_index (',' pids += frame_PID ',' pids += frame_PID ',' pids += frame_PID ',' pids += frame_PID)? '}'
+    | c = 'DataDump'  '{' nodeName = identifierValue ',' d1 = intValue ',' d2 = intValue ',' d3 = intValue ',' d4 = intValue ',' d5 = intValue'}'
+    | c = 'SaveConfiguration' '{' nodeName = identifierValue '}'
+    | c = 'AssignFrameIdRange' '{' nodeName = identifierValue ',' frameIndex = intValue (',' pids += intValue ',' pids += intValue ',' pids += intValue ',' pids += intValue)? '}'
     | c = 'FreeFormat' '{' d1 = intValue ',' d2 = intValue ',' d3 = intValue ',' d4 = intValue ',' d5 = intValue ',' d6 = intValue ','
         d7 = intValue ',' d8 = intValue '}'
-    | c = 'AssignFrameId' '{' nodeName = node_name ',' frameName = frame_name  '}'
-    ;
-
-frame_index:
-    i = intValue
-    ;
-
-frame_PID:
-    i = intValue
-    ;
-
-frame_time:
-    n = number
+    | c = 'AssignFrameId' '{' nodeName = identifierValue ',' frameName = identifierValue  '}'
     ;
 
 signal_encoding_type_def:
@@ -473,7 +353,7 @@ signal_encoding_type_def:
     ;
 
 signal_encoding_entry:
-    s = signal_encoding_type_name '{'
+    s = identifierValue '{'
         (items += signal_encoding_value)*
     '}'
     ;
@@ -482,16 +362,12 @@ signal_encoding_value:
     l = logical_value | p = physical_range | b = bcd_value | a = ascii_value
     ;
 
-signal_encoding_type_name:
-    i = identifierValue
-    ;
-
 logical_value:
-    'logical_value' ',' s = signal_value (',' t = text_info)? ';'
+    'logical_value' ',' s = intValue (',' t = stringValue)? ';'
     ;
 
 physical_range:
-    'physical_value' ',' minValue = min_value ',' maxValue = max_value ',' s = scale ',' o = offset (',' t = text_info)? ';'
+    'physical_value' ',' minValue = intValue ',' maxValue = intValue ',' s = number ',' o = number (',' t = stringValue)? ';'
     ;
 
 bcd_value:
@@ -500,30 +376,6 @@ bcd_value:
 
 ascii_value:
     'ascii_value' ';'
-    ;
-
-signal_value:
-    i = intValue
-    ;
-
-min_value:
-    i = intValue
-    ;
-
-max_value:
-    i = intValue
-    ;
-
-scale:
-    n = number
-    ;
-
-offset:
-    n = number
-    ;
-
-text_info:
-    s = stringValue
     ;
 
 signal_representation_def:
@@ -542,8 +394,7 @@ signal_representation_entry:
 **
 */
 intValue:
-      i = INT
-    | h = HEX
+    i = INT
     ;
 
 floatValue:
@@ -588,13 +439,6 @@ INT:
     SIGN? '0'..'9'+
     ;
 
-HEX:
-    '0'('x' | 'X') HEX_DIGIT+
-    ;
-
-fragment
-HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
-
 fragment
 ESC_SEQ:
       '\\' (
@@ -627,6 +471,4 @@ SIGN:
       '+'
     | '-'
     ;
-
-
 

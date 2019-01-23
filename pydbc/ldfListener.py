@@ -79,15 +79,6 @@ class LdfListener(parser.BaseListener):
         snames = [x.value for x in ctx.snames]
         ctx.value = dict(master = mname, timeBase = tb, jitter = j, slaves = snames)
 
-    def exitNode_name(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitTime_base(self, ctx):
-        ctx.value = ctx.n.value
-
-    def exitJitter(self, ctx):
-        ctx.value = ctx.n.value
-
     def exitNode_attributes_def(self, ctx):
         items = [x.value for x in ctx.items]
         ctx.value = items
@@ -97,14 +88,8 @@ class LdfListener(parser.BaseListener):
         version = ctx.version.value
         n0 = ctx.n0.value if ctx.n0 else None
         n1 = ctx.n1.value if ctx.n1 else None
-        attrs = ctx.attrs.value if ctx.attrs else None
-        ctx.value = dict(name = name, version = version, configuredNAD = n0, initialNAD = n1, attrs = attrs)
-
-    def exitProtocol_version(self, ctx):
-        ctx.value = ctx.s.value
-
-    def exitDiag_address(self, ctx):
-        ctx.value = ctx.i.value
+        attrs = ctx.attrs.value if ctx.attrs else dict()
+        ctx.value = dict(name = name, version = version, configuredNAD = n0, initialNAD = n1, **attrs)
 
     def exitAttributes_def(self, ctx):
         sid = ctx.sid.value if ctx.sid else None
@@ -118,20 +103,8 @@ class LdfListener(parser.BaseListener):
         nAs = ctx.nAs.value if ctx.nAs else None
         nCr = ctx.nCr.value if ctx.nCr else None
         ctx.value = dict(supplierID = sid, functionID = fid, variant = v, responseErrorSignal = sn0, faultStateSignals = sn1s,
-                p2Min = p2Min, stMin = stMin, nAs = nAs, nCr = nCr, configurableFrames = cf
+            p2Min = p2Min, stMin = stMin, nAs = nAs, nCr = nCr, configurableFrames = cf
         )
-
-    def exitSupplier_id(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitFunction_id(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitVariant(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitSignal_name(self, ctx):
-        ctx.value = ctx.i.value
 
     def exitConfigurable_frames(self, ctx):
         ctx.value = [x.value for x in ctx.frames]
@@ -140,9 +113,6 @@ class LdfListener(parser.BaseListener):
         fname = ctx.fname.value
         mid = ctx.mid.value if ctx.mid else None
         ctx.value = dict(frameName = fname, messageID = mid)
-
-    def exitMessage_id(self, ctx):
-        ctx.value = ctx.i.value
 
     def exitNode_composition_def(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -157,15 +127,6 @@ class LdfListener(parser.BaseListener):
         lnodes = [x.value for x in ctx.lnodes]
         ctx.value = dict(compositeNode = cnode, logicalNodes = lnodes)
 
-    def exitConfiguration_name(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitComposite_node(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitLogical_node(self, ctx):
-        ctx.value = ctx.i.value
-
     def exitSignal_def(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
@@ -177,9 +138,6 @@ class LdfListener(parser.BaseListener):
         sub = [x.value for x in ctx.sub]
         ctx.value = dict(name = sname, size = ssize, initValue = initValue, publishedBy = pub, subscribedBy = sub)
 
-    def exitSignal_size(self, ctx):
-        ctx.value = ctx.i.value
-
     def exitInit_value(self, ctx):
         scalar = ctx.s.value if ctx.s else None
         array = ctx.a.value if ctx.a else None
@@ -190,12 +148,6 @@ class LdfListener(parser.BaseListener):
 
     def exitInit_value_array(self, ctx):
         ctx.value = [x.value for x in ctx.vs]
-
-    def exitPublished_by(self, ctx):
-        ctx.value =  ctx.i.value
-
-    def exitSubscribed_by(self, ctx):
-        ctx.value =  ctx.i.value
 
     def exitDiagnostic_signal_def(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -220,15 +172,6 @@ class LdfListener(parser.BaseListener):
         goffs = ctx.goffs.value
         ctx.value = dict(signalName = sname, groupOffset = goffs)
 
-    def exitSignal_group_name(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitGroup_size(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitGroup_offset(self, ctx):
-        ctx.value = ctx.i.value
-
     def exitFrame_def(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
@@ -245,18 +188,6 @@ class LdfListener(parser.BaseListener):
         soffs = ctx.soffs.value
         ctx.value = dict(signalName = sname, signalOffset = soffs)
 
-    def exitFrame_name(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitFrame_id(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitFrame_size(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitSignal_offset(self, ctx):
-        ctx.value = ctx.i.value
-
     def exitSporadic_frame_def(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
@@ -264,9 +195,6 @@ class LdfListener(parser.BaseListener):
         name = ctx.sfn.value
         fnames = [x.value for x in ctx.names]
         ctx.value = dict(sporadicFrameName = name, frameNames = fnames)
-
-    def exitSporadic_frame_name(self, ctx):
-        ctx.value = ctx.i.value
 
     def exitEvent_triggered_frame_def(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -277,12 +205,6 @@ class LdfListener(parser.BaseListener):
         fid = ctx.fid.value
         items = [x.value for x in ctx.items]
         ctx.value = dict(frameName = e, frameID = fid, scheduleTable = c, frameNames = items)
-
-    def exitEvent_trig_frm_name(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitCollision_resolving_schedule_table(self, ctx):
-        ctx.value = ctx.i.value
 
     def exitDiag_frame_def(self, ctx):
         mid = ctx.mid.value
@@ -308,9 +230,6 @@ class LdfListener(parser.BaseListener):
         c = ctx.c.value
         f = ctx.f.value
         ctx.value = dict(command = c, frameTime = f)
-
-    def exitSchedule_table_name(self, ctx):
-        ctx.value = ctx.i.value
 
     def exitCommand(self, ctx):
         if ctx.frameName:
@@ -355,15 +274,6 @@ class LdfListener(parser.BaseListener):
             d1 = d2 = d3 = d4 = d5 = d6 = d7 = d8 = None
         ctx.value = dict(command = cmd)
 
-    def exitFrame_index(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitFrame_PID(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitFrame_time(self, ctx):
-        ctx.value = ctx.n.value
-
     def exitSignal_encoding_type_def(self, ctx):
         items = [x.value for x in ctx.items]
         ctx.value = items
@@ -388,10 +298,6 @@ class LdfListener(parser.BaseListener):
             vtype = "ascii"
         ctx.value = dict(value = value, valueType = vtype)
 
-
-    def exitSignal_encoding_type_name(self, ctx):
-        ctx.value = ctx.i.value
-
     def exitLogical_value(self, ctx):
         s = ctx.s.value
         t = ctx.t.value if ctx.t else None
@@ -400,8 +306,10 @@ class LdfListener(parser.BaseListener):
     def exitPhysical_range(self, ctx):
         minValue = ctx.minValue.value
         maxValue = ctx.maxValue.value
-        scale = ctx.scale.value if ctx.scale else None
-        offset = ctx.offset.value
+        #scale = ctx.scale.value if ctx.scale else None
+        #offset = ctx.offset.value
+        scale = ctx.scale
+        offset = ctx.offset
         ctx.value = dict(min = minValue, max = maxValue, scale = scale, offset = offset)
 
     def exitBcd_value(self, ctx):
@@ -409,26 +317,6 @@ class LdfListener(parser.BaseListener):
 
     def exitAscii_value(self, ctx):
         pass
-
-    def exitSignal_value(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitMin_value(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitMax_value(self, ctx):
-        ctx.value = ctx.i.value
-
-    def exitScale(self, ctx):
-        print("SCALE:", ctx.n.value)
-        #print("SCALE#2:", ctx.n)
-        ctx.value = ctx.n.value
-
-    def exitOffset(self, ctx):
-        ctx.value = ctx.n.value
-
-    def exitText_info(self, ctx):
-        ctx.value = ctx.s.value
 
     def exitSignal_representation_def(self, ctx):
         items = [x.value for x in ctx.items]
