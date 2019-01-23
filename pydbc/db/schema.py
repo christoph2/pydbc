@@ -58,6 +58,8 @@ TABLES = (
     "Attribute_Value",
     "AttributeRel_Value",
     "Attribute_Definition",
+    "linAttribute_Value",
+    "linAttribute_Definition",
     "VndbMeta",
     "EnvVar_AccessNode",
     "ECU_EnvVar",
@@ -143,6 +145,29 @@ SCHEMA = ('''
         String_Value TEXT,
         PRIMARY KEY(Object_ID,Attribute_Definition),
         FOREIGN KEY(Attribute_Definition) REFERENCES Attribute_Definition(RID) ON UPDATE CASCADE ON DELETE RESTRICT
+    );
+''', '''
+    CREATE TABLE IF NOT EXISTS linAttribute_Definition (
+        RID INTEGER NOT NULL DEFAULT 0,
+        Name VARCHAR(255) NOT NULL,
+        Objecttype INTEGER NOT NULL DEFAULT 0,
+        Valuetype INTEGER NOT NULL DEFAULT 0,
+        Minimum FLOAT8 DEFAULT 0,
+        Maximum FLOAT8 DEFAULT 0,
+        Enumvalues TEXT,
+        Default_Number FLOAT8 DEFAULT 0,
+        Default_String VARCHAR(255),
+        "Comment" TEXT,
+        PRIMARY KEY(RID)
+    );
+''', '''
+    CREATE TABLE IF NOT EXISTS linAttribute_Value (
+        Object_ID INTEGER NOT NULL DEFAULT 0,
+        Attribute_Definition INTEGER NOT NULL DEFAULT 0,
+        Num_Value FLOAT8 DEFAULT 0,
+        String_Value TEXT,
+        PRIMARY KEY(Object_ID,Attribute_Definition),
+        FOREIGN KEY(Attribute_Definition) REFERENCES linAttribute_Definition(RID) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS AttributeRel_Value (
