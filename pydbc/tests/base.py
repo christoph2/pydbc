@@ -1,15 +1,17 @@
 
-import unittest
+#import unittest
+import pytest
 
 from pydbc.api.db import Database
 from pydbc.api.db import BaseObject
 
 
-class BaseTest(unittest.TestCase):
+class BaseTest:
 
-    def setUp(self):
-        self.db = Database("test", inMemory = True)
+    @pytest.fixture(autouse = True)
+    def setup_database(self, db_in_memory):
+        self.db = db_in_memory
 
-    def tearDown(self):
-        self.db.close()
+#    def tearDown(self):
+#        self.db.close()
 
