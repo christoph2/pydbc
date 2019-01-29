@@ -1,15 +1,14 @@
-# Generated from ldf.g4 by ANTLR 4.7.2
+# Generated from ldf.g4 by ANTLR 4.7
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
 from typing.io import TextIO
 import sys
 
-
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3@")
-        buf.write("\u02e5\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3A")
+        buf.write("\u02e7\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
         buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31")
@@ -75,81 +74,81 @@ def serializedATN():
         buf.write(",\3,\3,\5,\u02b9\n,\3,\3,\3-\3-\3-\3.\3.\3.\3/\3/\3/\7")
         buf.write("/\u02c6\n/\f/\16/\u02c9\13/\3/\3/\3\60\3\60\3\60\3\60")
         buf.write("\3\60\7\60\u02d2\n\60\f\60\16\60\u02d5\13\60\3\60\3\60")
-        buf.write("\3\61\3\61\3\62\3\62\3\63\3\63\5\63\u02df\n\63\3\64\3")
-        buf.write("\64\3\65\3\65\3\65\2\2\66\2\4\6\b\n\f\16\20\22\24\26\30")
-        buf.write("\32\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJLNPRTVXZ\\^`b")
-        buf.write("dfh\2\2\2\u02ef\2j\3\2\2\2\4\u0092\3\2\2\2\6\u0097\3\2")
-        buf.write("\2\2\b\u009c\3\2\2\2\n\u00a1\3\2\2\2\f\u00a7\3\2\2\2\16")
-        buf.write("\u00ac\3\2\2\2\20\u00c5\3\2\2\2\22\u00cf\3\2\2\2\24\u00e3")
-        buf.write("\3\2\2\2\26\u0122\3\2\2\2\30\u012c\3\2\2\2\32\u0133\3")
-        buf.write("\2\2\2\34\u013d\3\2\2\2\36\u0148\3\2\2\2 \u0154\3\2\2")
-        buf.write("\2\"\u015e\3\2\2\2$\u0170\3\2\2\2&\u0172\3\2\2\2(\u0174")
-        buf.write("\3\2\2\2*\u017f\3\2\2\2,\u0189\3\2\2\2.\u0190\3\2\2\2")
-        buf.write("\60\u019a\3\2\2\2\62\u01a6\3\2\2\2\64\u01ab\3\2\2\2\66")
-        buf.write("\u01b5\3\2\2\28\u01c5\3\2\2\2:\u01ca\3\2\2\2<\u01d4\3")
-        buf.write("\2\2\2>\u01e0\3\2\2\2@\u01ea\3\2\2\2B\u01f8\3\2\2\2D\u0212")
-        buf.write("\3\2\2\2F\u0217\3\2\2\2H\u0221\3\2\2\2J\u022b\3\2\2\2")
-        buf.write("L\u0288\3\2\2\2N\u028a\3\2\2\2P\u0294\3\2\2\2R\u02a2\3")
-        buf.write("\2\2\2T\u02a4\3\2\2\2V\u02ad\3\2\2\2X\u02bc\3\2\2\2Z\u02bf")
-        buf.write("\3\2\2\2\\\u02c2\3\2\2\2^\u02cc\3\2\2\2`\u02d8\3\2\2\2")
-        buf.write("b\u02da\3\2\2\2d\u02de\3\2\2\2f\u02e0\3\2\2\2h\u02e2\3")
-        buf.write("\2\2\2jk\7\3\2\2kl\7\4\2\2lm\5\4\3\2mo\5\6\4\2np\5\b\5")
-        buf.write("\2on\3\2\2\2op\3\2\2\2pq\3\2\2\2qs\5\n\6\2rt\5\f\7\2s")
-        buf.write("r\3\2\2\2st\3\2\2\2tu\3\2\2\2uw\5\16\b\2vx\5\32\16\2w")
-        buf.write("v\3\2\2\2wx\3\2\2\2xy\3\2\2\2y{\5 \21\2z|\5*\26\2{z\3")
-        buf.write("\2\2\2{|\3\2\2\2|}\3\2\2\2}\177\5\64\33\2~\u0080\5:\36")
-        buf.write("\2\177~\3\2\2\2\177\u0080\3\2\2\2\u0080\u0082\3\2\2\2")
-        buf.write("\u0081\u0083\5> \2\u0082\u0081\3\2\2\2\u0082\u0083\3\2")
-        buf.write("\2\2\u0083\u0085\3\2\2\2\u0084\u0086\5B\"\2\u0085\u0084")
-        buf.write("\3\2\2\2\u0085\u0086\3\2\2\2\u0086\u0087\3\2\2\2\u0087")
-        buf.write("\u0088\5\20\t\2\u0088\u008a\5F$\2\u0089\u008b\5.\30\2")
-        buf.write("\u008a\u0089\3\2\2\2\u008a\u008b\3\2\2\2\u008b\u008d\3")
-        buf.write("\2\2\2\u008c\u008e\5N(\2\u008d\u008c\3\2\2\2\u008d\u008e")
-        buf.write("\3\2\2\2\u008e\u0090\3\2\2\2\u008f\u0091\5\\/\2\u0090")
-        buf.write("\u008f\3\2\2\2\u0090\u0091\3\2\2\2\u0091\3\3\2\2\2\u0092")
-        buf.write("\u0093\7\5\2\2\u0093\u0094\7\6\2\2\u0094\u0095\5f\64\2")
-        buf.write("\u0095\u0096\7\4\2\2\u0096\5\3\2\2\2\u0097\u0098\7\7\2")
-        buf.write("\2\u0098\u0099\7\6\2\2\u0099\u009a\5f\64\2\u009a\u009b")
-        buf.write("\7\4\2\2\u009b\7\3\2\2\2\u009c\u009d\7\b\2\2\u009d\u009e")
-        buf.write("\7\6\2\2\u009e\u009f\5f\64\2\u009f\u00a0\7\4\2\2\u00a0")
-        buf.write("\t\3\2\2\2\u00a1\u00a2\7\t\2\2\u00a2\u00a3\7\6\2\2\u00a3")
-        buf.write("\u00a4\5d\63\2\u00a4\u00a5\7\n\2\2\u00a5\u00a6\7\4\2\2")
-        buf.write("\u00a6\13\3\2\2\2\u00a7\u00a8\7\13\2\2\u00a8\u00a9\7\6")
-        buf.write("\2\2\u00a9\u00aa\5h\65\2\u00aa\u00ab\7\4\2\2\u00ab\r\3")
-        buf.write("\2\2\2\u00ac\u00ad\7\f\2\2\u00ad\u00ae\7\r\2\2\u00ae\u00af")
-        buf.write("\7\16\2\2\u00af\u00b0\7\17\2\2\u00b0\u00b1\5h\65\2\u00b1")
-        buf.write("\u00b2\7\20\2\2\u00b2\u00b3\5d\63\2\u00b3\u00b4\7\21\2")
-        buf.write("\2\u00b4\u00b5\7\20\2\2\u00b5\u00b6\5d\63\2\u00b6\u00b7")
-        buf.write("\7\21\2\2\u00b7\u00b8\7\4\2\2\u00b8\u00b9\7\22\2\2\u00b9")
-        buf.write("\u00ba\7\17\2\2\u00ba\u00bf\5h\65\2\u00bb\u00bc\7\20\2")
-        buf.write("\2\u00bc\u00be\5h\65\2\u00bd\u00bb\3\2\2\2\u00be\u00c1")
-        buf.write("\3\2\2\2\u00bf\u00bd\3\2\2\2\u00bf\u00c0\3\2\2\2\u00c0")
-        buf.write("\u00c2\3\2\2\2\u00c1\u00bf\3\2\2\2\u00c2\u00c3\7\4\2\2")
-        buf.write("\u00c3\u00c4\7\23\2\2\u00c4\17\3\2\2\2\u00c5\u00c6\7\24")
-        buf.write("\2\2\u00c6\u00ca\7\r\2\2\u00c7\u00c9\5\22\n\2\u00c8\u00c7")
-        buf.write("\3\2\2\2\u00c9\u00cc\3\2\2\2\u00ca\u00c8\3\2\2\2\u00ca")
-        buf.write("\u00cb\3\2\2\2\u00cb\u00cd\3\2\2\2\u00cc\u00ca\3\2\2\2")
-        buf.write("\u00cd\u00ce\7\23\2\2\u00ce\21\3\2\2\2\u00cf\u00d0\5h")
-        buf.write("\65\2\u00d0\u00d1\7\r\2\2\u00d1\u00d2\7\25\2\2\u00d2\u00d3")
-        buf.write("\7\6\2\2\u00d3\u00d4\5f\64\2\u00d4\u00d5\7\4\2\2\u00d5")
-        buf.write("\u00d6\7\26\2\2\u00d6\u00d7\7\6\2\2\u00d7\u00d8\5`\61")
-        buf.write("\2\u00d8\u00de\7\4\2\2\u00d9\u00da\7\27\2\2\u00da\u00db")
-        buf.write("\7\6\2\2\u00db\u00dc\5`\61\2\u00dc\u00dd\7\4\2\2\u00dd")
-        buf.write("\u00df\3\2\2\2\u00de\u00d9\3\2\2\2\u00de\u00df\3\2\2\2")
-        buf.write("\u00df\u00e0\3\2\2\2\u00e0\u00e1\5\24\13\2\u00e1\u00e2")
-        buf.write("\7\23\2\2\u00e2\23\3\2\2\2\u00e3\u00e4\7\30\2\2\u00e4")
-        buf.write("\u00e5\7\6\2\2\u00e5\u00e6\5`\61\2\u00e6\u00e7\7\20\2")
-        buf.write("\2\u00e7\u00ea\5`\61\2\u00e8\u00e9\7\20\2\2\u00e9\u00eb")
-        buf.write("\5`\61\2\u00ea\u00e8\3\2\2\2\u00ea\u00eb\3\2\2\2\u00eb")
-        buf.write("\u00ec\3\2\2\2\u00ec\u00ed\7\4\2\2\u00ed\u00ee\7\31\2")
-        buf.write("\2\u00ee\u00ef\7\6\2\2\u00ef\u00f0\5h\65\2\u00f0\u00fd")
-        buf.write("\7\4\2\2\u00f1\u00f2\7\32\2\2\u00f2\u00f3\7\6\2\2\u00f3")
-        buf.write("\u00f8\5h\65\2\u00f4\u00f5\7\20\2\2\u00f5\u00f7\5h\65")
-        buf.write("\2\u00f6\u00f4\3\2\2\2\u00f7\u00fa\3\2\2\2\u00f8\u00f6")
-        buf.write("\3\2\2\2\u00f8\u00f9\3\2\2\2\u00f9\u00fb\3\2\2\2\u00fa")
-        buf.write("\u00f8\3\2\2\2\u00fb\u00fc\7\4\2\2\u00fc\u00fe\3\2\2\2")
-        buf.write("\u00fd\u00f1\3\2\2\2\u00fd\u00fe\3\2\2\2\u00fe\u0105\3")
-        buf.write("\2\2\2\u00ff\u0100\7\33\2\2\u0100\u0101\7\6\2\2\u0101")
+        buf.write("\3\61\3\61\5\61\u02db\n\61\3\62\3\62\3\63\3\63\5\63\u02e1")
+        buf.write("\n\63\3\64\3\64\3\65\3\65\3\65\2\2\66\2\4\6\b\n\f\16\20")
+        buf.write("\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJL")
+        buf.write("NPRTVXZ\\^`bdfh\2\2\2\u02f2\2j\3\2\2\2\4\u0092\3\2\2\2")
+        buf.write("\6\u0097\3\2\2\2\b\u009c\3\2\2\2\n\u00a1\3\2\2\2\f\u00a7")
+        buf.write("\3\2\2\2\16\u00ac\3\2\2\2\20\u00c5\3\2\2\2\22\u00cf\3")
+        buf.write("\2\2\2\24\u00e3\3\2\2\2\26\u0122\3\2\2\2\30\u012c\3\2")
+        buf.write("\2\2\32\u0133\3\2\2\2\34\u013d\3\2\2\2\36\u0148\3\2\2")
+        buf.write("\2 \u0154\3\2\2\2\"\u015e\3\2\2\2$\u0170\3\2\2\2&\u0172")
+        buf.write("\3\2\2\2(\u0174\3\2\2\2*\u017f\3\2\2\2,\u0189\3\2\2\2")
+        buf.write(".\u0190\3\2\2\2\60\u019a\3\2\2\2\62\u01a6\3\2\2\2\64\u01ab")
+        buf.write("\3\2\2\2\66\u01b5\3\2\2\28\u01c5\3\2\2\2:\u01ca\3\2\2")
+        buf.write("\2<\u01d4\3\2\2\2>\u01e0\3\2\2\2@\u01ea\3\2\2\2B\u01f8")
+        buf.write("\3\2\2\2D\u0212\3\2\2\2F\u0217\3\2\2\2H\u0221\3\2\2\2")
+        buf.write("J\u022b\3\2\2\2L\u0288\3\2\2\2N\u028a\3\2\2\2P\u0294\3")
+        buf.write("\2\2\2R\u02a2\3\2\2\2T\u02a4\3\2\2\2V\u02ad\3\2\2\2X\u02bc")
+        buf.write("\3\2\2\2Z\u02bf\3\2\2\2\\\u02c2\3\2\2\2^\u02cc\3\2\2\2")
+        buf.write("`\u02da\3\2\2\2b\u02dc\3\2\2\2d\u02e0\3\2\2\2f\u02e2\3")
+        buf.write("\2\2\2h\u02e4\3\2\2\2jk\7\3\2\2kl\7\4\2\2lm\5\4\3\2mo")
+        buf.write("\5\6\4\2np\5\b\5\2on\3\2\2\2op\3\2\2\2pq\3\2\2\2qs\5\n")
+        buf.write("\6\2rt\5\f\7\2sr\3\2\2\2st\3\2\2\2tu\3\2\2\2uw\5\16\b")
+        buf.write("\2vx\5\32\16\2wv\3\2\2\2wx\3\2\2\2xy\3\2\2\2y{\5 \21\2")
+        buf.write("z|\5*\26\2{z\3\2\2\2{|\3\2\2\2|}\3\2\2\2}\177\5\64\33")
+        buf.write("\2~\u0080\5:\36\2\177~\3\2\2\2\177\u0080\3\2\2\2\u0080")
+        buf.write("\u0082\3\2\2\2\u0081\u0083\5> \2\u0082\u0081\3\2\2\2\u0082")
+        buf.write("\u0083\3\2\2\2\u0083\u0085\3\2\2\2\u0084\u0086\5B\"\2")
+        buf.write("\u0085\u0084\3\2\2\2\u0085\u0086\3\2\2\2\u0086\u0087\3")
+        buf.write("\2\2\2\u0087\u0088\5\20\t\2\u0088\u008a\5F$\2\u0089\u008b")
+        buf.write("\5.\30\2\u008a\u0089\3\2\2\2\u008a\u008b\3\2\2\2\u008b")
+        buf.write("\u008d\3\2\2\2\u008c\u008e\5N(\2\u008d\u008c\3\2\2\2\u008d")
+        buf.write("\u008e\3\2\2\2\u008e\u0090\3\2\2\2\u008f\u0091\5\\/\2")
+        buf.write("\u0090\u008f\3\2\2\2\u0090\u0091\3\2\2\2\u0091\3\3\2\2")
+        buf.write("\2\u0092\u0093\7\5\2\2\u0093\u0094\7\6\2\2\u0094\u0095")
+        buf.write("\5f\64\2\u0095\u0096\7\4\2\2\u0096\5\3\2\2\2\u0097\u0098")
+        buf.write("\7\7\2\2\u0098\u0099\7\6\2\2\u0099\u009a\5f\64\2\u009a")
+        buf.write("\u009b\7\4\2\2\u009b\7\3\2\2\2\u009c\u009d\7\b\2\2\u009d")
+        buf.write("\u009e\7\6\2\2\u009e\u009f\5f\64\2\u009f\u00a0\7\4\2\2")
+        buf.write("\u00a0\t\3\2\2\2\u00a1\u00a2\7\t\2\2\u00a2\u00a3\7\6\2")
+        buf.write("\2\u00a3\u00a4\5d\63\2\u00a4\u00a5\7\n\2\2\u00a5\u00a6")
+        buf.write("\7\4\2\2\u00a6\13\3\2\2\2\u00a7\u00a8\7\13\2\2\u00a8\u00a9")
+        buf.write("\7\6\2\2\u00a9\u00aa\5h\65\2\u00aa\u00ab\7\4\2\2\u00ab")
+        buf.write("\r\3\2\2\2\u00ac\u00ad\7\f\2\2\u00ad\u00ae\7\r\2\2\u00ae")
+        buf.write("\u00af\7\16\2\2\u00af\u00b0\7\17\2\2\u00b0\u00b1\5h\65")
+        buf.write("\2\u00b1\u00b2\7\20\2\2\u00b2\u00b3\5d\63\2\u00b3\u00b4")
+        buf.write("\7\21\2\2\u00b4\u00b5\7\20\2\2\u00b5\u00b6\5d\63\2\u00b6")
+        buf.write("\u00b7\7\21\2\2\u00b7\u00b8\7\4\2\2\u00b8\u00b9\7\22\2")
+        buf.write("\2\u00b9\u00ba\7\17\2\2\u00ba\u00bf\5h\65\2\u00bb\u00bc")
+        buf.write("\7\20\2\2\u00bc\u00be\5h\65\2\u00bd\u00bb\3\2\2\2\u00be")
+        buf.write("\u00c1\3\2\2\2\u00bf\u00bd\3\2\2\2\u00bf\u00c0\3\2\2\2")
+        buf.write("\u00c0\u00c2\3\2\2\2\u00c1\u00bf\3\2\2\2\u00c2\u00c3\7")
+        buf.write("\4\2\2\u00c3\u00c4\7\23\2\2\u00c4\17\3\2\2\2\u00c5\u00c6")
+        buf.write("\7\24\2\2\u00c6\u00ca\7\r\2\2\u00c7\u00c9\5\22\n\2\u00c8")
+        buf.write("\u00c7\3\2\2\2\u00c9\u00cc\3\2\2\2\u00ca\u00c8\3\2\2\2")
+        buf.write("\u00ca\u00cb\3\2\2\2\u00cb\u00cd\3\2\2\2\u00cc\u00ca\3")
+        buf.write("\2\2\2\u00cd\u00ce\7\23\2\2\u00ce\21\3\2\2\2\u00cf\u00d0")
+        buf.write("\5h\65\2\u00d0\u00d1\7\r\2\2\u00d1\u00d2\7\25\2\2\u00d2")
+        buf.write("\u00d3\7\6\2\2\u00d3\u00d4\5f\64\2\u00d4\u00d5\7\4\2\2")
+        buf.write("\u00d5\u00d6\7\26\2\2\u00d6\u00d7\7\6\2\2\u00d7\u00d8")
+        buf.write("\5`\61\2\u00d8\u00de\7\4\2\2\u00d9\u00da\7\27\2\2\u00da")
+        buf.write("\u00db\7\6\2\2\u00db\u00dc\5`\61\2\u00dc\u00dd\7\4\2\2")
+        buf.write("\u00dd\u00df\3\2\2\2\u00de\u00d9\3\2\2\2\u00de\u00df\3")
+        buf.write("\2\2\2\u00df\u00e0\3\2\2\2\u00e0\u00e1\5\24\13\2\u00e1")
+        buf.write("\u00e2\7\23\2\2\u00e2\23\3\2\2\2\u00e3\u00e4\7\30\2\2")
+        buf.write("\u00e4\u00e5\7\6\2\2\u00e5\u00e6\5`\61\2\u00e6\u00e7\7")
+        buf.write("\20\2\2\u00e7\u00ea\5`\61\2\u00e8\u00e9\7\20\2\2\u00e9")
+        buf.write("\u00eb\5`\61\2\u00ea\u00e8\3\2\2\2\u00ea\u00eb\3\2\2\2")
+        buf.write("\u00eb\u00ec\3\2\2\2\u00ec\u00ed\7\4\2\2\u00ed\u00ee\7")
+        buf.write("\31\2\2\u00ee\u00ef\7\6\2\2\u00ef\u00f0\5h\65\2\u00f0")
+        buf.write("\u00fd\7\4\2\2\u00f1\u00f2\7\32\2\2\u00f2\u00f3\7\6\2")
+        buf.write("\2\u00f3\u00f8\5h\65\2\u00f4\u00f5\7\20\2\2\u00f5\u00f7")
+        buf.write("\5h\65\2\u00f6\u00f4\3\2\2\2\u00f7\u00fa\3\2\2\2\u00f8")
+        buf.write("\u00f6\3\2\2\2\u00f8\u00f9\3\2\2\2\u00f9\u00fb\3\2\2\2")
+        buf.write("\u00fa\u00f8\3\2\2\2\u00fb\u00fc\7\4\2\2\u00fc\u00fe\3")
+        buf.write("\2\2\2\u00fd\u00f1\3\2\2\2\u00fd\u00fe\3\2\2\2\u00fe\u0105")
+        buf.write("\3\2\2\2\u00ff\u0100\7\33\2\2\u0100\u0101\7\6\2\2\u0101")
         buf.write("\u0102\5d\63\2\u0102\u0103\7\21\2\2\u0103\u0104\7\4\2")
         buf.write("\2\u0104\u0106\3\2\2\2\u0105\u00ff\3\2\2\2\u0105\u0106")
         buf.write("\3\2\2\2\u0106\u010d\3\2\2\2\u0107\u0108\7\34\2\2\u0108")
@@ -338,16 +337,17 @@ def serializedATN():
         buf.write("\5h\65\2\u02d1\u02cf\3\2\2\2\u02d2\u02d5\3\2\2\2\u02d3")
         buf.write("\u02d1\3\2\2\2\u02d3\u02d4\3\2\2\2\u02d4\u02d6\3\2\2\2")
         buf.write("\u02d5\u02d3\3\2\2\2\u02d6\u02d7\7\4\2\2\u02d7_\3\2\2")
-        buf.write("\2\u02d8\u02d9\7<\2\2\u02d9a\3\2\2\2\u02da\u02db\7;\2")
-        buf.write("\2\u02dbc\3\2\2\2\u02dc\u02df\5`\61\2\u02dd\u02df\5b\62")
-        buf.write("\2\u02de\u02dc\3\2\2\2\u02de\u02dd\3\2\2\2\u02dfe\3\2")
-        buf.write("\2\2\u02e0\u02e1\7?\2\2\u02e1g\3\2\2\2\u02e2\u02e3\7:")
-        buf.write("\2\2\u02e3i\3\2\2\2\67osw{\177\u0082\u0085\u008a\u008d")
+        buf.write("\2\u02d8\u02db\7<\2\2\u02d9\u02db\7=\2\2\u02da\u02d8\3")
+        buf.write("\2\2\2\u02da\u02d9\3\2\2\2\u02dba\3\2\2\2\u02dc\u02dd")
+        buf.write("\7;\2\2\u02ddc\3\2\2\2\u02de\u02e1\5`\61\2\u02df\u02e1")
+        buf.write("\5b\62\2\u02e0\u02de\3\2\2\2\u02e0\u02df\3\2\2\2\u02e1")
+        buf.write("e\3\2\2\2\u02e2\u02e3\7@\2\2\u02e3g\3\2\2\2\u02e4\u02e5")
+        buf.write("\7:\2\2\u02e5i\3\2\2\28osw{\177\u0082\u0085\u008a\u008d")
         buf.write("\u0090\u00bf\u00ca\u00de\u00ea\u00f8\u00fd\u0105\u010d")
         buf.write("\u0115\u011d\u0120\u0127\u012f\u0138\u0143\u014f\u0159")
         buf.write("\u0169\u0170\u017a\u0184\u0195\u01a1\u01b0\u01c0\u01cf")
         buf.write("\u01db\u01e5\u01f3\u0201\u020c\u021c\u0226\u026a\u0288")
-        buf.write("\u028f\u0299\u02a2\u02a9\u02b8\u02c7\u02d3\u02de")
+        buf.write("\u028f\u0299\u02a2\u02a9\u02b8\u02c7\u02d3\u02da\u02e0")
         return buf.getvalue()
 
 
@@ -393,8 +393,8 @@ class ldfParser ( Parser ):
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "C_IDENTIFIER", "FLOAT", "INT", "WS", "COMMENT", "STRING", 
-                      "SIGN" ]
+                      "C_IDENTIFIER", "FLOAT", "INT", "HEX", "WS", "COMMENT", 
+                      "STRING", "SIGN" ]
 
     RULE_lin_description_file = 0
     RULE_lin_protocol_version_def = 1
@@ -526,17 +526,17 @@ class ldfParser ( Parser ):
     C_IDENTIFIER=56
     FLOAT=57
     INT=58
-    WS=59
-    COMMENT=60
-    STRING=61
-    SIGN=62
+    HEX=59
+    WS=60
+    COMMENT=61
+    STRING=62
+    SIGN=63
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.7.2")
+        self.checkVersion("4.7")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
-
 
 
 
@@ -771,7 +771,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Lin_protocol_version_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -824,7 +823,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Lin_language_version_defContext(ParserRuleContext):
 
@@ -879,7 +877,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Lin_file_revision_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -932,7 +929,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Lin_speed_defContext(ParserRuleContext):
 
@@ -989,7 +985,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Channel_name_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1042,7 +1037,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Node_defContext(ParserRuleContext):
 
@@ -1152,7 +1146,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Node_attributes_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1219,7 +1212,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Node_attributeContext(ParserRuleContext):
 
@@ -1323,7 +1315,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Attributes_defContext(ParserRuleContext):
 
@@ -1532,7 +1523,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Configurable_framesContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1600,7 +1590,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Configurable_frameContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1665,7 +1654,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Node_composition_defContext(ParserRuleContext):
 
@@ -1733,7 +1721,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class ConfigurationContext(ParserRuleContext):
 
@@ -1809,7 +1796,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Configuration_itemContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1883,7 +1869,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Signal_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1950,7 +1935,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Signal_itemContext(ParserRuleContext):
 
@@ -2043,7 +2027,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Init_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2088,7 +2071,7 @@ class ldfParser ( Parser ):
             self.state = 366
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [ldfParser.INT]:
+            if token in [ldfParser.INT, ldfParser.HEX]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 364
                 localctx.s = self.init_value_scalar()
@@ -2108,7 +2091,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Init_value_scalarContext(ParserRuleContext):
 
@@ -2156,7 +2138,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Init_value_arrayContext(ParserRuleContext):
 
@@ -2228,7 +2209,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Diagnostic_signal_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2296,7 +2276,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Diagnostic_itemContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2362,7 +2341,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Signal_groups_defContext(ParserRuleContext):
 
@@ -2430,7 +2408,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Signal_groupContext(ParserRuleContext):
 
@@ -2513,7 +2490,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Signal_group_itemContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2571,7 +2547,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Frame_defContext(ParserRuleContext):
 
@@ -2639,7 +2614,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Frame_itemContext(ParserRuleContext):
 
@@ -2738,7 +2712,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Frame_signalContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2796,7 +2769,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Sporadic_frame_defContext(ParserRuleContext):
 
@@ -2864,7 +2836,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Sporadic_frame_itemContext(ParserRuleContext):
 
@@ -2939,7 +2910,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Event_triggered_frame_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3006,7 +2976,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Event_triggered_frame_itemContext(ParserRuleContext):
 
@@ -3089,7 +3058,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Diag_frame_defContext(ParserRuleContext):
 
@@ -3199,7 +3167,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Diag_frame_itemContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3257,7 +3224,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Schedule_table_defContext(ParserRuleContext):
 
@@ -3325,7 +3291,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Schedule_table_entryContext(ParserRuleContext):
 
@@ -3399,7 +3364,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Schedule_table_commandContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3459,7 +3423,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class CommandContext(ParserRuleContext):
 
@@ -3735,7 +3698,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Signal_encoding_type_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3802,7 +3764,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Signal_encoding_entryContext(ParserRuleContext):
 
@@ -3875,7 +3836,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Signal_encoding_valueContext(ParserRuleContext):
 
@@ -3962,7 +3922,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Logical_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4031,7 +3990,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Physical_rangeContext(ParserRuleContext):
 
@@ -4127,7 +4085,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Bcd_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4173,7 +4130,6 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Ascii_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4218,7 +4174,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Signal_representation_defContext(ParserRuleContext):
 
@@ -4286,7 +4241,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Signal_representation_entryContext(ParserRuleContext):
 
@@ -4361,16 +4315,19 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class IntValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
             self.i = None # Token
+            self.h = None # Token
 
         def INT(self):
             return self.getToken(ldfParser.INT, 0)
+
+        def HEX(self):
+            return self.getToken(ldfParser.HEX, 0)
 
         def getRuleIndex(self):
             return ldfParser.RULE_intValue
@@ -4397,9 +4354,22 @@ class ldfParser ( Parser ):
         localctx = ldfParser.IntValueContext(self, self._ctx, self.state)
         self.enterRule(localctx, 94, self.RULE_intValue)
         try:
-            self.enterOuterAlt(localctx, 1)
-            self.state = 726
-            localctx.i = self.match(ldfParser.INT)
+            self.state = 728
+            self._errHandler.sync(self)
+            token = self._input.LA(1)
+            if token in [ldfParser.INT]:
+                self.enterOuterAlt(localctx, 1)
+                self.state = 726
+                localctx.i = self.match(ldfParser.INT)
+                pass
+            elif token in [ldfParser.HEX]:
+                self.enterOuterAlt(localctx, 2)
+                self.state = 727
+                localctx.h = self.match(ldfParser.HEX)
+                pass
+            else:
+                raise NoViableAltException(self)
+
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -4407,7 +4377,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class FloatValueContext(ParserRuleContext):
 
@@ -4445,7 +4414,7 @@ class ldfParser ( Parser ):
         self.enterRule(localctx, 96, self.RULE_floatValue)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 728
+            self.state = 730
             localctx.f = self.match(ldfParser.FLOAT)
         except RecognitionException as re:
             localctx.exception = re
@@ -4454,7 +4423,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class NumberContext(ParserRuleContext):
 
@@ -4497,17 +4465,17 @@ class ldfParser ( Parser ):
         localctx = ldfParser.NumberContext(self, self._ctx, self.state)
         self.enterRule(localctx, 98, self.RULE_number)
         try:
-            self.state = 732
+            self.state = 734
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [ldfParser.INT]:
+            if token in [ldfParser.INT, ldfParser.HEX]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 730
+                self.state = 732
                 localctx.i = self.intValue()
                 pass
             elif token in [ldfParser.FLOAT]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 731
+                self.state = 733
                 localctx.f = self.floatValue()
                 pass
             else:
@@ -4520,7 +4488,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class StringValueContext(ParserRuleContext):
 
@@ -4558,7 +4525,7 @@ class ldfParser ( Parser ):
         self.enterRule(localctx, 100, self.RULE_stringValue)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 734
+            self.state = 736
             localctx.s = self.match(ldfParser.STRING)
         except RecognitionException as re:
             localctx.exception = re
@@ -4567,7 +4534,6 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class IdentifierValueContext(ParserRuleContext):
 
@@ -4605,7 +4571,7 @@ class ldfParser ( Parser ):
         self.enterRule(localctx, 102, self.RULE_identifierValue)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 736
+            self.state = 738
             localctx.i = self.match(ldfParser.C_IDENTIFIER)
         except RecognitionException as re:
             localctx.exception = re

@@ -44,12 +44,18 @@ Before moving on, note that J1939 is a bit special in regards to the CAN DBC fil
 
 DIGITS = re.compile(r'(\d+)')
 
+CO_MPX = re.compile(r"^m(\d+)M$")
+
 def validateMultiplexerIndicatior(value):
     if value == "M" or (value[0] == 'm' and value[1 : ].isdigit()):
         return True
     else:
-        print("Invalid multiplex indicator: '{}'".format(value))
-        return False
+        match = CO_MPX.match(value)
+        if not match:
+            print("Invalid multiplex indicator: '{}'".format(value))
+            return False
+        else:
+            return True
 
 
 def extractAccessType(value):
@@ -102,21 +108,28 @@ class DbcListener(parser.BaseListener):
     def exitSignalExtendedValueType(self, ctx):
         messageID = ctx.messageID.value
         signalName = ctx.signalName.value
-        valType = ctx.valType.value  # TODO: Validate ('0' | '1' | '2' | '3')
+        valType = ctx.valType.value
+        if not valType in (0, 1, 2, 3):
+            pass
+            #self.logger.error("ValueType must be in range [0..3]")
         ctx.value = dict(messageID = messageID, signalName = signalName, valueType = valType)
 
     def exitMessages(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
     def exitMessage(self, ctx):
+        # TODO: Check signals for multiple multiplexors!
         ctx.value = dict(messageID = ctx.messageID.value, name = ctx.messageName.value, dlc = ctx.messageSize.value,
             transmitter = ctx.transmt.text if ctx.transmt else None, signals = [x.value for x in ctx.sgs]
         )
 
     def exitSignal(self, ctx):
-        # TODO: Check signals for multiple multiplexors!
+        byteOrder = ctx.byteOrder.value
+        if not byteOrder in (0, 1):
+            pass
+            #self.logger.error("Byteorder must be either 0 or 1")
         ctx.value = dict(name = ctx.signalName.value, startBit = ctx.startBit.value, signalSize = ctx.signalSize.value,
-            byteOrder = ctx.byteOrder.value, sign = -1 if ctx.sign.text == '-' else +1, factor = ctx.factor.value, offset = ctx.offset.value,
+            byteOrder = byteOrder, sign = -1 if ctx.sign.text == '-' else +1, factor = ctx.factor.value, offset = ctx.offset.value,
             minimum = ctx.minimum.value, maximum = ctx.maximum.value, unit = ctx.unit.value, receiver = ctx.rcv.value,
             multiplexerIndicator = ctx.mind.value if ctx.mind else None
         )

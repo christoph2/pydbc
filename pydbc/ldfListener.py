@@ -60,13 +60,13 @@ class LdfListener(parser.BaseListener):
 
     def exitLin_language_version_def(self, ctx):
         ctx.value = ctx.s.value
-        print("Language-Ver:", ctx.value)
 
     def exitLin_file_revision_def(self, ctx):
         ctx.value = ctx.s.value
-        print("File_Revision:", ctx.value)
 
     def exitLin_speed_def(self, ctx):
+        #print("SPEED:", dir(ctx.n))
+        print("SPEED:", ctx.n.start.line, ctx.n.start.column)
         ctx.value = ctx.n.value if ctx.n else None
 
     def exitChannel_name_def(self, ctx):
