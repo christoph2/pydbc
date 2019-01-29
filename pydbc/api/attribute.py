@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -42,14 +42,14 @@ class AttributeDefinition:
 
     """
 
-    def __init__(self, database, rid, name, objectType, valueType, defaultValue, limits, enumValues = None, comment= None):
+    def __init__(self, database, rid, name, objectType, valueType, defaultValue, limits = None, enumValues = None, comment= None):
         self._database = database
         self._rid = rid
         self._name = name
         self._objectType = objectType
         self._valueType = valueType
         self._default = defaultValue
-        self._limits = limits
+        self._limits = limits if limits else Limits()
         self._values = [ev for ev in enumValues.split(";")] if enumValues else []
         self._comment = comment
 
@@ -71,13 +71,19 @@ class AttributeDefinition:
         default = self.default
         minimum = self.limits.min
         maximum = self.limits.max
-        values = self.values
+        values = ';'.join(self.values)
+        defaultNumber = None
+        defaultString = None
+        if self.valueType in (ValueType.HEX, ValueType.INT, ValueType.FLOAT):
+            defaultNumber = self.default
+        else:
+            defaultString = self.default
         comment = self.comment
         cur = self.database.getCursor()
         where = "RID = {}".format(self.rid)
         self.database.updateStatement(cur, 'Attribute_Definition', """Name, Objecttype, Valuetype, Minimum, Maximum,
             Enumvalues, Default_Number, Default_String, Comment""", where,
-            [name, objectType, valueType, minimum, maximum, values]
+            [name, objectType, valueType, minimum, maximum, values, defaultNumber, defaultString, comment]
         )
 
     def remove(self):
