@@ -30,7 +30,7 @@ class TestAttributes(BaseTest):
         attr.valueType = ValueType.FLOAT
         attr.objectType = AttributeType.ENV_VAR
         attr.update()
-        attr = AttributeDefinition(self.db, 42, "ABC", AttributeType.ENV_VAR, ValueType.FLOAT, 0, comment ="world")
+        attr = AttributeDefinition(self.db, 42, "ABC", AttributeType.ENV_VAR, ValueType.FLOAT, 0, comment = "world")
         assert attr.objectType == AttributeType.ENV_VAR
         assert attr.valueType == ValueType.FLOAT
         assert attr.comment == "world"
@@ -40,21 +40,13 @@ class TestAttributes(BaseTest):
 
     def testRidCouldNotBeSet(self):
       attr = self.createAttribute()
-      try:
+      with pytest.raises(AttributeError):
           attr.rid = 0
-      except AttributeError:
-          pass
-      except Exception as e:
-          raise
 
     def testDatabaseCouldNotBeSet(self):
       attr = self.createAttribute()
-      try:
+      with pytest.raises(AttributeError):
           attr.database = None
-      except AttributeError:
-          pass
-      except Exception:
-          raise
 
     def testSetNameWorks(self):
         attr = self.createAttribute()
@@ -78,21 +70,13 @@ class TestAttributes(BaseTest):
 
     def testSetObjectTypeFails1(self):
         attr = self.createAttribute()
-        try:
+        with pytest.raises(ValueError):
             attr.objectType = 112
-        except ValueError:
-            pass
-        except Exception:
-            raise
 
     def testSetObjectTypeFail21(self):
         attr = self.createAttribute()
-        try:
+        with pytest.raises(ValueError):
             attr.objectType = "hello"
-        except ValueError:
-            pass
-        except Exception:
-            raise
 
     def testSetLimitsWorks(self):
         attr = self.createAttribute()

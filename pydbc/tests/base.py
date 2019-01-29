@@ -1,5 +1,4 @@
 
-#import unittest
 import pytest
 
 from pydbc.api.db import Database
@@ -11,7 +10,4 @@ class BaseTest:
     @pytest.fixture(autouse = True)
     def setup_database(self, db_in_memory):
         self.db = db_in_memory
-
-#    def tearDown(self):
-#        self.db.close()
 

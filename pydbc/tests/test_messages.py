@@ -1,6 +1,6 @@
 
 from pprint import pprint
-import unittest
+import pytest
 
 from pydbc.tests.base import BaseTest
 from pydbc.api.db import DuplicateKeyError
@@ -15,19 +15,20 @@ class TestMessage(BaseTest):
 
     def testInsertMessageWorks(self):
         msg = self.createMessage()
-        self.assertEqual(msg.name, "MSG")
-        self.assertEqual(msg.identifier, 0x0815)
-        self.assertEqual(msg.dlc, 4)
-        self.assertEqual(msg.comment, "test-message")
+        assert msg.name == "MSG"
+        assert msg.identifier == 0x0815
+        assert msg.dlc == 4
+        assert msg.comment == "test-message"
 
     def testInsertDuplicateMessageFails(self):
         msg1 = self.createMessage()
-        self.assertRaises(DuplicateKeyError, self.createMessage)
+        with pytest.raises(DuplicateKeyError):
+            self.createMessage()
 
     def testNewlyCreatedMessageHasNoSignals(self):
         msg = self.createMessage()
         signals = list(msg.signals())
-        self.assertEqual(signals, [])
+        assert signals == []
 
     def testAddSignalWorks(self):
         msg = self.createMessage()
@@ -36,32 +37,32 @@ class TestMessage(BaseTest):
     def testSignalTypeUintWorks(self):
         msg = self.createMessage()
         signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.UINT, "rpm", Formula(), Limits())
-        self.assertEqual(signal.valueType, SignalType.UINT)
+        assert signal.valueType == SignalType.UINT
 
     def testSignalTypeSintWorks(self):
         msg = self.createMessage()
         signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.SINT, "rpm", Formula(), Limits())
-        self.assertEqual(signal.valueType, SignalType.SINT)
+        assert signal.valueType == SignalType.SINT
 
     def testSignalTypeFloat32Works(self):
         msg = self.createMessage()
         signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.FLOAT32, "rpm", Formula(), Limits())
-        self.assertEqual(signal.valueType, SignalType.FLOAT32)
+        assert signal.valueType == SignalType.FLOAT32
 
     def testSignalTypeFloat64Works(self):
         msg = self.createMessage()
         signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.FLOAT64, "rpm", Formula(), Limits())
-        self.assertEqual(signal.valueType, SignalType.FLOAT64)
+        assert signal.valueType == SignalType.FLOAT64
 
     def testSignalByteOrderIntelWorks(self):
         msg = self.createMessage()
         signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.INTEL, SignalType.UINT, "rpm", Formula(), Limits())
-        self.assertEqual(signal.byteOrder, ByteOrderType.INTEL)
+        assert signal.byteOrder == ByteOrderType.INTEL
 
     def testSignalByteOrderMotorolaWorks(self):
         msg = self.createMessage()
         signal = msg.addSignal("Drehzahl", 4, 8, ByteOrderType.MOTOROLA, SignalType.UINT, "rpm", Formula(), Limits())
-        self.assertEqual(signal.byteOrder, ByteOrderType.MOTOROLA)
+        assert signal.byteOrder == ByteOrderType.MOTOROLA
 
     def testUpdateWorks(self):
         msg = self.createMessage()
@@ -70,17 +71,18 @@ class TestMessage(BaseTest):
         msg.dlc = 8
         msg.comment = "hello"
         msg.update()
-        self.assertEqual(msg.name, "MSG2")
-        self.assertEqual(msg.identifier, 0x4711)
-        self.assertEqual(msg.dlc, 8)
-        self.assertEqual(msg.comment, "hello")
+        assert msg.name == "MSG2"
+        assert msg.identifier == 0x4711
+        assert msg.dlc == 8
+        assert msg.comment == "hello"
 
     def testUpdateFails(self):
         msg = self.createMessage()
         msg2 = self.db.addMessage("MSG2", 0x4711, 8)
         msg2.name = "MSG"
         msg2.dlc = 7
-        self.assertRaises(DuplicateKeyError, msg2.update)
+        with pytest.raises(DuplicateKeyError):
+            msg2.update()
 
 
 

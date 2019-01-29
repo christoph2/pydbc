@@ -1,14 +1,12 @@
 
-import unittest
+import pytest
 
 from pydbc.api.db import Database
 
 
-class TestCreation(unittest.TestCase):
+class TestCreation:
 
-  def testCreateDatabase(self):
-    db = Database("test")
-    
-    
-if __name__ == '__main__':
-  unittest.main()
+    def testCreateDatabase(self):
+        db = Database("test")
+        assert db.dbname == "test.vndb"
+        assert db.dbtype == "CAN"
