@@ -36,6 +36,9 @@ import six
 import antlr4
 import antlr4.tree
 
+from pydbc.logger import Logger
+
+
 def indent(level):
     print(" " * level,)
 
@@ -54,8 +57,11 @@ def dump(tree, level = 0):
 
 
 class BaseListener(antlr4.ParseTreeListener):
-    value = []
+    """
+    """
 
+    value = []
+    logger = Logger(__name__)
 
     def getList(self, attr):
         return [x for x in attr()] if attr() else []
@@ -88,6 +94,27 @@ class BaseListener(antlr4.ParseTreeListener):
 
     def exitIdentifierValue(self, ctx):
         ctx.value = ctx.i.text if ctx.i else None
+
+    def _formatMessage(self, msg, location):
+        return "[{0}:{1}] {2}".format(location.start.line, location.start.column + 1, msg)
+
+    def _log(self, method, msg, location = None):
+        if location:
+            method(self._formatMessage(msg, location))
+        else:
+            method(msg)
+
+    def info(self, msg, location = None):
+        self._log(self.info.warn, msg, location)
+
+    def warn(self, msg, location = None):
+        self._log(self.logger.warn, msg, location)
+
+    def error(self, msg, location = None):
+        self._log(self.logger.warn, msg, location)
+
+    def debug(self, msg, location = None):
+        self._log(self.logger.warn, msg, location)
 
 
 class ParserWrapper(object):
@@ -138,17 +165,4 @@ class ParserWrapper(object):
 
     numberOfSyntaxErrors = property(_getNumberOfSyntaxErrors)
 
-
-class Parser:
-    """
-    """
-
-    def __init__(self, grammar, startSymbol, listener):
-        self.pw = ParserWrapper(grammar, startSymbol, listener)
-
-    def parseFromString(self, buf, encoding = 'latin-1', trace = False):
-        return self.pw.parseFromString(buf, encoding, trace)
-
-    def parseFromFile(self,  fileName, encoding = 'latin-1', trace = False):
-        return self.pw.parseFromString(fileName, encoding, trace)
 

@@ -110,8 +110,7 @@ class DbcListener(parser.BaseListener):
         signalName = ctx.signalName.value
         valType = ctx.valType.value
         if not valType in (0, 1, 2, 3):
-            pass
-            #self.logger.error("ValueType must be in range [0..3]")
+            self.logger.error("ValueType must be in range [0..3]", ctx.valType)
         ctx.value = dict(messageID = messageID, signalName = signalName, valueType = valType)
 
     def exitMessages(self, ctx):
@@ -126,8 +125,7 @@ class DbcListener(parser.BaseListener):
     def exitSignal(self, ctx):
         byteOrder = ctx.byteOrder.value
         if not byteOrder in (0, 1):
-            pass
-            #self.logger.error("Byteorder must be either 0 or 1")
+            self.logger.error("Byteorder must be either 0 or 1", ctx.byteOrder)
         ctx.value = dict(name = ctx.signalName.value, startBit = ctx.startBit.value, signalSize = ctx.signalSize.value,
             byteOrder = byteOrder, sign = -1 if ctx.sign.text == '-' else +1, factor = ctx.factor.value, offset = ctx.offset.value,
             minimum = ctx.minimum.value, maximum = ctx.maximum.value, unit = ctx.unit.value, receiver = ctx.rcv.value,

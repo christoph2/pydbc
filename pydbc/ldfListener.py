@@ -65,8 +65,6 @@ class LdfListener(parser.BaseListener):
         ctx.value = ctx.s.value
 
     def exitLin_speed_def(self, ctx):
-        #print("SPEED:", dir(ctx.n))
-        print("SPEED:", ctx.n.start.line, ctx.n.start.column)
         ctx.value = ctx.n.value if ctx.n else None
 
     def exitChannel_name_def(self, ctx):
