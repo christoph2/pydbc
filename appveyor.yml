@@ -69,12 +69,12 @@ artifacts:
 #  See Appveyor's documentation for more details. Or you can simply
 #  access your wheels from the Appveyor "artifacts" tab for your build.
 
-deploy:
-- provider: GitHub
-  artifact: '*.*'
-  description: Test release -- do not use
-  auth_token:
-    secure: Wiweaot1JAHzV9mMZ3Zhn/5XUuLe5XYAyfpRZmWNpLW7fMW1FhAdoRliiAhz3Sv6
-  draft: false
-  prerelease: true
+#deploy:
+#- provider: GitHub
+#  artifact: '*.*'
+#  description: Test release -- do not use
+#  auth_token:
+#    secure: Wiweaot1JAHzV9mMZ3Zhn/5XUuLe5XYAyfpRZmWNpLW7fMW1FhAdoRliiAhz3Sv6
+#  draft: false
+#  prerelease: true
 
