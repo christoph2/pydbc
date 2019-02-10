@@ -7,6 +7,8 @@ from glob import glob
 
 ANTLR_VERSION = '4.7.2'
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 if os.environ.get("TRAVIS") or os.environ.get("APPVEYOR"):
     INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'colorama', 'numpydoc', 'sphinxcontrib-napoleon']
@@ -21,7 +23,9 @@ if (sys.version_info.major == 3 and sys.version_info.minor < 4) or (sys.version_
 setup(
     name = 'pydbc',
     version = '0.1.0',
-    description = "DBC for Python",
+    description = "Vehicle description file handling for Python",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author = 'Christoph Schueler',
     author_email = 'cpu12.gems@googlemail.com',
     url = 'https://www.github.com/Christoph2/pydbc',
