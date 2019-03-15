@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -32,6 +32,7 @@ from functools import lru_cache
 
 from pydbc.api.attribute import AttributeDefinition, AttributeValue, Value
 from pydbc.api.limits import Limits
+from pydbc.logger import Logger
 from pydbc.types import ValueType,AttributeType
 
 
@@ -43,6 +44,7 @@ class BaseObject:
 
     def __init__(self, database):
         self._database = database
+        logger = Logger(__name__)
 
     def update(self):
         attrValues = []
