@@ -5,7 +5,7 @@ Installation and Getting Started
 
 **Platforms**: No platform-specific restrictions.
 
-**Documentation**: `get latest <https://pydbc.rtfd.org>`_.
+**Documentation**: `get latest <https://pyvndb.rtfd.org>`_.
 
 
 Prerequisites
