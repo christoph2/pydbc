@@ -31,7 +31,7 @@ __version__ = '0.1.0'
 from pydbc.types import AttributeType, MultiplexingType, ValueTableType, ByteOrderType, SignalType
 from pydbc.api.base import BaseObject
 from pydbc.api.limits import Limits
-from pydbc.api.valuetable import ValueTable #, Value
+from pydbc.api.valuetable import Valuetable
 
 class Multiplexing:
     """
@@ -105,7 +105,7 @@ class Signal(BaseObject):
         self.comment = signal['Comment']
         self.limits = Limits(signal['Minimum'], signal['Maximum'])
         self.unit = signal['Unit']
-        self.valueTable = ValueTable(self.database, ValueTableType.SIGNAL, self.rid)
+        self._valuetable = Valuetable(self.database, ValueTableType.SIGNAL, self.rid)
 
     def getMultiplexing(self, messageSignal):   # TODO: property multiplexing
         """
@@ -121,32 +121,16 @@ class Signal(BaseObject):
             mpxType = MultiplexingType.NONE
         return Multiplexing(mpxType, mpxValue)
 
-    @property
-    def values(self):
-        """
-        """
-        return self.valueTable
-
-    @values.setter
-    def values(self, vs):
-        """
-        """
-        pass
 
     @property
     def valuetable(self):
-        pass
-
-    def valuesFromGlobalTable(self):
-        """
-        """
-        pass
+        return self._valuetable
 
     def __str__(self):
         return '{}(name = "{}", type = {}, startBit = {}, bitSize = {}, byteOrder = {}, unit = "{}",\
  limits = {}, formula = {}, multiplexing = {}, values = {}, comment = "{}")'.format(self.__class__.__name__, self.name,
             self.valueType.name, self.startBit, self.bitSize, self.byteOrder.name, self.unit, self.limits,
-            self.formula, self.multiplexing, self.valueTable.values or [], self.comment or ""
+            self.formula, self.multiplexing, self.valuetable.values or [], self.comment or ""
         )
 
     __repr__ = __str__

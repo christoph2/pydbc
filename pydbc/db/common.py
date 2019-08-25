@@ -104,10 +104,10 @@ class Queries:
         cur = self.getCursor()
         cur.execute("""SELECT t1.RID, t1.Name, t1.Value,
             (SELECT t2.Message_Id FROM Message AS t2 WHERE t2.RID = t1.Message) AS Message_Id FROM Signal_Group as t1
+            ORDER BY t1.RID
         """)
         while True:
             row = cur.fetchone()
-            #print("HELLO SG:", row)
             if row is None:
                 return
             else:

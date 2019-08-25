@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -45,7 +45,7 @@ class Value:
     __repr__ = __str__
 
 
-class ValueTable:
+class Valuetable:
     """
     """
 
@@ -53,9 +53,11 @@ class ValueTable:
         self.database = database
         self.objectType = objectType
         self.objectRid = objectRid
+
         cur = self.database.getCursor()
         cur.execute("""SELECT Object_RID, Valuetable AS VT_RID, Name, Comment FROM Object_Valuetable AS t1,
         Valuetable AS t2 WHERE t1.Valuetable = t2.RID AND Object_Type = ? AND Object_RID = ?""", [objectType, objectRid])
+
         row = cur.fetchone()
         values = []
         if row:
@@ -75,8 +77,29 @@ class ValueTable:
     def addValue(self, name, value):
         self.values.append(Value(name, value))
 
+    def update(self):
+        pass
+
+    def fetchValuetable(self):
+        values = []
+        cur = self.database.getCursor()
+        cur.execute("""SELECT Object_RID, Valuetable AS VT_RID, Name, Comment FROM Object_Valuetable AS t1,
+        Valuetable AS t2 WHERE t1.Valuetable = t2.RID AND Object_Type = ? AND Object_RID = ?""",
+            [self.objectType, self.objectRid]
+        )
+        row = cur.fetchone()
+        if row:
+            res = self.database.db.createDictFromRow(row, cur.description)
+            cur.execute("SELECT Value, Value_Description FROM Value_Description WHERE Valuetable = ?", [res['VT_RID']])
+            rows = cur.fetchall()
+            for value, desc in rows:
+                val = Value(desc, int(value))
+                values.append(val)
+        else:
+            pass
+
     def __str__(self):
-        return '{}(name = "{}", comment = "{}", values = {})'.format(self.__class__.__name__, self.name, self.comment or "", self.values)
+        return '{}(comment = "{}", values = {})'.format(self.__class__.__name__, self.comment or "", self.values)
 
     __repr__ = __str__
 
