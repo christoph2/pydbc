@@ -11,9 +11,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 if os.environ.get("TRAVIS") or os.environ.get("APPVEYOR"):
-    INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'colorama', 'numpydoc', 'sphinxcontrib-napoleon']
+    INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'colorama']
 else:
-    INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'wxPython>=4.0.0', 'colorama', 'numpydoc', 'sphinxcontrib-napoleon']
+    INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'wxPython>=4.0.0', 'colorama']
 
 
 if (sys.version_info.major == 3 and sys.version_info.minor < 4) or (sys.version_info.minor < 3):
@@ -33,6 +33,14 @@ setup(
     install_requires = INSTALL_REQUIRES,
 #    setup_requires=["pytest-runner"],
     tests_require=["pytest", "pytest-runner"],
+    extras_require={
+        "docs": [
+            'sphinxcontrib-napoleon', 'numpydoc'
+        ],
+       "develop": [
+            "bumpversion"
+        ]
+    },
     entry_points = {
         'console_scripts': [
                 'vndb_importer = pydbc.scripts.vndb_importer:main'
