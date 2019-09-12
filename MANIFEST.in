@@ -1,1 +1,14 @@
-include cgen/templates/*.tmpl
+include *.md
+include *.txt
+include *.yml
+include .bumpversion.cfg
+include LICENSE
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs *.txt
+recursive-include docs Makefile
+recursive-include pydbc *.cmd
+recursive-include pydbc *.g4
+recursive-include pydbc *.py
+recursive-include pydbc *.tmpl
+recursive-include pydbc *.tokens
