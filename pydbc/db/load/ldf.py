@@ -111,6 +111,8 @@ LDF_ATTRS = {
     "LIN_ST_min": AttributeContainer("LIN_ST_min", AttributeType.NODE, ValueType.FLOAT),
     "LIN_N_As_timeout": AttributeContainer("LIN_N_As_timeout", AttributeType.NODE, ValueType.FLOAT),
     "LIN_N_Cr_timeout": AttributeContainer("LIN_N_Cr_timeout", AttributeType.NODE, ValueType.FLOAT),
+    # Signals
+    "LIN_signal_initial_value": AttributeContainer("LIN_signal_initial_value", AttributeType.SIGNAL, ValueType.INT),
 }
 
 class LdfLoader(BaseLoader):
@@ -234,6 +236,15 @@ class LdfLoader(BaseLoader):
             self.db.insertStatement(cur, "Signal", "Name, Bitsize", name, size)
             signal['rid'] = cur.lastrowid
             self.signals[name] = signal
+            if initValue['array'] is None:
+                if initValue['scalar'] is None:
+                    continue
+                else:
+                    iv = initValue['scalar']
+            else:
+                iv = ';'.join([str(x) for x in initValue['array']])
+            self.setAttributeValue(cur, signal['rid'], 'LIN_signal_initial_value', iv)
+
 
     def insertFrames(self, cur, frames):
         """
