@@ -93,7 +93,7 @@ LDF_ATTRS = {
     "LIN_file_revision": AttributeContainer("LIN_file_revision", AttributeType.NETWORK, ValueType.STRING),
     "LIN_speed": AttributeContainer("LIN_speed", AttributeType.NETWORK, ValueType.FLOAT),
     "LIN_channel_name": AttributeContainer("LIN_channel_name", AttributeType.NETWORK, ValueType.STRING),
-    "LIN_include_diag": AttributeContainer("LIN_channel_name", AttributeType.NETWORK, ValueType.INT),
+    "LIN_include_diag": AttributeContainer("LIN_include_diag", AttributeType.NETWORK, ValueType.INT),
     # Nodes
     "LIN_is_master": AttributeContainer("LIN_is_master", AttributeType.NODE, ValueType.INT),
     "LIN_is_slave": AttributeContainer("LIN_is_slave", AttributeType.NODE, ValueType.INT),
