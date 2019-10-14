@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""Database schema.
+"""
+
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
@@ -25,8 +28,6 @@ __copyright__ = """
    s. FLOSS-EXCEPTION.txt
 """
 __author__  = 'Christoph Schueler'
-__version__ = '0.1.0'
-
 
 INDICES = (
     "CREATE UNIQUE INDEX IF NOT EXISTS Node_Name ON Node(Name)",
@@ -60,7 +61,6 @@ TABLES = (
     "Attribute_Definition",
     "linAttribute_Value",
     "linAttribute_Definition",
-    "VndbMeta",
     "EnvVar_AccessNode",
     "ECU_EnvVar",
     "ECU",
@@ -82,6 +82,8 @@ TABLES = (
     "Category_Value",
     "Category_Definition",
     "Dbc_Version",
+    "Vndb_Protocol",
+    "Vndb_Migrations",
 )
 
 VIEWS = (
@@ -196,6 +198,14 @@ SCHEMA = ('''
         Name varchar(255) NOT NULL,
         Applied TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY(RID)
+    );
+''', '''
+    CREATE TABLE IF NOT EXISTS Vndb_Protocol (
+        Network INTEGER NOT NULL DEFAULT 0,
+        Name varchar(255) NOT NULL,
+        Specific varchar(255) NOT NULL,
+        PRIMARY KEY(Network),
+        FOREIGN KEY(Network) REFERENCES Network(RID) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 ''', '''
     CREATE TABLE IF NOT EXISTS ECU (
