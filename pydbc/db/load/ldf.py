@@ -235,6 +235,9 @@ class LdfLoader(BaseLoader):
             subscribedBy = signal['subscribedBy']
             self.db.insertStatement(cur, "Signal", "Name, Bitsize", name, size)
             signal['rid'] = cur.lastrowid
+            rid = signal['rid']
+            publisherId = self.queries.fetchNodeId(publishedBy)
+            self.db.insertStatement(cur, "Node_TxSig", "Node, Signal", publisherId, rid)
             self.signals[name] = signal
             if initValue['array'] is None:
                 if initValue['scalar'] is None:
@@ -243,7 +246,7 @@ class LdfLoader(BaseLoader):
                     iv = initValue['scalar']
             else:
                 iv = ';'.join([str(x) for x in initValue['array']])
-            self.setAttributeValue(cur, signal['rid'], 'LIN_signal_initial_value', iv)
+            self.setAttributeValue(cur, rid, 'LIN_signal_initial_value', iv)
 
 
     def insertFrames(self, cur, frames):
@@ -263,6 +266,12 @@ class LdfLoader(BaseLoader):
             self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Sender", name, frid, size, sender)
             frame['rid'] = cur.lastrowid
             self.frames[name] = frame
+            for signal in frame['signals']:
+                signalOffs = signal['signalOffset']
+                signalName = signal['signalName']
+                srid = self.signals[signalName]['rid']
+                self.db.insertStatement(cur, "Message_Signal", "Message, Signal, Offset", frame['rid'], srid, signalOffs)
+
 
     def insertFrameSignalRelationships(self, cur):
         for sigName, signal in self.signals.items():
