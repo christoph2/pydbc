@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+"""
+
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
@@ -31,112 +34,23 @@ import argparse
 
 import io
 import pathlib
-from pprint import pprint
-import pkgutil
-import sqlite3
-import sys
 
-import antlr4
-
-from pydbc import parser
-from pydbc.dbcListener import DbcListener
-from pydbc.ldfListener import LdfListener
-
-from pydbc.db import CanDatabase
-from pydbc.db.creator import Creator
-from pydbc.db.load import (DbcLoader, LdfLoader)
-from pydbc.template import renderTemplateFromText
-from pydbc.db.common import Queries
-from .hilighter import makeHilighter
-
-
-template = pkgutil.get_data("pydbc", "cgen/templates/dbc.tmpl")
-
-hl = makeHilighter(None)
-
-def execute(fun, name, *args):
-    try:
-        fun(*args)
-    except Exception as e:
-        msg = hl.errorText("   Exiting import function due to exception while {}".format(name))
-        if not isinstance(e, sqlite3.DatabaseError):
-            msg += ": {}".format(str(e))
-        print("{}\n".format(msg), flush = True)
-        print(str(e))
-        #sys.exit(1)
-        return False
-    else:
-        return True
-
-
-class Importer: pass
-
-
-class DbcImporter(Importer):
-    pass
-
-
-class LdfImporter(Importer):
-    pass
-
+from pydbc.db.imex import createImporter
 
 def importFile(pth):
-    global ucout
+    fnext = pth.suffix[ 1 : ].lower()
 
-    fname = pth.parts[-1]
-    fnbase = pth.stem
-    fnext = pth.suffix
+    importer = createImporter(fnext)
+    imp = importer(pth)
+    imp.run()
 
-    db = CanDatabase(r"{}.vndb".format(fnbase))
+    print("OK, done.\n", flush = True)
 
-    print(hl.progressText("Processing file '{}'...").format(fname), flush = True)
-
-    cr = Creator(db)
-    if not execute(cr.dropTables, "dropping tables"):
-        return
-    if not execute(cr.createSchema, "creating schema"):
-        return
-
-    pa = parser.ParserWrapper('dbc', 'dbcfile', DbcListener)
-
-    try:
-        tree = pa.parseFromFile("{}".format(pth.absolute()), encoding = "utf-8" if ucout else "latin-1", trace = False)
-    except Exception as e:
-        print(hl.errorText("   Exiting import function due to exception while parsing: {}\n".format(str(e))), flush = True)
-        return
-
-    print("Finished ANTLR parsing.", flush = True)
-
-    loader = DbcLoader(db, Queries)
-
-    if not execute(loader.insertValues, "inserting values", tree):
-        return
-    if not execute(cr.createIndices, "creating indices"):
-        return
-    if not execute(cr.createMetaData, "creating meta-data"):
-        return
-
-    #pprint(tree, indent = 4)
-
-    namespace = dict(db = Queries(db))
-    #print("Rending template...", flush = True)
-
-#    db.outputDbc(0, "{}.render".format(fnbase))
-    res = renderTemplateFromText(template, namespace, formatExceptions = True, encoding = "utf-8" if ucout else "latin-1")
-    with io.open("{}.render".format(fnbase), "w", encoding = "utf-8" if ucout else "latin-1", newline = "\r\n") as outf:
-        outf.write(res)
-
-    print(hl.successText("OK, done.\n"), flush = True)
-    #print("-" * 80, flush = True)
-
-ucout = False
 
 def main():
-    global ucout
-
     footer = "CAVEAT: In this version vndb_importer is DESTRUCTIVE, i.e. no merging happens!"
     parser = argparse.ArgumentParser(description = 'Import .dbc file into Vehicle Network Database.', epilog = footer)
-    parser.add_argument("dbcfile", help = ".dbc file(s) to import", nargs = "+")
+    parser.add_argument("vehicle_file", help = ".dbc or .ldf file(s) to import", nargs = "+")
     parser.add_argument("-k", dest = 'keepDirectory', action = "store_true", default = False,
         help = "keep directory; otherwise create db in current directory"
     )
@@ -145,7 +59,7 @@ def main():
     parser.add_argument("-u", help = "Generate UTF-8 encoded output (otherwise Latin-1).", dest = "ucout", action = "store_true")
     args = parser.parse_args()
     ucout = args.ucout
-    for arg in args.dbcfile:
+    for arg in args.vehicle_file:
         for pth in pathlib.Path().glob(arg):
             importFile(pth)
 
