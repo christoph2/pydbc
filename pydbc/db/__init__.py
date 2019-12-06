@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -27,168 +27,137 @@ __copyright__ = """
 __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
-from collections import namedtuple
-import itertools
-import logging
+from datetime import datetime
+from functools import partial
 import mmap
 import os
-import pkgutil
-from pprint import pprint
-import re
 import sqlite3
 import sys
-import types
 
-from pydbc.exceptions import DuplicateKeyError
+from sqlalchemy import (MetaData, schema, types, orm, event,
+    create_engine, Column, ForeignKey, ForeignKeyConstraint, func,
+    PassiveDefault, UniqueConstraint, inspect
+)
+
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.engine import Engine
+from sqlalchemy.sql import exists
+#from sqlalchemy.ext.automap import automap_base
+
 from pydbc.logger import Logger
-from pydbc.utils import flatten
+from pydbc.db import model
 
-PAGE_SIZE = mmap.PAGESIZE
-DB_EXTENSION = "vndb"
+DB_EXTENSION    = "vndb"
 
-def regexer(expr, value):
-    return re.match(expr, value, re.UNICODE) is not None
+CACHE_SIZE      = 4 # MB
+PAGE_SIZE       = mmap.PAGESIZE
 
 def calculateCacheSize(value):
     return -(value // PAGE_SIZE)
 
+def regexer(expr, value):
+    return re.match(expr, value, re.UNICODE) is not None
+
+class MyCustomEnum(types.TypeDecorator):
+
+    impl=types.Integer
+
+    def __init__(self, enum_values, *l, **kw):
+        types.TypeDecorator.__init__(self, *l, **kw)
+        self._enum_values = enum_values
+
+    def convert_bind_param(self, value, engine):
+        result = self.impl.convert_bind_param(value, engine)
+        if result not in self._enum_values:
+            raise TypeError("Value %s must be one of %s" % (result, self._enum_values))
+        return result
+
+    def convert_result_value(self, value, engine):
+        'Do nothing here'
+        return self.impl.convert_result_value(value, engine)
+
+@event.listens_for(Engine, "connect")
+def set_sqlite3_pragmas(dbapi_connection, connection_record):
+    dbapi_connection.create_function("REGEXP", 2, regexer)
+    cursor = dbapi_connection.cursor()
+    #cursor.execute("PRAGMA jornal_mode=WAL")
+    cursor.execute("PRAGMA FOREIGN_KEYS=ON")
+    cursor.execute("PRAGMA PAGE_SIZE={}".format(PAGE_SIZE))
+    cursor.execute("PRAGMA CACHE_SIZE={}".format(calculateCacheSize(CACHE_SIZE * 1024 * 1024)))
+    cursor.execute("PRAGMA SYNCHRONOUS=OFF") # FULL
+    cursor.execute("PRAGMA LOCKING_MODE=EXCLUSIVE") # NORMAL
+    cursor.execute("PRAGMA TEMP_STORE=MEMORY")  # FILE
+    cursor.close()
+
 
 class CanDatabase(object):
-    """
 
-    """
-
-    def __init__(self, filename = ":memory:", inMemory = False, cachesize = 4, logLevel = 'INFO'):
-        self._name,_ = os.path.splitext(filename)
-        if inMemory:
-            self._dbname = ":memory:"
+    def __init__(self, filename, debug = False, logLevel = 'INFO'):
+        if filename == ':memory:':
+            self.dbname = ""
         else:
             if not filename.lower().endswith(DB_EXTENSION):
-                self._dbname = "{}.{}".format(filename, DB_EXTENSION)
+               self.dbname = "{}.{}".format(filename, DB_EXTENSION)
             else:
-                self._dbname = filename
-        self._filename = filename
-        self.conn = sqlite3.connect(self.dbname, isolation_level = None)
-        self.conn.create_function("REGEXP", 2, regexer)
-        self.conn.isolation_level = None
-        self.cachesize = cachesize
-        self.setPragmas()
-        self._filename = filename
-        self.logger = Logger('db', level = logLevel)
+               self.dbname = filename
+            try:
+                os.unlink(self.dbname)
+            except:
+                pass
+        self._engine = create_engine("sqlite:///{}".format(self.dbname), echo = debug,
+            connect_args={'detect_types': sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES},
+        native_datetime = True)
 
-    def __del__(self):
-        self.conn.close()
+        self._session = orm.Session(self._engine, autoflush = True, autocommit = False)
+        self._metadata = model.Base.metadata
+        #self._metadata = MetaData(self._engine, reflect = False)
+        #self._metadata.create_all()
+        model.loadInitialData(model.Node)
+        model.Base.metadata.create_all(self.engine)
+        #print(model.Base.metadata.tables)
+        self.session.flush()
+        self.session.commit()
 
-    def close(self):
-        self.conn.close()
+        res = self.session.query(model.Node).all()
+        print("NODES", res)
+
+        """
+
+        from sqlalchemy import distinct, func
+        stmt = select([func.count(distinct(users_table.c.name))])
+        # ODER
+        stmt = select([func.count(users_table.c.name.distinct())])
+
+        ##
+        ##
+        from sqlalchemy import bindparam
+
+        stmt = select([users_table]) where(users_table.c.name == bindparam('username'))
+        result = connection.execute(stmt, username='wendy')
+        """
+
+        self.logger = Logger(__name__, level = logLevel)
 
     @property
-    def name(self):
-        return self._name
+    def engine(self):
+        return self._engine
 
     @property
-    def dbname(self):
-        return self._dbname
+    def metadata(self):
+        return self._metadata
 
     @property
-    def filename(self):
-        return self._filename
+    def session(self):
+        return self._session
 
-    def getCursor(self):
-        return self.conn.cursor()
-
-    def setPragma(self, cur, key, value):
-        cur.execute("PRAGMA {} = {}".format(key, value))
-
-    def setPragmas(self):
-        cur = self.getCursor()
-        self.setPragma(cur, "FOREIGN_KEYS", "ON")
-        self.setPragma(cur, "PAGE_SIZE", "{}".format(PAGE_SIZE))
-        self.setPragma(cur, "CACHE_SIZE", "{}".format(calculateCacheSize(self.cachesize * 1024 * 1024)))
-        self.setPragma(cur, "SYNCHRONOUS", "OFF")   # FULL
-        self.setPragma(cur, "LOCKING_MODE", "EXCLUSIVE")    # NORMAL
-        self.setPragma(cur, "TEMP_STORE", "MEMORY") # FILE
-        """
-
-        #self.cur.execute('PRAGMA journal_mode = MEMORY')   # TRUNCATE
-        #self.cur.execute('PRAGMA journal_mode = WAL')
-        """
-
-    def beginTransaction(self):
-        self.conn.execute("BEGIN TRANSACTION")
-
-    def commitTransaction(self):
-        self.conn.commit()
-
-    def rollbackTransaction(self):
-        self.conn.rollback()
-
-    def createDictFromRow(self, row, description):
-        names = [d[0] for d in description]
-        di = dict(zip(names, row))
-        return di
-
-    def fetchSingleRow(self, cur, tname, column, where):
-        cur.execute("""SELECT {} FROM {} WHERE {}""".format(column, tname, where))
-        row = cur.fetchone()
-        if row is None:
-            return []
-        return self.createDictFromRow(row, cur.description)
-
-    def fetchSingleValue(self, cur, tname, column, where):
-        cur.execute("""SELECT {} FROM {} WHERE {}""".format(column, tname, where))
-        result = cur.fetchone()
-        if result is None:
-            return None
-        return result[0]
-
-    def updateStatement(self, cur, tname, columns, where, *values):
-        columns = [c.strip() for c in columns.split(",")]
-        colStmt = ', '.join(["{} = ?".format(c) for c in columns])
-        sql = "UPDATE OR FAIL {} SET {} WHERE {}".format(tname, colStmt, where)
-        try:
-            res = cur.execute(sql, *values)
-        except sqlite3.DatabaseError as e:
-            excText = str(e)
-            msg = "{} - Table: '{}'; Data: {}".format(excText, tname, values)
-            self.logger.debug(msg)
-            if excText.startswith("UNIQUE constraint failed:"):
-                ii = excText.find(":")
-                raise DuplicateKeyError("Table: '{}'; Key-Column: '{}'; Data: {}".format(tname, excText[ii + 2 : ], values)) from None
-            else:
-                raise
-
-    def insertOrReplaceStatement(self, insert, cur, tname, columns, *values):
+    def begin_transaction(self):
         """
         """
-        verb = "INSERT OR FAIL" if insert else "REPLACE"
-        try:
-            placeholder = ','.join("?" * len(values))
-            stmt = "{} INTO {}({}) VALUES({})".format(verb, tname, columns, placeholder)
-            cur.execute(stmt, flatten(*values))
-            #cur.execute(stmt, *values)
-        except sqlite3.DatabaseError as e:
-            msg = "{} - Data: {}".format(str(e), values)
-            self.logger.error(msg)
-            return None
-        else:
-            return cur.lastrowid
 
-    def insertStatement(self, cur, tname, columns, *values):
-        return self.insertOrReplaceStatement(True, cur, tname, columns, *values)
+    def commit_transaction(self):
+        """
+        """
 
-    def replaceStatement(self, cur, tname, columns, *values):
-        return self.insertOrReplaceStatement(False, cur, tname, columns, *values)
-
-    def fetchFromTable(self, cur, tname, columns = None, where = None, orderBy = None):
-        whereClause = "" if not where else "WHERE {}".format(where)
-        orderByClause = "ORDER BY rowid" if not orderBy else "ORDER BY {}".format(orderBy)
-        columnsClause = columns if columns else "*"
-        result = cur.execute("""SELECT {} FROM {} {} {}""".format(columnsClause, tname, whereClause, orderByClause), [])
-        while True:
-            row = cur.fetchone()
-            if row is None:
-                return
-            else:
-                yield self.createDictFromRow(row, cur.description)
-
+    def rollback_transaction(self):
+        """
+        """

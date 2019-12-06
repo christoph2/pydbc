@@ -32,6 +32,11 @@ import itertools
 from pydbc.types import AttributeType, ValueType, CategoryType
 from .base import BaseLoader
 
+from pydbc.db.model import (
+    Dbc_Version, Message, Message_Signal, Network, Node, Signal, Value_Description, 
+    Valuetable, EnvironmentVariablesData, EnvVar
+)
+
 """
 FIBEX elements              CANdb object type
 ---------------------------------------------
@@ -94,7 +99,8 @@ class DbcLoader(BaseLoader):
         super(DbcLoader, self).__init__(db, queryClass)
         self.comments = Comments()
 
-    def _insertValues(self, cur, tree):
+    def _insertValues(self, tree):
+        cur = None
         self.insertVersion(cur, tree['version'])
         self.insertEnvironmentVariablesData(cur, tree['environmentVariablesData'])
         self.insertComments(cur, tree['comments'])
@@ -129,24 +135,28 @@ class DbcLoader(BaseLoader):
 
     def insertVersion(self, cur, version):
         network = 0 ## TODO: Real value!!!
-        self.db.insertStatement(cur, "Dbc_Version", "Version_String, Network", version, network)
+        vers = Dbc_Version(version_string = version, network = network)
+        self.session.add(vers)
+        res = self.session.query(Dbc_Version).all()
+        print("Dbc_Version", res)
 
     def insertNetwork(self, cur):
         comment = self.comments.network()
-        self.db.insertStatement(cur, "Network", "Name, Comment", self.db.name, comment)
+        network = Network(name = self.db.dbname, comment = comment)
+        self.session.add(network)
 
     def insertValueTables(self, cur, tables):
         for table in tables:
             name = table['name']
             description = table['description']
-            self.db.insertStatement(cur, "Valuetable", "Name", name)
-            res = cur.execute("SELECT RID FROM Valuetable WHERE Name = ?", [name]).fetchall()
-            rid = res[0][0]
-            self.insertValueDescription(cur, rid, description)
+            vt = Valuetable(name = name)
+            self.session.add(vt)
+            self.insertValueDescription(vt.rid, description)
 
-    def insertValueDescription(self, cur, rid, description):
+    def insertValueDescription(self, rid, description):
         for desc, value in description:
-            self.db.insertStatement(cur, "Value_Description", "Valuetable, Value, Value_Description", rid, value, desc)
+            vd = Value_Description(valuetable = rid, value = value, value_description = desc)
+            self.session.add(vd)
 
     def insertEnvironmentVariables(self, cur, vars):
         for var in vars:
@@ -160,36 +170,47 @@ class DbcLoader(BaseLoader):
             varType = var['varType']
             name = var['name']
             cmt = self.comments.envVar(name)
-            dataSize = self.queries.fetchEnvironmentVariablesData(name)
-            self.db.insertStatement(cur, "EnvVar", "Name, Type, Unit, Minimum, Maximum, Access, Startup_Value, Comment, Size",
-                name, varType, unit, minimum, maximum, accessType, initialValue, cmt, dataSize
-            )
-            evid = cur.lastrowid
+            dataSize = self.session.query(EnvironmentVariablesData.value).filter(EnvironmentVariablesData.name == name).scalar()            
+            envVar = EnvVar(name = name, type = varType, unit = unit, minimum = minimum, maximum = maximum,
+                access = accessType, startup_value = initialValue, comment = cmt, size = dataSize)
+            self.session.add(envVar)
+            #print("ENV-VAR", envVar)
+            #evid = cur.lastrowid
             for node in accessNodes:
-                nid = self.queries.fetchNodeId(node)
-                self.db.insertStatement(cur, "EnvVar_AccessNode", "EnvVar,Node", evid, nid)
+                nn = self.session.query(Node).filter(Node.name == node).one()
+                envVar.accessingNodes.append(nn)
+            #print("AN_S", envVar.accessingNodes)
+        self.session.commit()
 
-    def getSignalByName(self, cur, messageID, name):
-        return cur.execute("""SELECT t1.RID FROM signal AS t1, Message_Signal AS t2 where
-            t1.RID = t2.signal AND t1.name = ? AND t2.message = (SELECT RID FROM message
-            WHERE message_id = ?)""", [name, messageID]
-        ).fetchone()[0]
+    def get_signal_by_name(self, messageID, name):
+        return self.session.query(Signal.rid).join(Message_Signal).join(Message).\
+            filter(Message.message_id == messageID, Signal.name == name).scalar()
+        #return cur.execute("""SELECT t1.RID FROM signal AS t1, Message_Signal AS t2 where
+        #    t1.RID = t2.signal AND t1.name = ? AND t2.message = (SELECT RID FROM message
+        #    WHERE message_id = ?)""", [name, messageID]
+        #).fetchone()[0]
 
     def insertValueDescriptions(self, cur, descriptions):
         for item in descriptions:
+            print("VD-ITEM", item)
             tp = item['type']
             description = item['description']
             if tp == 'SG':
                 messageID = item['messageID']
                 name = item['signalName']
                 otype = 0
-                rid = self.getSignalByName(cur, messageID, name)
+                rid = self.get_signal_by_name(messageID, name)
             elif tp == 'EV':
                 name = item['envVarName']
                 otype = 1
-                rid = cur.execute("SELECT RID FROM EnvVar WHERE name = ?", [name]).fetchone()[0]
-            self.db.insertStatement(cur, "Valuetable", "Name", name)
-            vtid = cur.lastrowid
+                rid = self.session.query(EnvVar.rid).filter(EnvVar.name == name).scalar()
+            ###
+            vt = Valuetable(name = name)
+            self.session.add(vt)
+
+            #self.db.insertStatement(cur, "Valuetable", "Name", name)
+            #vtid = cur.lastrowid
+            
             self.db.insertStatement(cur, "Object_Valuetable", "Object_Type, Object_RID, Valuetable", otype, rid, vtid)
             self.insertValueDescription(cur, vtid, description)
 
@@ -221,7 +242,10 @@ class DbcLoader(BaseLoader):
         for item in data:
             name = item['name']
             value = item['value']
-            self.db.insertStatement(cur, "EnvironmentVariablesData", "name, value", name, value)
+            #self.db.insertStatement(cur, "EnvironmentVariablesData", "name, value", name, value)
+            evd = EnvironmentVariablesData(name = name, value = value)
+            self.session.add(evd)
+            print(evd)
 
     def insertCategoryDefinitions(self, cur, catagories):
         for category in catagories:
@@ -330,7 +354,7 @@ class DbcLoader(BaseLoader):
             if attrType == AttributeType.MESSAGE:
                 rid = self.queries.fetchMessageIdById(attr['messageID'])
             elif attrType == AttributeType.SIGNAL:
-               rid = self.getSignalByName(cur, attr['messageID'], attr['signalName'])
+               rid = self.get_signal_by_name(attr['messageID'], attr['signalName'])
             elif attrType == AttributeType.NODE:
                 rid = self.queries.fetchNodeId(attr['nodeName'])
             elif attrType == AttributeType.ENV_VAR:
@@ -363,7 +387,7 @@ class DbcLoader(BaseLoader):
             if attrributeType == AttributeType.REL_SIGNAL:
                 messageID = parent['messageID']
                 optOid2 = messageID
-                rid = self.getSignalByName(cur, messageID, parent['signalName'])
+                rid = self.get_signal_by_name(messageID, parent['signalName'])
             elif attrributeType == AttributeType.REL_ENV_VAR:
                 evName = parent['evName']
                 rid = self.queries.fetchEnvVarId(evName)
@@ -392,10 +416,12 @@ class DbcLoader(BaseLoader):
     def insertNodes(self, cur, nodes):
         nodeSet = set()
         for node in nodes:
-            cmt = self.comments.node(node)
+            comment = self.comments.node(node)
             if not node in nodeSet:
-                self.db.insertStatement(cur, "Node", "Name, Comment", node, cmt)
+                nn = Node(name = node, comment = comment)
+                self.session.add(nn)
             nodeSet.add(node)
+        #self.session.commit()
 
     def insertMessageTransmitters(self, cur, transmitters):
         for transmitter in transmitters:
@@ -413,11 +439,10 @@ class DbcLoader(BaseLoader):
             cmt = self.comments.message(mid)
 
             transmitter = msg['transmitter']
-            tid = self.queries.fetchNodeId(transmitter)
+            tid = self.session.query(Node.rid).filter(Node.name == transmitter).scalar()
             valueTypesForMessage = valueTypes.get(mid, {})
-            mrid = self.db.insertStatement(cur, "Message", "Name, Message_ID, DLC, Comment, Sender", name, mid, dlc, cmt, tid)
-            #if tid != 0:
-            #    self.db.insertStatement(cur, "Node_TxMessage", "Node, Message", tid, mrid)
+            mm = Message(name = name, message_id = mid, dlc = dlc, comment = cmt, sender = tid)
+            self.session.add(mm)
             for signal in signals:
                 name = signal['name']
                 startBit = signal['startBit']
@@ -446,13 +471,26 @@ class DbcLoader(BaseLoader):
                     multiplexDependent = None
                     multiplexorValue = None
                 cmt = self.comments.signal((mid, name, ))
-                self.db.insertStatement(cur, "Signal", """Name, Bitsize, Byteorder, Sign, Valuetype, Formula_Factor, Formula_Offset,
-                    Minimum, Maximum, Unit, Comment""",
-                    name, signalSize, byteOrder, sign, valueType, factor, offset, minimum, maximum, unit, cmt
+                
+                ss = Signal(name = name, bitsize = signalSize, byteorder = byteOrder, sign = sign, valuetype = valueType, 
+                    formula_factor = factor, formula_offset = offset, minimum = minimum, maximum = maximum, unit = unit, 
+                    comment = cmt
                 )
-                srid = cur.lastrowid
-                self.db.insertStatement(cur, "Message_Signal", "Message, Signal, Offset, Multiplexor_Signal, Multiplex_Dependent, Multiplexor_Value",
-                    mrid, srid, startBit, multiplexorSignal, multiplexDependent, multiplexorValue
-                )
-                self.insertReceivers(cur, mrid, srid, receiver)
+                self.session.add(ss)
+                srid = ss.rid
+                ms = Message_Signal(offset = startBit, multiplexor_signal = multiplexorSignal, 
+                    multiplex_dependent = multiplexDependent, multiplexor_value = multiplexorValue)
+                self.session.add(ms)
+                ms.signal = ss
+                mm.signals.append(ms)
+                self.session.flush()
 
+                """
+                # create parent, append a child via association
+                p = Parent()
+                a = Association(extra_data="some data")
+                a.child = Child()
+                p.children.append(a)
+                """
+                
+                #self.insertReceivers(cur, mrid, srid, receiver)    # TODO: Implement!!!

@@ -35,12 +35,14 @@ class BaseLoader(object):
 
     def __init__(self, db, queryClass):
         self.db = db
+        self.session = db.session
         self.queries = queryClass(db)
         self.logger = Logger(__name__)
 
     def insertValues(self, tree):
-        cur = self.db.getCursor()
-        self.db.beginTransaction()
-        self._insertValues(cur, tree)
-        self.db.commitTransaction()
+        #cur = self.db.getCursor()
+        self.db.begin_transaction()
+        self._insertValues(tree)
+        #self._insertValues(cur, tree)
+        self.db.commit_transaction()
 
