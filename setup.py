@@ -10,10 +10,7 @@ ANTLR_VERSION = '4.7.2'
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-if os.environ.get("TRAVIS") or os.environ.get("APPVEYOR") or os.environ.get("READTHEDOCS"):
-    INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'colorama', 'SQLAlchemy']
-else:
-    INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'wxPython>=4.0.0', 'colorama', 'SQLAlchemy']
+INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'colorama', 'SQLAlchemy']
 
 
 if (sys.version_info.major == 3 and sys.version_info.minor < 4) or (sys.version_info.minor < 3):
