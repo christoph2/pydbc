@@ -100,27 +100,21 @@ class CanDatabase(object):
                self.dbname = "{}.{}".format(filename, DB_EXTENSION)
             else:
                self.dbname = filename
-            try:
-                os.unlink(self.dbname)
-            except:
-                pass
+            #try:
+            #    os.unlink(self.dbname)
+            #except:
+            #    pass
         self._engine = create_engine("sqlite:///{}".format(self.dbname), echo = debug,
             connect_args={'detect_types': sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES},
         native_datetime = True)
 
         self._session = orm.Session(self._engine, autoflush = True, autocommit = False)
         self._metadata = model.Base.metadata
-        #self._metadata = MetaData(self._engine, reflect = False)
-        #self._metadata.create_all()
-        model.loadInitialData(model.Node)
         model.Base.metadata.create_all(self.engine)
-        #print(model.Base.metadata.tables)
+        model.loadInitialData(model.Node)
         self.session.flush()
         self.session.commit()
-
-        res = self.session.query(model.Node).all()
-        print("NODES", res)
-
+        self.logger = Logger(__name__, level = logLevel)
         """
 
         from sqlalchemy import distinct, func
@@ -135,8 +129,6 @@ class CanDatabase(object):
         stmt = select([users_table]) where(users_table.c.name == bindparam('username'))
         result = connection.execute(stmt, username='wendy')
         """
-
-        self.logger = Logger(__name__, level = logLevel)
 
     @property
     def engine(self):
