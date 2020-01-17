@@ -117,9 +117,9 @@ general_definition:
         'variant' '=' var = variant_id ';'
         'bitrate' '=' br = bitrate_definition ';'
         ('sends_wake_up_signal' '=' tf = ('yes' | 'no') ';')? // Not 2.0
-		('volt_range' '=' vfrom = number ',' vto = number ';')? // optional in 2.0
-		('temp_range' '=' tfrom = number ',' tto = number ';')? // optional in 2.0
-		('conformance' '=' conf = stringValue ';')? // optional in 2.0
+        ('volt_range' '=' vfrom = number ',' vto = number ';')? // optional in 2.0
+        ('temp_range' '=' tfrom = number ',' tto = number ';')? // optional in 2.0
+        ('conformance' '=' conf = stringValue ';')? // optional in 2.0
     '}'
     ;
 
