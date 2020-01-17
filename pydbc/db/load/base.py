@@ -33,10 +33,9 @@ from pydbc.logger import Logger
 
 class BaseLoader(object):
 
-    def __init__(self, db, queryClass):
+    def __init__(self, db):
         self.db = db
         self.session = db.session
-        self.queries = queryClass(db)
         self.logger = Logger(__name__)
 
     def insertValues(self, tree):
