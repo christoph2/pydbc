@@ -357,33 +357,37 @@ INT:
     SIGN? '0'..'9'+
     ;
 
-fragment
-ESC_SEQ:
-      '\\' (
-        'b'
-      | 't'
-      | 'n'
-      | 'f'
-      | 'r'
-      | '\u0022'
-      | '\''
-      | '\\'
-    )
-    ;
 
 WS:
     (' ' | '\t' | '\r' | '\n') -> channel(HIDDEN)
     ;
 
-/*
+fragment
+HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
+
 STRING:
     '"' ( ESC_SEQ | ~('\\'|'"') )* '"'
     ;
-*/
 
-STRING:
-    '"' ( ~('"') )* '"'
+fragment
+ESC_SEQ
+    :   '\\'
+        (   // The standard escaped character set such as tab, newline, etc.
+            [btnfr"'\\]
+        |   // A Java style Unicode escape sequence
+            UNICODE_ESC
+        |   // Invalid escape
+            .
+        |   // Invalid escape at end of file
+            EOF
+        )
     ;
+
+fragment
+UNICODE_ESC
+    :   'u' (HEX_DIGIT (HEX_DIGIT (HEX_DIGIT HEX_DIGIT?)?)?)?
+;
+
 
 SIGN:
       '+'

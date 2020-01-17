@@ -1,4 +1,3 @@
-
 /*
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
