@@ -244,4 +244,3 @@ class NcfListener(parser.BaseListener):
         text = ctx.f.value
         ctx.value = text
 
-

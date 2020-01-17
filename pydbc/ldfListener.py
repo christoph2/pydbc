@@ -231,46 +231,66 @@ class LdfListener(parser.BaseListener):
 
     def exitCommand(self, ctx):
         if ctx.frameName:
-            cmd = ctx.frameName.value
+            cmdName = "Frame"
         else:
-            cmd = ctx.c.text
-        if cmd == 'AssignNAD':
-            nodeName = ctx.nodeName.value
-        elif cmd == 'ConditionalChangeNAD':
-            nad = ctx.nad.value
-            id_ = ctx.id_.value
-            byte_ = ctx.byte_.value
-            mask = ctx.mask.value
-            inv = ctx.inv.value
-            newNad = ctx.new_NAD.value
-        elif cmd == 'DataDump':
-            nodeName = ctx.nodeName.value
-            d1 = ctx.d1.value
-            d2 = ctx.d2.value
-            d3 = ctx.d3.value
-            d4 = ctx.d4.value
-            d5 = ctx.d5.value
-        elif cmd == 'SaveConfiguration':
-            nodeName = ctx.nodeName.value
-        elif cmd == 'AssignFrameIdRange':
-            nodeName = ctx.nodeName.value
-            frameIndex = ctx.frameIndex.value
+            cmdName = ctx.c.text
+        cmd = dict(type = cmdName)
+        if cmdName == "Frame":
+            cmd['frame_name'] = ctx.frameName.value
+        elif cmdName == 'AssignNAD':
+            cmd['node_name'] = ctx.nodeName.value
+        elif cmdName == 'ConditionalChangeNAD':
+            cmd['nad'] = ctx.nad.value
+            cmd['id'] = ctx.id_.value
+            cmd['byte'] = ctx.byte_.value
+            cmd['mask'] = ctx.mask.value
+            cmd['inv'] = ctx.inv.value
+            cmd['new_nad'] = ctx.new_NAD.value
+        elif cmdName == 'DataDump':
+            cmd['node_name'] = ctx.nodeName.value
+            cmd['d1'] = ctx.d1.value
+            cmd['d2'] = ctx.d2.value
+            cmd['d3'] = ctx.d3.value
+            cmd['d4'] = ctx.d4.value
+            cmd['d5'] = ctx.d5.value
+        elif cmdName == 'SaveConfiguration':
+            cmd['node_name'] = ctx.nodeName.value
+        elif cmdName == 'AssignFrameIdRange':
+            cmd['node_name'] = ctx.nodeName.value
+            cmd['frame_index'] = ctx.frameIndex.value
+            cmd['pid1'] = None
+            cmd['pid2'] = None
+            cmd['pid3'] = None
+            cmd['pid4'] = None
             pids = [p.value for p in ctx.pids]
-        elif cmd == 'FreeFormat':
-            d1 = ctx.d1.value
-            d2 = ctx.d2.value
-            d3 = ctx.d3.value
-            d4 = ctx.d4.value
-            d5 = ctx.d5.value
-            d6 = ctx.d6.value
-            d7 = ctx.d7.value
-            d8 = ctx.d8.value
-        elif cmd == 'AssignFrameId':
-            nodeName = ctx.nodeName.value
-            frameName = ctx.frameName.value
-        else:
-            d1 = d2 = d3 = d4 = d5 = d6 = d7 = d8 = None
-        ctx.value = dict(command = cmd)
+            lp = len(pids)
+            if lp == 1:
+                cmd['pid1'] = pids[0]
+            elif lp == 2:
+                cmd['pid1'] = pids[0]
+                cmd['pid2'] = pids[1]
+            elif lp == 3:
+                cmd['pid1'] = pids[0]
+                cmd['pid2'] = pids[1]
+                cmd['pid3'] = pids[2]
+            elif lp == 4:
+                cmd['pid1'] = pids[0]
+                cmd['pid2'] = pids[1]
+                cmd['pid3'] = pids[2]
+                cmd['pid4'] = pids[3]
+        elif cmdName == 'FreeFormat':
+            cmd['d1'] = ctx.d1.value
+            cmd['d2'] = ctx.d2.value
+            cmd['d3'] = ctx.d3.value
+            cmd['d4'] = ctx.d4.value
+            cmd['d5'] = ctx.d5.value
+            cmd['d6'] = ctx.d6.value
+            cmd['d7'] = ctx.d7.value
+            cmd['d8'] = ctx.d8.value
+        elif cmdName == 'AssignFrameId':
+            cmd['nodeName'] = ctx.nodeName.value
+            cmd['frameName'] = ctx.frameName.value
+        ctx.value = cmd
 
     def exitSignal_encoding_type_def(self, ctx):
         items = [x.value for x in ctx.items]
@@ -308,7 +328,8 @@ class LdfListener(parser.BaseListener):
         #offset = ctx.offset.value
         scale = ctx.s.value
         offset = ctx.o.value
-        ctx.value = dict(min = minValue, max = maxValue, scale = scale, offset = offset)
+        t = ctx.t.value if ctx.t else None
+        ctx.value = dict(min = minValue, max = maxValue, scale = scale, offset = offset, text = t)
 
     def exitBcd_value(self, ctx):
         pass

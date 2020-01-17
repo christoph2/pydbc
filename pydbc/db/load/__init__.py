@@ -30,4 +30,5 @@ __version__ = '0.1.0'
 
 from .dbc import DbcLoader
 from .ldf import LdfLoader
+from .ncf import NcfLoader
 
