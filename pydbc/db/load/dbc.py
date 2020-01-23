@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -32,11 +32,13 @@ import itertools
 from pydbc.types import AttributeType, ValueType, CategoryType
 from .base import BaseLoader
 
+from pydbc.db import BusType
+
 from pydbc.db.model import (
     Dbc_Version, Message, Message_Signal, Network, Node, Signal, Value_Description, 
     Valuetable, EnvironmentVariablesData, EnvVar, Attribute_Definition, Attribute_Value,
     Node_TxMessage, Node_RxSignal, Category_Definition, Category_Value, AttributeRel_Value,
-    Signal_Group_Signal, Signal_Group
+    Signal_Group_Signal, Signal_Group, Vndb_Protocol
 )
 
 """
@@ -140,13 +142,13 @@ class DbcLoader(BaseLoader):
         vers = Dbc_Version(version_string = version, network = network)
         self.session.add(vers)
         self.session.flush()
-        res = self.session.query(Dbc_Version).all()
-        print("Dbc_Version", res)
 
-    def insertNetwork(self):
+    def insertNetwork(self, specific = None):
         comment = self.comments.network()
         network = Network(name = self.db.dbname, comment = comment)
         self.session.add(network)
+        proto = Vndb_Protocol(network = network, name = BusType.CAN.name, specific = specific)
+        self.session.add(proto)
         self.session.flush()
 
     def insertValueTables(self, tables):
@@ -183,7 +185,6 @@ class DbcLoader(BaseLoader):
             for node in accessNodes:
                 nn = self.session.query(Node).filter(Node.name == node).one()
                 envVar.accessingNodes.append(nn)
-            #print("AN_S", envVar.accessingNodes)
         self.session.flush()
 
     def get_signal_by_name(self, messageID, name):
@@ -250,7 +251,6 @@ class DbcLoader(BaseLoader):
         for item in data:
             name = item['name']
             value = item['value']
-            #self.db.insertStatement(cur, "EnvironmentVariablesData", "name, value", name, value)
             evd = EnvironmentVariablesData(name = name, value = value)
             self.session.add(evd)
             print(evd)
@@ -386,7 +386,7 @@ class DbcLoader(BaseLoader):
             attributeName = attr['attributeName']
             attributeValue = attr['attributeValue']
             attrributeType = self.getAttributeType(attr['attributeType'])
-            aid = self.queries.fetchAttributeId(attr['attributeName'])
+            aid = self.session.query(Attribute_Definition).filter(Attribute_Definition.name == attr['attributeName']).scalar()
             nodeId = self.session.query(Node.rid).filter(Node.name == attr['nodeName']).scalar()
             parent = attr['parent']
             optOid1 = nodeId
@@ -404,21 +404,18 @@ class DbcLoader(BaseLoader):
                 rid = self.get_signal_by_name(messageID, parent['signalName'])
             elif attrributeType == AttributeType.REL_ENV_VAR:
                 evName = parent['evName']
-                rid = self.queries.fetchEnvVarId(evName)
+                rid = self.session.query(EnvVar.rid).filter(EnvVar.name == evName).scalar()
+                #optOid2 = ???
             elif attrributeType == AttributeType.REL_NODE:
                 messageID = parent['messageID']
                 optOid2 = messageID
                 rid = self.session.query(Message.rid).filter(Message.message_id == messageID).scalar()
             
-            arv = AttributeRel_Value(object_id = rid, attribute_definition_id = aid, num_value = numValue,
+            arv = AttributeRel_Value(object_id = rid, attribute_definition = aid, num_value = numValue,
                 string_value = stringValue, opt_object_id_1 = optOid1, opt_object_id_2 = optOid2
             )
             self.session.add(arv)
             self.session.flush()
-            #self.db.insertStatement(cur, "AttributeRel_Value",
-            #    """Object_ID, Attribute_Definition, Num_Value, String_Value, Opt_Object_ID_1, Opt_Object_ID_2""",
-            #    rid, aid, numValue, stringValue, optOid1, optOid2
-            #)
 
     def insertSignalGroups(self, signalGroups):
         for group in signalGroups:
@@ -430,16 +427,13 @@ class DbcLoader(BaseLoader):
             sg = Signal_Group(name = groupName, value = gValue, message = msg)
             self.session.add(sg)
             self.session.flush()
+            print("SIGNAL-GROUP", group)
             for signalName in signalNames:
-                signal = self.session.query(Signal).join(Message).\
-                    filter(Message.message_id == messageID, Signal.name == signalName).first()
-            #cur.execute("""SELECT  t2.Message, t2.Signal FROM Message AS t1, Message_Signal AS t2, Signal AS t3 WHERE
-            #t1.Message_Id = {} AND t2.Message = t1.RID AND t2.Signal = t3.RID AND t3.Name = '{}'
-            #""".format(messageID, signalName))
+                signal = self.session.query(Signal).join(Message_Signal).join(Message).\
+                filter(Message.message_id == messageID, Signal.name == signalName).first()
                 sgs = Signal_Group_Signal(signal_group = sg, message = msg, signal = signal)
                 self.session.add(sgs)
             self.session.flush()
-            #mrid, srid =  self.queries.fetchMessageSignalByMessageIDandSignalName(messageID, signalName)
 
     def insertNodes(self, nodes):
         nodeSet = set()
@@ -451,15 +445,13 @@ class DbcLoader(BaseLoader):
             nodeSet.add(node)
         self.session.flush()
 
-    def insertMessageTransmitters(self, transmitters):  # TODO: relationship!!!
+    def insertMessageTransmitters(self, transmitters):
         for transmitter in transmitters:
-            print("TxM", transmitter)
-            mid = self.session.query(Message.rid).filter(Message.message_id == transmitter['messageID']).scalar()
+            mid = self.session.query(Message).filter(Message.message_id == transmitter['messageID']).scalar()
             for name in transmitter['transmitters']:
-                nid = self.session.query(Node.rid).filter(Node.name == name).scalar()
+                nid = self.session.query(Node).filter(Node.name == name).scalar()
                 ntm = Node_TxMessage(node = nid, message = mid)
                 self.session.add(ntm)
-                #self.db.replaceStatement(cur, "Node_TxMessage", "Node, Message", nid, mid)
         self.session.flush()
 
     def insertMessages(self, messages, valueTypes):

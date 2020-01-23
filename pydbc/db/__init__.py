@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -28,6 +28,7 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 from datetime import datetime
+import enum
 from functools import partial
 import mmap
 import os
@@ -47,6 +48,11 @@ from sqlalchemy.sql import exists
 from pydbc.logger import Logger
 from pydbc.db import model
 
+
+class BusType(enum.IntEnum):
+    CAN = 0
+    LIN = 1
+
 DB_EXTENSION    = "vndb"
 
 CACHE_SIZE      = 4 # MB
@@ -57,6 +63,34 @@ def calculateCacheSize(value):
 
 def regexer(expr, value):
     return re.match(expr, value, re.UNICODE) is not None
+
+INITIAL_DATA = {
+    'node': (
+        {"rid": 0, "node_id": 0, "name": 'Vector__XXX', "comment": 'Dummy node for non-existent senders/receivers.'},
+    ),
+}
+"""
+    INSERT INTO message(comment,rid,name,message_id,dlc,sender,type) VALUES(
+        'This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.',
+        1,
+        'VECTOR__INDEPENDENT_SIG_MSG',
+        3221225472,
+        0,
+        0,
+        'Message');
+"""
+# ${db.session.query(Node.name).filter(Node.rid == msg.sender).scalar()}
+def _inserter(data, target, conn, **kws):
+    for row in data:
+        k, v = row.keys(), row.values()
+        keys = ', '.join([x for x in k])
+        values = ', '.join([repr(x) for x in v])
+        stmt = "INSERT INTO {}({}) VALUES ({})".format(target.name, keys, values)
+        conn.execute(stmt)
+
+def loadInitialData(target):
+    data = INITIAL_DATA[target.__table__.fullname]
+    event.listen(target.__table__, 'after_create', partial(_inserter, data))
 
 class MyCustomEnum(types.TypeDecorator):
 
@@ -100,35 +134,18 @@ class CanDatabase(object):
                self.dbname = "{}.{}".format(filename, DB_EXTENSION)
             else:
                self.dbname = filename
-            #try:
-            #    os.unlink(self.dbname)
-            #except:
-            #    pass
         self._engine = create_engine("sqlite:///{}".format(self.dbname), echo = debug,
-            connect_args={'detect_types': sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES},
-        native_datetime = True)
-
+            connect_args={'detect_types': sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES}, native_datetime = True)
         self._session = orm.Session(self._engine, autoflush = True, autocommit = False)
         self._metadata = model.Base.metadata
         model.Base.metadata.create_all(self.engine)
-        model.loadInitialData(model.Node)
         self.session.flush()
         self.session.commit()
         self.logger = Logger(__name__, level = logLevel)
-        """
-
-        from sqlalchemy import distinct, func
-        stmt = select([func.count(distinct(users_table.c.name))])
-        # ODER
-        stmt = select([func.count(users_table.c.name.distinct())])
-
-        ##
-        ##
-        from sqlalchemy import bindparam
-
-        stmt = select([users_table]) where(users_table.c.name == bindparam('username'))
-        result = connection.execute(stmt, username='wendy')
-        """
+        
+    def close(self):
+        self.session.close()
+        self.engine.dispose()
 
     @property
     def engine(self):
@@ -153,3 +170,5 @@ class CanDatabase(object):
     def rollback_transaction(self):
         """
         """
+
+loadInitialData(model.Node)

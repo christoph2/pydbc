@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -43,24 +43,6 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship, with_polymorphic
 
 Base = declarative_base()
-
-INITIAL_DATA = {
-    'node': (
-                {"rid": 0, "node_id": 0, "name": 'Vector__XXX', "comment": 'Dummy node for non-existent senders/receivers.'},
-            ),
-}
-
-def _inserter(data, target, conn, **kws):
-    for row in data:
-        k, v = row.keys(), row.values()
-        keys = ', '.join([x for x in k])
-        values = ', '.join([repr(x) for x in v])
-        stmt = "INSERT INTO {}({}) VALUES ({})".format(target.name, keys, values)
-        conn.execute(stmt)
-
-def loadInitialData(target):
-    data = INITIAL_DATA[target.__table__.fullname]
-    event.listen(target.__table__, 'after_create', partial(_inserter, data))
 
 class MixInBase(object):
 
@@ -204,6 +186,7 @@ class AttributeRel_Value(Base, MixInBase):
     opt_object_id_1 = Column(types.Integer, nullable = False, default = 0, primary_key = True)
     opt_object_id_2 = Column(types.Integer, nullable = False, default = 0, primary_key = True)
     blob_value = Column(types.BLOB)
+    attribute_definition = relationship("Attribute_Definition", backref = "attribute_rel_values")
 
 
 class Vndb_Meta(Base, RidMixIn):
@@ -221,12 +204,13 @@ class Vndb_Migrations(Base, RidMixIn):
 
 class Vndb_Protocol(Base, MixInBase):
 
-    network = Column(types.Integer,
+    network_id = Column(types.Integer,
         ForeignKey("network.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
         nullable = False, default = 0, primary_key = True,
     )
     name = Column(types.Unicode(255), nullable = False)
-    specific = Column(types.Unicode(255), nullable = False)
+    specific = Column(types.Unicode(255), nullable = True)
+    network = relationship("Network", uselist = False)
 
 class ECU(Base, RidMixIn, CommentableMixIn):
 
@@ -398,10 +382,11 @@ class Object_Valuetable(Base, MixInBase):
 
     object_type = Column(types.Integer, nullable = False, default = 0, primary_key = True)
     object_rid = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    valuetable = Column(types.Integer,
+    valuetable_id = Column(types.Integer,
         ForeignKey("valuetable.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
         nullable = False, default = 0
     )
+    valuetable = relationship("Valuetable") # , backref = "values"
 
 class Value_Description(Base, MixInBase):
 

@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -33,6 +33,8 @@ import itertools
 from pydbc.types import AttributeType, ValueType, CategoryType
 from .base import BaseLoader
 
+from pydbc.db import BusType
+
 from pydbc.db.model import (
     Dbc_Version, Message, Message_Signal, Network, Node, Signal, Value_Description, 
     Valuetable, EnvironmentVariablesData, EnvVar, Attribute_Definition, Attribute_Value,
@@ -45,6 +47,7 @@ from pydbc.db.model import (
     LinScheduleTable_Command_SaveConfiguration, LinScheduleTable_Command_AssignFrameIdRange,
     LinScheduleTable_Command_FreeFormat, LinScheduleTable_Command_AssignFrameId, LinSporadicFrame,
     LinUnconditionalFrame, LinEventTriggeredFrame, LinConfigurableFrame, LinFaultStateSignal,
+    Vndb_Protocol
 )
 
 from pprint import pprint
@@ -194,9 +197,11 @@ class LdfLoader(BaseLoader):
             if value is not None:
                 self.setAttributeValue(objID, mappedKey, value)
 
-    def insertNetwork(self):
+    def insertNetwork(self, specific = None):
         network = Network(name = self.db.dbname)
         self.session.add(network)
+        proto = Vndb_Protocol(network = network, name = BusType.LIN.name, specific = specific)
+        self.session.add(proto)
         self.session.flush()
 
     def insertNodes(self, nodes):
