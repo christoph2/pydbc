@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -29,6 +29,7 @@ __version__ = '0.1.0'
 
 import codecs
 import importlib
+import os
 from pprint import pprint
 import sys
 
@@ -37,7 +38,7 @@ import antlr4
 import antlr4.tree
 
 from pydbc.logger import Logger
-
+from pydbc.db import CanDatabase
 
 def indent(level):
     print(" " * level,)
@@ -120,12 +121,18 @@ class BaseListener(antlr4.ParseTreeListener):
 class ParserWrapper(object):
     """
     """
-    def __init__(self, grammarName, startSymbol, listener = None):
+    def __init__(self, grammarName, startSymbol, loaderClass, listener = None, debug = False):
         self.grammarName = grammarName
         self.startSymbol = startSymbol
         self.lexerModule, self.lexerClass = self._load('Lexer')
         self.parserModule, self.parserClass = self._load('Parser')
         self.listener = listener
+        self.loaderClass = loaderClass
+        self.debug = debug
+
+    def __del__(self):
+        if hasattr(self, "db"):
+            self.db.close()
 
     def _load(self, name):
         className = '{0}{1}'.format(self.grammarName, name)
@@ -135,6 +142,8 @@ class ParserWrapper(object):
         return (module, klass, )
 
     def parse(self, input, trace = False):
+        self.db = CanDatabase(self.fnbase, debug = self.debug)
+        loader = self.loaderClass(self.db)
         lexer = self.lexerClass(input)
         tokenStream = antlr4.CommonTokenStream(lexer)
         parser = self.parserClass(tokenStream)
@@ -144,16 +153,20 @@ class ParserWrapper(object):
         tree = meth()
         if self.listener:
             listener = self.listener()
+            listener.db = self.db
             walker = antlr4.ParseTreeWalker()
             walker.walk(listener, tree)
-            return listener.value
-        else:
-            return tree
+            loader.insertValues(listener.value)
+        self.db.session.commit()
+        return self.db.session
 
-    def parseFromFile(self, fileName, encoding = 'latin-1', trace = False):
-        return self.parse(ParserWrapper.stringStream(fileName, encoding), trace)
+    def parseFromFile(self, filename, encoding = 'latin-1', trace = False):
+        pth, fname = os.path.split(filename)
+        self.fnbase = os.path.splitext(fname)[0]
+        return self.parse(ParserWrapper.stringStream(filename, encoding), trace)
 
-    def parseFromString(self, buf, encoding = 'latin-1', trace = False):
+    def parseFromString(self, buf, encoding = 'latin-1', trace = False, dbname = ":memory:"):
+        self.fnbase = dbname
         return self.parse(antlr4.InputStream(buf), trace)
 
     @staticmethod

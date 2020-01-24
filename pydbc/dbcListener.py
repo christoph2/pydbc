@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -46,7 +46,7 @@ DIGITS = re.compile(r'(\d+)')
 
 CO_MPX = re.compile(r"^m(\d+)M$")
 
-def validateMultiplexerIndicatior(value):
+def validate_multiplexer_indicator(value):
     if value == "M" or (value[0] == 'm' and value[1 : ].isdigit()):
         return True
     else:
@@ -140,7 +140,7 @@ class DbcListener(parser.BaseListener):
 
     def exitMultiplexerIndicator(self, ctx):
         mind = ctx.mind.value
-        if validateMultiplexerIndicatior(mind):
+        if validate_multiplexer_indicator(mind):
             ctx.value = mind
         else:
              ctx.value = None
@@ -217,7 +217,6 @@ class DbcListener(parser.BaseListener):
 
     def exitComments(self, ctx):
         ctx.value = [x.value for x in ctx.items]
-        pass
 
     def exitComment(self, ctx):
         comment = ctx.s.value
@@ -395,4 +394,3 @@ class DbcListener(parser.BaseListener):
             evName = ctx.evName.value
             di = dict(type = 'EV', envVarname = evName)
         ctx.value = dict(category = category, **di)
-
