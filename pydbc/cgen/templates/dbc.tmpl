@@ -1,4 +1,62 @@
-VERSION "${db.dbcVersion()}"
+<%
+class Result(object):
+    pass
+
+def multiplexIndicator(value):
+    if value.multiplexor_signal:
+        return 'M '
+    elif value.multiplex_dependent:
+        return "m{} ".format(value.multiplexor_value)
+    else:
+        return ''
+
+def spaceBeforeNodes(nodes):
+    nodes = [n.name for n in nodes]
+    if len(nodes) == 1 and nodes[0] == 'Vector__XXX':
+        return ''
+    else:
+        return ' '
+
+def multipleTransmitters(session):
+    import itertools
+
+    crit = session.query(model.Node_TxMessage.message_id).group_by(model.Node_TxMessage.message_id).\
+        having(sa.func.count(model.Node_TxMessage.node_id) > 1).subquery()
+
+    items = session.query(model.Message.message_id, model.Node.name, model.Node_TxMessage).\
+        filter(model.Message.rid == model.Node_TxMessage.message_id, model.Node.rid == model.Node_TxMessage.node_id, \
+        model.Message.rid.in_(crit)).order_by(model.Node_TxMessage.message_id, model.Node_TxMessage.node_id).all()
+        
+    return itertools.groupby(items, lambda x: x.message_id)
+    
+def comments(session):
+
+    for item in session.query(model.Network.name.label("k0"), model.Network.comment, sa.literal("NW").label("type"), \
+        sa.literal(None).label("k1")).filter(model.Network.comment != None).all():
+        yield item
+    for item in session.query(model.Node.name.label("k0"), model.Node.comment, sa.literal("BU").label("type"), \
+        sa.literal(None).label("k1")).filter(model.Node.comment != None, model.Node.name != "Vector__XXX").all():
+        yield item
+    for item in session.query(model.Message.rid, model.Message.message_id.label("k0"), model.Message.comment, \
+        sa.literal("BO").label("type"), sa.literal(None).label("k1")).all():
+        if item.comment:
+            yield item
+        sq = session.query(model.Message_Signal.signal_id).filter(model.Message_Signal.message_id == item.rid).subquery()
+        for signal in session.query(model.Signal.name.distinct().label("name"), model.Signal.comment).\
+            filter(model.Signal.rid.in_(sq), model.Signal.comment != None).all():
+            result = Result()
+            result.type = "SG"
+            result.k0 = item.k0
+            result.k1 = signal.name
+            result.comment = signal.comment
+            yield result
+    for item in session.query(model.EnvVar.name.label("k0"), model.EnvVar.comment, sa.literal("EV").label("type"), \
+        sa.literal(None).label("k1")).filter(model.EnvVar.comment != None).all():
+        yield item
+
+
+%>\
+VERSION "${db.session.query(model.Dbc_Version.version_string).scalar()}"
 
 
 NS_ : 
@@ -33,208 +91,222 @@ NS_ :
 
 BS_:
 
-%if db.nodeNames:
-BU_: ${' '.join(db.nodeNames)}
+%if db.session.query(model.Node.name).all():
+BU_: ${' '.join([n[0] for n in db.session.query(model.Node.name).all()])}
 %else:
 BU_:
 %endif
-%for vt in db.valueTablesGlobal():
-VAL_TABLE_ ${vt['Name']} \
-%for desc in db.valueDescription(vt['RID']):
-${int(desc['Value'])} "${desc['Value_Description']}" \
+<% ovt_ids = db.session.query(model.Object_Valuetable.valuetable_id).all() %>\
+%for vt in db.session.query(model.Valuetable).filter(sa.not_(model.Valuetable.rid.in_(ovt_ids))).all():
+VAL_TABLE_ ${vt.name} \
+%for desc in db.session.query(model.Value_Description).filter(model.Value_Description.valuetable_id == vt.rid).\
+    order_by(sa.desc(model.Value_Description.value)).all():
+${int(desc.value)} "${desc.value_description}" \
 %endfor
 ;
 %endfor
 
 
-%for msg in db.messages():
-BO_ ${msg['Message_ID']} ${msg['Name']}: ${msg['DLC']} ${db.nodeName(msg['Sender'])}
-%for signal in db.signals(msg['RID']):
-<% receivers = db.fetchSignalReceivers(msg['RID'], signal['RID']) %>\
- SG_ ${signal['Name']} ${db.multiplexIndicator(signal)}: ${signal['Offset']}|${signal['Bitsize']}@${signal['Byteorder']}\
-${"-" if signal['Sign'] == -1 else "+"} \
-(${"{:.14G}".format(signal['Formula_Factor'])},${"{:.14G}".format(signal['Formula_Offset'])}) [${"{:.14G}".format(signal['Minimum'])}|\
-${"{:.14G}".format(signal['Maximum'])}] "${signal['Unit']}" ${db.spaceBeforeNodes(receivers)}${','.join(receivers)}
+%for msg in db.session.query(model.Message).all():
+BO_ ${msg.message_id} ${msg.name}: ${msg.dlc} ${db.session.query(model.Node.name).filter(model.Node.rid == msg.sender).scalar()}
+%for signal in db.session.query(*model.Message_Signal.__table__.columns + model.Signal.__table__.columns).\
+    filter(model.Message_Signal.signal_id == model.Signal.rid, model.Message_Signal.message_id == msg.rid).all():
+<% receivers = db.session.query(model.Node.name).join(model.Node_RxSignal).\
+    filter(model.Node_RxSignal.message_id == msg.rid, model.Node_RxSignal.signal_id == signal.rid).with_labels().all()
+%>\
+ SG_ ${signal.name} ${multiplexIndicator(signal)}: ${signal.offset}|${signal.bitsize}@${signal.byteorder}\
+${"-" if signal.sign == -1 else "+"} \
+(${"{:.14G}".format(signal.formula_factor)},${"{:.14G}".format(signal.formula_offset)}) [${"{:.14G}".format(signal.minimum)}|\
+${"{:.14G}".format(signal.maximum)}] "${signal.unit}" ${spaceBeforeNodes(receivers)}${','.join([r.name for r in receivers])}
 %endfor
 
 %endfor
-%for mid, senders in db.multipleTransmitters():
-BO_TX_BU_ ${mid} : ${','.join(senders)};
+%for mid, senders in multipleTransmitters(db.session):
+BO_TX_BU_ ${mid} : ${','.join([s.name for s in senders])};
 %endfor
 
 
-%for idx, var in enumerate(db.environmentVariables(), 1):
-<% nodes = list(db.envVarAccessNodes(var['RID'])) %>\
-EV_ ${var['Name']}: ${var['Type']} [${"{:.14G}".format(var['Minimum'])}|${"{:.14G}".format(var['Maximum'])}] "${var['Unit']}" \
-${"{:.14G}".format(var['Startup_Value'])} ${idx} DUMMY_NODE_VECTOR${var['Access']} ${db.spaceBeforeNodes(nodes)}\
-${','.join(nodes)};
+%for idx, var in enumerate(db.session.query(model.EnvVar).all(), 1):
+<% nodes = db.session.query(model.Node.name).join(model.EnvVar_AccessNode).\
+    filter(model.EnvVar_AccessNode.node_id == model.Node.rid, model.EnvVar_AccessNode.envvar_id == var.rid).all()
+%>\
+EV_ ${var.name}: ${var.type} [${"{:.14G}".format(var.minimum)}|${"{:.14G}".format(var.maximum)}] "${var.unit}" \
+${"{:.14G}".format(var.startup_value)} ${idx} DUMMY_NODE_VECTOR${var.access} ${spaceBeforeNodes(nodes)}\
+${','.join([n.name for n in nodes])};
 
 %endfor
-%for item in db.environmentVariablesData():
-ENVVAR_DATA_ ${item['name']}: ${item['value']};
+%for item in db.session.query(model.EnvironmentVariablesData).all():
+ENVVAR_DATA_ ${item.name}: ${item.value};
 %endfor
-%for comment in db.comments():
+%for comment in comments(db.session):
 CM_ \
-%if comment['type'] == 'NW':
-"${comment['comment']}";
-%elif comment['type'] == 'BO':
-BO_ ${comment['k0']} "${comment['comment']}";
-%elif comment['type'] == 'SG':
-SG_ ${comment['k0']} ${comment['k1']} "${comment['comment']}";
-%elif comment['type'] == 'BU':
-BU_ ${comment['k0']} "${comment['comment']}";
-%elif comment['type'] == 'EV':
-EV_ ${comment['k0']} "${comment['comment']}";
+%if comment.type == 'NW':
+"${comment.comment}";
+%elif comment.type == 'BO':
+BO_ ${comment.k0} "${comment.comment}";
+%elif comment.type == 'SG':
+SG_ ${comment.k0} ${comment.k1} "${comment.comment}";
+%elif comment.type == 'BU':
+BU_ ${comment.k0} "${comment.comment}";
+%elif comment.type == 'EV':
+EV_ ${comment.k0} "${comment.comment}";
 %endif
 %endfor
-%for attr in db.attributeDefinitions():
-%if attr['Objecttype'] in (0, 1, 2, 3, 4):
+%for attr in db.session.query(model.Attribute_Definition).all():
+%if attr.objecttype in (0, 1, 2, 3, 4):
 BA_DEF_ \
 %else:
 BA_DEF_REL_ \
 %endif
-%if attr['Objecttype'] == 0:
+%if attr.objecttype == 0:
 BU_ \
-%elif attr['Objecttype'] == 1:
+%elif attr.objecttype == 1:
 BO_ \
-%elif attr['Objecttype'] == 2:
+%elif attr.objecttype == 2:
 SG_ \
-%elif attr['Objecttype'] == 3:
+%elif attr.objecttype == 3:
 EV_ \
-%elif attr['Objecttype'] == 5:
+%elif attr.objecttype == 5:
 BU_BO_REL_ \
-%elif attr['Objecttype'] == 6:
+%elif attr.objecttype == 6:
 BU_SG_REL_ \
-%elif attr['Objecttype'] == 7:
+%elif attr.objecttype == 7:
 BU_EV_REL_ \
 %endif
- "${attr['Name']}" \
-%if attr['Valuetype'] == 0:
-INT ${"{:.14G}".format(attr['Minimum'])} ${"{:.14G}".format(attr['Maximum'])}\
-%elif attr['Valuetype'] == 1:
-HEX ${"{:.14G}".format(attr['Minimum'])} ${"{:.14G}".format(attr['Maximum'])}\
-%elif attr['Valuetype'] == 2:
-FLOAT ${"{:.14G}".format(attr['Minimum'])} ${"{:.14G}".format(attr['Maximum'])}\
-%elif attr['Valuetype'] == 3:
+ "${attr.name}" \
+%if attr.valuetype == 0:
+INT ${"{:.14G}".format(attr.minimum)} ${"{:.14G}".format(attr.maximum)}\
+%elif attr.valuetype == 1:
+HEX ${"{:.14G}".format(attr.minimum)} ${"{:.14G}".format(attr.maximum)}\
+%elif attr.valuetype == 2:
+FLOAT ${"{:.14G}".format(attr.minimum)} ${"{:.14G}".format(attr.maximum)}\
+%elif attr.valuetype == 3:
 STRING \
-%elif attr['Valuetype'] == 4:
-ENUM  ${','.join(['"{}"'.format(n) for n in attr['Enumvalues'].split(";")])}\
+%elif attr.valuetype == 4:
+ENUM  ${','.join(['"{}"'.format(n) for n in attr.enumvalues.split(";")])}\
 %endif
 ;
 %endfor
-%for attr in db.attributeDefinitions():
-%if attr['Default_Number'] is not None:
-%if attr['Objecttype'] in (0, 1, 2, 3, 4):
+%for attr in db.session.query(model.Attribute_Definition).all():
+%if attr.objecttype in (0, 1, 2, 3, 4):
 BA_DEF_DEF_  \
 %else:
 BA_DEF_DEF_REL_ \
 %endif
-"${attr['Name']}" ${"{:.14G}".format(attr['Default_Number'])};
-%elif attr['Default_String'] is not None:
-%if attr['Objecttype'] in (0, 1, 2, 3, 4):
-BA_DEF_DEF_  \
+%if attr.valuetype in (0, 1, 2):
+"${attr.name}" ${"{:.14G}".format(attr.default_number)};
 %else:
-BA_DEF_DEF_REL_ \
-%endif
-"${attr['Name']}" "${attr['Default_String']}";
+"${attr.name}" "${attr.default_string}";
 %endif
 %endfor
-%for attr in db.attributeValues():
-<% attrDef = list(db.attributeDefintion(attr['Attribute_Definition']))[0] %>\
-BA_ "${attrDef['Name']}" \
-%if attrDef['Objecttype'] == 0:
-BU_ ${db.fetchNodenameByRid(attr['Object_ID'])} \
-%elif attrDef['Objecttype'] == 1:
-BO_ ${db.fetchMessageIdByRid(attr['Object_ID'])} \
-%elif attrDef['Objecttype'] == 2:
-<% ms = db.fetchMessageSignalByRid(attr['Object_ID']) %>\
-SG_ ${ms['Message_ID']} ${ms['Name']} \
-%elif attrDef['Objecttype'] == 3:
-EV_ ${db.fetchEnvvarNameByRid(attr['Object_ID'])} \
-%elif attrDef['Objecttype'] == 4:
+%for attr in db.session.query(model.Attribute_Value).all():
+<% attrDef = db.session.query(model.Attribute_Definition).filter(model.Attribute_Definition.rid == attr.attribute_definition_id).one() %>\
+BA_ "${attrDef.name}" \
+%if attrDef.objecttype == 0:
+BU_ ${db.session.query(model.Node.name).filter(model.Node.rid == attr.object_id).scalar()} \
+%elif attrDef.objecttype == 1:
+BO_ ${db.session.query(model.Message.message_id).filter(model.Message.rid == attr.object_id).scalar()} \
+%elif attrDef.objecttype == 2:
+<% ms = db.session.query(model.Signal.name, model.Message.message_id).join(model.Message_Signal).\
+    filter(model.Message.rid == model.Message_Signal.message_id, model.Message_Signal.signal_id == attr.object_id).one()
+%>\
+SG_ ${ms.message_id} ${ms.name} \
+%elif attrDef.objecttype == 3:
+EV_ ${db.session.query(model.EnvVar.name).filter(model.EnvVar.rid == attr.object_id).scalar()} \
+%elif attrDef.objecttype == 4:
 \
 %endif
-%if attrDef['Valuetype'] == 0:
-${int(attr['Num_Value'])}\
-%elif attrDef['Valuetype'] == 1:
-${int(attr['Num_Value'])}\
-%elif attrDef['Valuetype'] == 2:
-${"{:.14G}".format(attr['Num_Value'])}\
-%elif attrDef['Valuetype'] == 3:
-"${attr['String_Value']}"\
-%elif attrDef['Valuetype'] == 4:
-${int(attr['Num_Value'])}\
+%if attrDef.valuetype == 0:
+${int(attr.num_value)}\
+%elif attrDef.valuetype == 1:
+${int(attr.num_value)}\
+%elif attrDef.valuetype == 2:
+${"{:.14G}".format(attr.num_value)}\
+%elif attrDef.valuetype == 3:
+"${attr.string_value}"\
+%elif attrDef.valuetype == 4:
+${int(attr.num_value)}\
 %endif
 ;
 %endfor
-%for attr in db.relativeAttributeValues():
-<% attrDef = list(db.attributeDefintion(attr['Attribute_Definition']))[0] %>\
-BA_REL_ "${attrDef['Name']}" \
-%if attrDef['Objecttype'] == 5:
+%for attr in db.session.query(model.AttributeRel_Value).all():
+<% attrDef = db.session.query(model.Attribute_Definition).filter(model.Attribute_Definition.rid == attr.attribute_definition_id).one() %>\
+BA_REL_ "${attrDef.name}" \
+%if attrDef.objecttype == 5:
 BU_BO_REL_ \
-%elif attrDef['Objecttype'] == 6:
+%elif attrDef.objecttype == 6:
 BU_SG_REL_ \
-%elif attrDef['Objecttype'] == 7:
+%elif attrDef.objecttype == 7:
 BU_EV_REL_ \
 %endif
-${db.fetchNodenameByRid(attr['Opt_Object_ID_1'])} \
-%if attrDef['Objecttype'] == 6:
+${db.session.query(model.Node.name).filter(model.Node.rid == attr.opt_object_id_1).scalar()} \
+%if attrDef.objecttype == 6:
 SG_ \
 %endif
-%if attrDef['Objecttype'] in (5, 6):
-${attr['Opt_Object_ID_2']} \
+%if attrDef.objecttype in (5, 6):
+${attr.opt_object_id_2} \
 %endif
-%if attrDef['Objecttype'] == 6:
-<% signal = db.fetchSignalByRid(attr['Object_ID']) %>\
-${signal['Name']} \
-%elif attrDef['Objecttype'] == 7:
-${db.fetchEnvvarNameByRid(attr['Object_ID'])} \
+%if attrDef.objecttype == 6:
+<% sig_name = db.session.query(model.Signal.name).filter(model.Signal.rid == attr.object_id).scalar() %>\
+${sig_name} \
+%elif attrDef.objecttype == 7:
+${db.session.query(model.EnvVar.name).filter(model.EnvVar.rid == attr.object_id).scalar()} \
 %endif
-%if attrDef['Valuetype'] == 0:
-${int(attr['Num_Value'])}\
-%elif attrDef['Valuetype'] == 1:
-${int(attr['Num_Value'])}\
-%elif attrDef['Valuetype'] == 2:
-${"{:.14G}".format(attr['Num_Value'])}\
-%elif attrDef['Valuetype'] == 3:
-"${attr['String_Value']}"\
-%elif attrDef['Valuetype'] == 4:
-${int(attr['Num_Value'])}\
+%if attrDef.valuetype == 0:
+${int(attr.num_value)}\
+%elif attrDef.valuetype == 1:
+${int(attr.num_value)}\
+%elif attrDef.valuetype == 2:
+${"{:.14G}".format(attr.num_value)}\
+%elif attrDef.valuetype == 3:
+"${attr.string_value}"\
+%elif attrDef.valuetype == 4:
+${int(attr.num_value)}\
 %endif
 ;
 %endfor
-%for vt in db.valueTablesLocal():
+%for vt in db.session.query(model.Object_Valuetable).join(model.Valuetable).all():
 VAL_ \
-%if vt['Object_Type'] == 0:
-${vt['Message_ID']} ${vt['Name']} \
+%if vt.object_type == 0:
+${db.session.query(model.Message.message_id).filter(model.Message.rid == vt.object_rid).one()} ${vt.name} \
 %else:
-${vt['Name']} \
+${vt.name} \
 %endif
-%for desc in db.valueDescription(vt['RID'], srt = False):
-${int(desc['Value'])} "${desc['Value_Description']}" \
+%for desc in db.valueDescription(vt.rid, srt = False):
+${int(desc.value)} "${desc.value_description}" \
 %endfor
 ;
 %endfor
-%for sigGroup in db.fetchSignalGroups():
-SIG_GROUP_ ${sigGroup['Message_Id']} ${sigGroup['Name']} ${sigGroup['Value']} : ${' '.join(sigGroup['Signals'])};
+<% 
+sq = db.session.query(model.Message.message_id).filter(model.Message.rid == model.Signal_Group.message_id).as_scalar()
+signal_groups = db.session.query(model.Signal_Group.rid.label("rid"), model.Signal_Group.name.label("name"), \
+model.Signal_Group.value.label("value"), sq.label("message_id")).order_by(model.Signal_Group.rid).all()
+%>\
+%for sig_group in signal_groups:
+SIG_GROUP_ ${sig_group.message_id} ${sig_group.name} ${sig_group.value} : ${' '.join([s.name for s in db.session.query(model.Signal.name).\
+join(model.Signal_Group_Signal).filter(model.Signal_Group_Signal.signal_group_id == sig_group.rid).all()])};
 %endfor
-<% signalValueTypes = db.fetchExtendedSignalValueTypes() %>\
-%if signalValueTypes:
-%for item in signalValueTypes:
-SIG_VALTYPE_ ${item['Message_ID']} ${item['Name']} : ${item['Valuetype']};
+<% signal_value_types = db.session.query(model.Message_Signal.message_id, model.Message.message_id.label("message_id"), \
+model.Signal.name.label("name"), model.Signal.valuetype.label("valuetype")).\
+filter(model.Message_Signal.message_id == model.Message.rid, model.Message_Signal.signal_id == model.Signal.rid, 
+model.Signal.valuetype != 0).all()
+%>\
+%if signal_value_types:
+%for item in signal_value_types:
+SIG_VALTYPE_ ${item.message_id} ${item.name} : ${item.valuetype};
 %endfor
 %endif
-%for cat in db.categoryDefinitions():
-CAT_DEF_ ${cat['Key']} ${cat['Name']} ${cat['Level']};
+%for cat in db.session.query(model.Category_Definition).all():
+CAT_DEF_ ${cat.key} ${cat.name} ${cat.level};
 %endfor
-%for cat in db.categoryValues():
+%for cat in db.session.query(model.Category_Value).all():
 CAT_ \
-%if cat['Objecttype'] == 0:
-BU_ ${db.fetchNodenameByRid(cat['Object_ID'])} \
-%elif cat['Objecttype'] == 1:
-BO_ ${db.fetchMessageIdByRid(cat['Object_ID'])} \
-%elif cat['Objecttype'] == 2:
-EV_ ${db.fetchEnvvarNameByRid(cat['Object_ID'])} \
+%if cat.objecttype == 0:
+BU_ ${db.session.query(model.Node.name).filter(model.Node.rid == cat.object_id).scalar()} \
+%elif cat.objecttype == 1:
+BO_ ${db.session.query(model.Message.message_id).filter(model.Message.rid == cat.object_id).scalar()} \
+%elif cat.objecttype == 2:
+EV_ ${db.session.query(model.EnvVar.name).filter(model.EnvVar.rid == cat.object_id).scalar()} \
 %endif
-${cat['Category_Definition']};
+${cat.category_definition};
 %endfor
