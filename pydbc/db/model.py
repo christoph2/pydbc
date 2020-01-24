@@ -351,7 +351,7 @@ class Signal_Group(Base, RidMixIn):
     value = Column(types.Integer, nullable = False, default = 0)
     message_id = Column(types.Integer,
         ForeignKey("message.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, unique = True
+        nullable = False, default = 0
     )
     message = relationship("Message", backref = "signal_groups")
     UniqueConstraint("Message", "Name")
