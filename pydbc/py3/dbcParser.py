@@ -328,8 +328,8 @@ class dbcParser ( Parser ):
     RULE_bitTiming = 15
     RULE_newSymbols = 16
     RULE_version = 17
-    RULE_valueDescriptions = 18
-    RULE_specializedValueDescription = 19
+    RULE_objectValueTables = 18
+    RULE_objectValueTable = 19
     RULE_environmentVariables = 20
     RULE_environmentVariable = 21
     RULE_accessNodes = 22
@@ -370,19 +370,18 @@ class dbcParser ( Parser ):
                    "messages", "message", "signal", "receiver", "transmitter", 
                    "multiplexerIndicator", "valueTables", "valueTable", 
                    "valueDescription", "nodes", "bitTiming", "newSymbols", 
-                   "version", "valueDescriptions", "specializedValueDescription", 
-                   "environmentVariables", "environmentVariable", "accessNodes", 
-                   "environmentVariablesData", "environmentVariableData", 
-                   "signalTypes", "signalType", "comments", "comment", "attributeDefinitions", 
-                   "attributeDefinition", "relativeAttributeDefinitions", 
-                   "relativeAttributeDefinition", "attributeValueType", 
-                   "attributeDefaults", "attributeDefault", "relativeAttributeDefaults", 
-                   "relativeAttributeDefault", "attributeValue", "attributeValues", 
-                   "attributeValueForObject", "relativeAttributeValues", 
-                   "relativeAttributeValueForObject", "signalGroups", "signalGroup", 
-                   "categoryDefinitions", "categoryDefinition", "categories", 
-                   "category", "intValue", "floatValue", "number", "stringValue", 
-                   "identifierValue" ]
+                   "version", "objectValueTables", "objectValueTable", "environmentVariables", 
+                   "environmentVariable", "accessNodes", "environmentVariablesData", 
+                   "environmentVariableData", "signalTypes", "signalType", 
+                   "comments", "comment", "attributeDefinitions", "attributeDefinition", 
+                   "relativeAttributeDefinitions", "relativeAttributeDefinition", 
+                   "attributeValueType", "attributeDefaults", "attributeDefault", 
+                   "relativeAttributeDefaults", "relativeAttributeDefault", 
+                   "attributeValue", "attributeValues", "attributeValueForObject", 
+                   "relativeAttributeValues", "relativeAttributeValueForObject", 
+                   "signalGroups", "signalGroup", "categoryDefinitions", 
+                   "categoryDefinition", "categories", "category", "intValue", 
+                   "floatValue", "number", "stringValue", "identifierValue" ]
 
     EOF = Token.EOF
     T__0=1
@@ -524,8 +523,8 @@ class dbcParser ( Parser ):
             return self.getTypedRuleContext(dbcParser.RelativeAttributeValuesContext,0)
 
 
-        def valueDescriptions(self):
-            return self.getTypedRuleContext(dbcParser.ValueDescriptionsContext,0)
+        def objectValueTables(self):
+            return self.getTypedRuleContext(dbcParser.ObjectValueTablesContext,0)
 
 
         def signalGroups(self):
@@ -605,7 +604,7 @@ class dbcParser ( Parser ):
             self.state = 124
             self.relativeAttributeValues()
             self.state = 125
-            self.valueDescriptions()
+            self.objectValueTables()
             self.state = 126
             self.signalGroups()
             self.state = 127
@@ -1807,45 +1806,45 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
-    class ValueDescriptionsContext(ParserRuleContext):
+    class ObjectValueTablesContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
-            self._specializedValueDescription = None # SpecializedValueDescriptionContext
-            self.items = list() # of SpecializedValueDescriptionContexts
+            self._objectValueTable = None # ObjectValueTableContext
+            self.items = list() # of ObjectValueTableContexts
 
-        def specializedValueDescription(self, i:int=None):
+        def objectValueTable(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(dbcParser.SpecializedValueDescriptionContext)
+                return self.getTypedRuleContexts(dbcParser.ObjectValueTableContext)
             else:
-                return self.getTypedRuleContext(dbcParser.SpecializedValueDescriptionContext,i)
+                return self.getTypedRuleContext(dbcParser.ObjectValueTableContext,i)
 
 
         def getRuleIndex(self):
-            return dbcParser.RULE_valueDescriptions
+            return dbcParser.RULE_objectValueTables
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterValueDescriptions" ):
-                listener.enterValueDescriptions(self)
+            if hasattr( listener, "enterObjectValueTables" ):
+                listener.enterObjectValueTables(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitValueDescriptions" ):
-                listener.exitValueDescriptions(self)
+            if hasattr( listener, "exitObjectValueTables" ):
+                listener.exitObjectValueTables(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitValueDescriptions" ):
-                return visitor.visitValueDescriptions(self)
+            if hasattr( visitor, "visitObjectValueTables" ):
+                return visitor.visitObjectValueTables(self)
             else:
                 return visitor.visitChildren(self)
 
 
 
 
-    def valueDescriptions(self):
+    def objectValueTables(self):
 
-        localctx = dbcParser.ValueDescriptionsContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 36, self.RULE_valueDescriptions)
+        localctx = dbcParser.ObjectValueTablesContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 36, self.RULE_objectValueTables)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
@@ -1854,8 +1853,8 @@ class dbcParser ( Parser ):
             _la = self._input.LA(1)
             while _la==dbcParser.T__21:
                 self.state = 265
-                localctx._specializedValueDescription = self.specializedValueDescription()
-                localctx.items.append(localctx._specializedValueDescription)
+                localctx._objectValueTable = self.objectValueTable()
+                localctx.items.append(localctx._objectValueTable)
                 self.state = 270
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
@@ -1868,7 +1867,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
-    class SpecializedValueDescriptionContext(ParserRuleContext):
+    class ObjectValueTableContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1895,29 +1894,29 @@ class dbcParser ( Parser ):
 
 
         def getRuleIndex(self):
-            return dbcParser.RULE_specializedValueDescription
+            return dbcParser.RULE_objectValueTable
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterSpecializedValueDescription" ):
-                listener.enterSpecializedValueDescription(self)
+            if hasattr( listener, "enterObjectValueTable" ):
+                listener.enterObjectValueTable(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitSpecializedValueDescription" ):
-                listener.exitSpecializedValueDescription(self)
+            if hasattr( listener, "exitObjectValueTable" ):
+                listener.exitObjectValueTable(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitSpecializedValueDescription" ):
-                return visitor.visitSpecializedValueDescription(self)
+            if hasattr( visitor, "visitObjectValueTable" ):
+                return visitor.visitObjectValueTable(self)
             else:
                 return visitor.visitChildren(self)
 
 
 
 
-    def specializedValueDescription(self):
+    def objectValueTable(self):
 
-        localctx = dbcParser.SpecializedValueDescriptionContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 38, self.RULE_specializedValueDescription)
+        localctx = dbcParser.ObjectValueTableContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 38, self.RULE_objectValueTable)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)

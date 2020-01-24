@@ -46,7 +46,7 @@ dbcfile:
     relativeAttributeDefaults       // BA_DEF_DEF_REL_
     attributeValues                 // BA_
     relativeAttributeValues         // BA_REL_
-    valueDescriptions               // VAL_
+    objectValueTables               // VAL_
     signalGroups                    // SIG_GROUP_
     categoryDefinitions             // CAT_DEF_
     categories                      // CAT_
@@ -137,11 +137,11 @@ version:
     'VERSION' vs = stringValue
     ;
 
-valueDescriptions:
-    (items += specializedValueDescription)*
+objectValueTables:
+    (items += objectValueTable)*
     ;
 
-specializedValueDescription:
+objectValueTable:
     'VAL_'  (
       messageID = intValue signalName = identifierValue (items += valueDescription)*
     |

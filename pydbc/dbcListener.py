@@ -88,11 +88,12 @@ class DbcListener(parser.BaseListener):
             relativeAttributeDefaults = ctx.relativeAttributeDefaults().value,
             attributeValues = ctx.attributeValues().value,
             relativeAttributeValues = ctx.relativeAttributeValues().value,
-            valueDescriptions = ctx.valueDescriptions().value,
+            objectValueTables = ctx.objectValueTables().value,
             categoryDefinitions = ctx.categoryDefinitions().value,
             categories = ctx.categories().value,
             signalGroups = ctx.signalGroups().value,
             signalExtendedValueTypeList = ctx.signalExtendedValueTypeList().value
+            
         )
 
     def exitMessageTransmitters(self, ctx):
@@ -162,6 +163,7 @@ class DbcListener(parser.BaseListener):
             btr1 = ctx.btr1.value if ctx.btr1 else None,
             btr2 = ctx.btr2.value if ctx.btr2 else None
         )
+        print("BIT-TIMING", ctx.value)
 
     def exitNewSymbols(self, ctx):
         ctx.value = [x.text for x in ctx.ids]
@@ -169,10 +171,10 @@ class DbcListener(parser.BaseListener):
     def exitVersion(self, ctx):
         ctx.value = ctx.vs.value
 
-    def exitValueDescriptions(self, ctx):
+    def exitObjectValueTables(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
-    def exitSpecializedValueDescription(self, ctx):
+    def exitObjectValueTable(self, ctx):
         items = [x.value for x in ctx.items]
         if ctx.messageID:
             messageID = ctx.messageID.value
@@ -184,6 +186,7 @@ class DbcListener(parser.BaseListener):
             di = dict(envVarName = envVarName)
             tp = "EV"
         ctx.value = dict(type = tp, description = items, **di)
+        print("OBJECT_VALUE_TABLE", ctx.value)
 
     def exitEnvironmentVariables(self, ctx):
         ctx.value = [x.value for x in ctx.evs]
@@ -214,6 +217,7 @@ class DbcListener(parser.BaseListener):
             valueType = ctx.valueType.value, factor = ctx.factor.value, offset = ctx.offset.value, minimum = ctx.minimum.value,
             maximum = ctx.maximum.value, unit = ctx.unit.value, defaultValue = ctx.defaultValue.value, valTable = ctx.valTable.value,
         )
+        print("SIGNAL-TYPE", ctx.value)
 
     def exitComments(self, ctx):
         ctx.value = [x.value for x in ctx.items]

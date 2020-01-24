@@ -170,21 +170,21 @@ class dbcListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#valueDescriptions.
-    def enterValueDescriptions(self, ctx:dbcParser.ValueDescriptionsContext):
+    # Enter a parse tree produced by dbcParser#objectValueTables.
+    def enterObjectValueTables(self, ctx:dbcParser.ObjectValueTablesContext):
         pass
 
-    # Exit a parse tree produced by dbcParser#valueDescriptions.
-    def exitValueDescriptions(self, ctx:dbcParser.ValueDescriptionsContext):
+    # Exit a parse tree produced by dbcParser#objectValueTables.
+    def exitObjectValueTables(self, ctx:dbcParser.ObjectValueTablesContext):
         pass
 
 
-    # Enter a parse tree produced by dbcParser#specializedValueDescription.
-    def enterSpecializedValueDescription(self, ctx:dbcParser.SpecializedValueDescriptionContext):
+    # Enter a parse tree produced by dbcParser#objectValueTable.
+    def enterObjectValueTable(self, ctx:dbcParser.ObjectValueTableContext):
         pass
 
-    # Exit a parse tree produced by dbcParser#specializedValueDescription.
-    def exitSpecializedValueDescription(self, ctx:dbcParser.SpecializedValueDescriptionContext):
+    # Exit a parse tree produced by dbcParser#objectValueTable.
+    def exitObjectValueTable(self, ctx:dbcParser.ObjectValueTableContext):
         pass
 
 

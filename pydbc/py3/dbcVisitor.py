@@ -99,13 +99,13 @@ class dbcVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by dbcParser#valueDescriptions.
-    def visitValueDescriptions(self, ctx:dbcParser.ValueDescriptionsContext):
+    # Visit a parse tree produced by dbcParser#objectValueTables.
+    def visitObjectValueTables(self, ctx:dbcParser.ObjectValueTablesContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by dbcParser#specializedValueDescription.
-    def visitSpecializedValueDescription(self, ctx:dbcParser.SpecializedValueDescriptionContext):
+    # Visit a parse tree produced by dbcParser#objectValueTable.
+    def visitObjectValueTable(self, ctx:dbcParser.ObjectValueTableContext):
         return self.visitChildren(ctx)
 
 
