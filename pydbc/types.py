@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -35,6 +35,10 @@ class VndbType(enum.IntEnum):
     SINGLE_NETWORK = 0
     MULTIPLE_NETWORKS = 1
 
+
+class BusType(enum.IntEnum):
+    CAN = 0
+    LIN = 1
 
 class AttributeType(enum.IntEnum):
     NODE        = 0

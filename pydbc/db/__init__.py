@@ -49,10 +49,6 @@ from pydbc.logger import Logger
 from pydbc.db import model
 
 
-class BusType(enum.IntEnum):
-    CAN = 0
-    LIN = 1
-
 DB_EXTENSION    = "vndb"
 
 CACHE_SIZE      = 4 # MB
@@ -142,7 +138,7 @@ class CanDatabase(object):
         self.session.flush()
         self.session.commit()
         self.logger = Logger(__name__, level = logLevel)
-        
+
     def close(self):
         self.session.close()
         self.engine.dispose()
