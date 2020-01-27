@@ -56,7 +56,7 @@ def comments(session):
 
 
 %>\
-VERSION "${db.session.query(model.Dbc_Version.version_string).scalar()}"
+VERSION "${db.session.query(model.Dbc_Version.version_string).scalar() or ''}"
 
 
 NS_ : 
@@ -96,7 +96,7 @@ BU_: ${' '.join([n[0] for n in db.session.query(model.Node.name).all()])}
 %else:
 BU_:
 %endif
-<% ovt_ids = db.session.query(model.Object_Valuetable.valuetable_id).all() %>\
+<% ovt_ids = [v.valuetable_id for v in db.session.query(model.Object_Valuetable.valuetable_id).all()] %>\
 %for vt in db.session.query(model.Valuetable).filter(sa.not_(model.Valuetable.rid.in_(ovt_ids))).all():
 VAL_TABLE_ ${vt.name} \
 %for desc in db.session.query(model.Value_Description).filter(model.Value_Description.valuetable_id == vt.rid).\
@@ -265,14 +265,16 @@ ${int(attr.num_value)}\
 %endif
 ;
 %endfor
-%for vt in db.session.query(model.Object_Valuetable).join(model.Valuetable).all():
+%for vt in db.session.query(model.Object_Valuetable.object_type, model.Object_Valuetable.object_rid, model.Valuetable.rid, \
+    model.Valuetable.name). filter(model.Object_Valuetable.valuetable_id  == model.Valuetable.rid).all():
 VAL_ \
 %if vt.object_type == 0:
-${db.session.query(model.Message.message_id).filter(model.Message.rid == vt.object_rid).one()} ${vt.name} \
+${vt.object_rid} ${vt.name} \
 %else:
 ${vt.name} \
 %endif
-%for desc in db.valueDescription(vt.rid, srt = False):
+%for desc in db.session.query(model.Value_Description).filter(model.Value_Description.valuetable_id == vt.rid).\
+    order_by(model.Value_Description.valuetable_id, sa.desc(model.Value_Description.value)).all():
 ${int(desc.value)} "${desc.value_description}" \
 %endfor
 ;
@@ -308,5 +310,5 @@ BO_ ${db.session.query(model.Message.message_id).filter(model.Message.rid == cat
 %elif cat.objecttype == 2:
 EV_ ${db.session.query(model.EnvVar.name).filter(model.EnvVar.rid == cat.object_id).scalar()} \
 %endif
-${cat.category_definition};
+${cat.category_definition.key};
 %endfor
