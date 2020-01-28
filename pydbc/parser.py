@@ -57,12 +57,36 @@ def dump(tree, level = 0):
     print(")")
 
 
+def toInt(number, base = 10):
+    """
+
+    """
+    try:
+        res = int(number, base)
+    except ValueError as e:
+        res = None
+    return res
+
+def toFloat(number):
+    """
+
+    """
+    try:
+        res = float(number)
+    except ValueError as e:
+        res = None
+    return res
+
 class BaseListener(antlr4.ParseTreeListener):
     """
     """
 
     value = []
     logger = Logger(__name__)
+
+    def __init__(self, database):
+        self.db = database
+        super(BaseListener, self).__init__()
 
     def getList(self, attr):
         return [x for x in attr()] if attr() else []
@@ -72,14 +96,14 @@ class BaseListener(antlr4.ParseTreeListener):
 
     def exitIntValue(self, ctx):
         if ctx.i:
-            ctx.value = int(ctx.i.text, 10)
+            ctx.value = toInt(ctx.i.text, 10)
         elif ctx.h:
-            ctx.value = int(ctx.h.text, 16)
+            ctx.value = toInt(ctx.i.text, 16)
         else:
             ctx.value = None
 
     def exitFloatValue(self, ctx):
-        ctx.value = float(ctx.f.text) if ctx.f else None
+        ctx.value = toFloat(ctx.f.text) if ctx.f else None
 
     def exitNumber(self, ctx):
         if ctx.i:
@@ -121,18 +145,16 @@ class BaseListener(antlr4.ParseTreeListener):
 class ParserWrapper(object):
     """
     """
-    def __init__(self, grammarName, startSymbol, loaderClass, listener = None, debug = False):
+    def __init__(self, grammarName, startSymbol, listenerClass, debug = False):
         self.grammarName = grammarName
         self.startSymbol = startSymbol
         self.lexerModule, self.lexerClass = self._load('Lexer')
         self.parserModule, self.parserClass = self._load('Parser')
-        self.listener = listener
-        self.loaderClass = loaderClass
+        self.listenerClass = listenerClass
         self.debug = debug
 
     def __del__(self):
-        if hasattr(self, "db"):
-            self.db.close()
+        pass
 
     def _load(self, name):
         className = '{0}{1}'.format(self.grammarName, name)
@@ -143,7 +165,6 @@ class ParserWrapper(object):
 
     def parse(self, input, trace = False):
         self.db = CanDatabase(self.fnbase, debug = self.debug)
-        loader = self.loaderClass(self.db)
         lexer = self.lexerClass(input)
         tokenStream = antlr4.CommonTokenStream(lexer)
         parser = self.parserClass(tokenStream)
@@ -151,12 +172,10 @@ class ParserWrapper(object):
         meth = getattr(parser, self.startSymbol)
         self._syntaxErrors = parser._syntaxErrors
         tree = meth()
-        if self.listener:
-            listener = self.listener()
-            listener.db = self.db
+        if self.listenerClass:
+            listener = self.listenerClass(self.db)
             walker = antlr4.ParseTreeWalker()
             walker.walk(listener, tree)
-            loader.insertValues(listener.value)
         self.db.session.commit()
         return self.db.session
 
