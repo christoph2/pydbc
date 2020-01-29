@@ -40,6 +40,12 @@ class BusType(enum.IntEnum):
     CAN = 0
     LIN = 1
 
+
+class FileType(enum.IntEnum):
+    DBC = 0
+    LDF = 1
+    NCF = 2
+
 class AttributeType(enum.IntEnum):
     NODE        = 0
     MESSAGE     = 1
