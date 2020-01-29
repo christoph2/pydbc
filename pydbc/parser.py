@@ -89,10 +89,13 @@ class BaseListener(antlr4.ParseTreeListener):
         super(BaseListener, self).__init__()
 
     def getList(self, attr):
-        return [x for x in attr()] if attr() else []
+        return [x for x in attr] if attr else []
 
-    def getTerminal(self, attr):
-        return attr().getText() if attr() else ''
+    def getTerminal(self, attr, default = None):
+        return attr.text if attr else default
+
+    def getValue(self, attr, default = None):
+        return attr.value if attr else default
 
     def exitIntValue(self, ctx):
         if ctx.i:
@@ -115,10 +118,13 @@ class BaseListener(antlr4.ParseTreeListener):
         ctx.value = value
 
     def exitStringValue(self, ctx):
-        ctx.value = ctx.s.text.strip('"') if ctx.s else None
+        value = ctx.s.text.strip('"') if ctx.s else None
+        ctx.value = value
 
     def exitIdentifierValue(self, ctx):
-        ctx.value = ctx.i.text if ctx.i else None
+        value = ctx.i.text if ctx.i else None
+        value = None if value == "<missing C_IDENTIFIER>" else value
+        ctx.value = value
 
     def _formatMessage(self, msg, location):
         return "[{0}:{1}] {2}".format(location.start.line, location.start.column + 1, msg)

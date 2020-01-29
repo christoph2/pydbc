@@ -28,7 +28,6 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 
-from pprint import pprint
 import re
 
 from pydbc import parser
@@ -55,18 +54,7 @@ Before moving on, note that J1939 is a bit special in regards to the CAN DBC fil
 
 DIGITS = re.compile(r'(\d+)')
 
-CO_MPX = re.compile(r"^m(\d+)M$")
-
-def validate_multiplexer_indicator(value):
-    if value == "M" or (value[0] == 'm' and value[1 : ].isdigit()):
-        return True
-    else:
-        match = CO_MPX.match(value)
-        if not match:
-            print("Invalid multiplex indicator: '{}'".format(value))
-            return False
-        else:
-            return True
+CO_MPX = re.compile(r"^(?P<multiplexed>m)(?P<value>\d+)(?P<multiplexer>M)$")
 
 
 def extractAccessType(value):
@@ -218,8 +206,10 @@ class DbcListener(parser.BaseListener):
         for item in ctx.items:
             name, value = item.value
             defaults[name] = value
-            ad = self.db.session.query(Attribute_Definition).filter(Attribute_Definition.name == name).one()
-
+            ad = self.db.session.query(Attribute_Definition).filter(Attribute_Definition.name == name).first()
+            if not ad:
+                self.logger.error("Error while inserting attribute default values: attribute '{}' does not exist.".format(name))
+                continue
             if ad.valuetype in (ValueType.INT, ValueType.HEX, ValueType.FLOAT):
                 ad.default_number = value
             elif ad.valuetype in (ValueType.STRING, ValueType.ENUM):
@@ -230,10 +220,10 @@ class DbcListener(parser.BaseListener):
     def insertNetwork(self, specific = None):
         network = Network(name = self.db.dbname)
         self.db.session.add(network)
-        self.network_id = network.rid
         proto = Vndb_Protocol(network = network, name = BusType.CAN.name, specific = specific)
         self.db.session.add(proto)
         self.db.session.flush()
+        self.network_id = network.rid
 
     def exitDbcfile(self, ctx):
         self.db.session.commit()
@@ -274,8 +264,8 @@ class DbcListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitMessageTransmitter(self, ctx):
-        transmitters = ctx.tx.value
-        ctx.value = dict(messageID = ctx.messageID.value, transmitters = transmitters)
+        transmitters = self.getValue(ctx.tx)
+        ctx.value = dict(messageID = self.getValue(ctx.messageID), transmitters = transmitters)
 
     def exitSignalExtendedValueTypeList(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -290,18 +280,18 @@ class DbcListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitSignalExtendedValueType(self, ctx):
-        messageID = ctx.messageID.value
-        signalName = ctx.signalName.value
-        valType = ctx.valType.value
+        messageID = self.getValue(ctx.messageID)
+        signalName = self.getValue(ctx.signalName)
+        valType = self.getValue(ctx.valType)
         if not valType in (0, 1, 2, 3):
-            self.logger.error("ValueType must be in range [0..3]", ctx.valType)
+            self.logger.error("ValueType must be in range [0..3] - got '{}'.".format(valType))
+            valType = 0
         ctx.value = dict(messageID = messageID, signalName = signalName, valueType = valType)
 
     def exitMessages(self, ctx):
         ctx.value = [x.value for x in ctx.items]
         for msg in ctx.value:
             name = msg['name']
-            print("MSG:", name)
             mid = msg['messageID']
             dlc = msg['dlc']
             signals = msg['signals']
@@ -311,7 +301,6 @@ class DbcListener(parser.BaseListener):
             self.db.session.add(mm)
             for signal in signals:
                 name = signal['name']
-                print("\t\tSIG-NAME", name)
                 startBit = signal['startBit']
                 signalSize = signal['signalSize']
                 byteOrder = signal['byteOrder']
@@ -322,22 +311,42 @@ class DbcListener(parser.BaseListener):
                 maximum = signal['maximum']
                 unit = signal['unit']
                 receiver = signal['receiver']
+
+                multiplexorSignal = None
+                multiplexDependent = None
+                multiplexorValue = None
                 multiplexerIndicator = signal['multiplexerIndicator']
                 if multiplexerIndicator:
+                    match = CO_MPX.match(multiplexerIndicator)
+                    if match:
+                        gd = match.groupdict()
+                        print("MPX:", gd)
+                        gd['multiplexed'] == 'm'
+                        multiplexorValue = gd['value']
+                        multiplexorSignal = 1 if gd['multiplexer'] == 'M' else 0
+                        multiplexDependent = 0 if multiplexorSignal else 1
+
+                    """
                     multiplexorSignal = 1 if multiplexerIndicator == 'M' else 0
                     if multiplexorSignal:
                         multiplexDependent = 0
                         multiplexorValue = None
                     else:
                         multiplexDependent = 1
-                        multiplexorValue = int(multiplexerIndicator[1 : ])
+
+                        try:
+                            multiplexorValue = int(multiplexerIndicator[1 : ])
+                        except Exception as e:
+                            print(str(e), "MPX:", multiplexerIndicator)
                 else:
                     multiplexorSignal = None
                     multiplexDependent = None
                     multiplexorValue = None
+                     """
+
                 ss = Signal(name = name, bitsize = signalSize, byteorder = byteOrder, sign = sign,
                     formula_factor = factor, formula_offset = offset, minimum = minimum, maximum = maximum, unit = unit
-                )   # valuetype = valueType,
+                )
                 self.db.session.add(ss)
                 srid = ss.rid
                 ms = Message_Signal(offset = startBit, multiplexor_signal = multiplexorSignal,
@@ -348,19 +357,30 @@ class DbcListener(parser.BaseListener):
                 self.insertReceivers(mm.rid, ss.rid, receiver)
 
     def exitMessage(self, ctx):
-        # TODO: Check signals for multiple multiplexors!
-        ctx.value = dict(messageID = ctx.messageID.value, name = ctx.messageName.value, dlc = ctx.messageSize.value,
-            transmitter = ctx.transmt.text if ctx.transmt else None, signals = [x.value for x in ctx.sgs]
+        ctx.value = dict(messageID = self.getValue(ctx.messageID), name = self.getValue(ctx.messageName),
+            dlc = self.getValue(ctx.messageSize), transmitter = self.getTerminal(ctx.transmt),
+            signals = [x.value for x in ctx.sgs]
         )
-        print("MSG:", ctx.value)
 
     def exitSignal(self, ctx):
-        byteOrder = ctx.byteOrder.value
+        byteOrder = self.getValue(ctx.byteOrder)
         if not byteOrder in (0, 1):
-            self.logger.error("Byteorder must be either 0 or 1", ctx.byteOrder)
-        ctx.value = dict(name = ctx.signalName.value, startBit = ctx.startBit.value, signalSize = ctx.signalSize.value,
-            byteOrder = byteOrder, sign = -1 if ctx.sign.text == '-' else +1, factor = ctx.factor.value, offset = ctx.offset.value,
-            minimum = ctx.minimum.value, maximum = ctx.maximum.value, unit = ctx.unit.value, receiver = ctx.rcv.value,
+            self.logger.error("Error while parsing signal '{}': byteorder must be either 0 or 1".format(ctx.signalName.value))
+            byteOrder = 0
+        name = self.getValue(ctx.signalName)
+        startBit = self.getValue(ctx.startBit)
+        signalSize = self.getValue(ctx.signalSize)
+        st = self.getTerminal(ctx.sign)
+        sign = None if st is None else -1 if st == '-' else +1
+        factor = self.getValue(ctx.factor)
+        offset = self.getValue(ctx.offset)
+        minimum = self.getValue(ctx.minimum)
+        maximum = self.getValue(ctx.maximum)
+        unit = self.getValue(ctx.unit)
+        receiver = self.getValue(ctx.rcv) or []
+        ctx.value = dict(name = name, startBit = startBit, signalSize = signalSize,
+            byteOrder = byteOrder, sign = sign, factor = factor, offset = offset,
+            minimum = minimum, maximum = maximum, unit = unit, receiver = receiver,
             multiplexerIndicator = ctx.mind.value if ctx.mind else None
         )
 
@@ -371,11 +391,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = [x.value for x in ctx.ids]
 
     def exitMultiplexerIndicator(self, ctx):
-        mind = ctx.mind.value
-        if validate_multiplexer_indicator(mind):
-            ctx.value = mind
-        else:
-             ctx.value = None
+        ctx.value = self.getValue(ctx.mind)
 
     def exitValueTables(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -405,16 +421,13 @@ class DbcListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitBitTiming(self, ctx):
-        ctx.value = dict(baudrate = ctx.baudrate.value if ctx.baudrate else None,
-            btr1 = ctx.btr1.value if ctx.btr1 else None,
-            btr2 = ctx.btr2.value if ctx.btr2 else None
-        )
+        ctx.value = dict(baudrate = self.getValue(ctx.baudrate), btr1 = self.getValue(ctx.btr1), btr2 = self.getValue(ctx.btr2))
 
     def exitNewSymbols(self, ctx):
         ctx.value = [x.text for x in ctx.ids]
 
     def exitVersion(self, ctx):
-        ctx.value = ctx.vs.value
+        ctx.value = self.getValue(ctx.vs)
         version = ctx.value
         network = self.network_id
         vers = Dbc_Version(version_string = version, network = network)
@@ -480,9 +493,10 @@ class DbcListener(parser.BaseListener):
     def exitEnvironmentVariable(self, ctx):
         accessType = extractAccessType(ctx.DUMMY_NODE_VECTOR().getText())
 
-        ctx.value = dict(name = ctx.name.value, varType = ctx.varType.value, minimum = ctx.minimum.value,
-            maximum = ctx.maximum.value, unit = ctx.unit.value, initialValue = ctx.initialValue.value, envId = ctx.envId.value,
-            accessType = accessType, accessNodes = ctx.accNodes.value
+        ctx.value = dict(name = self.getValue(ctx.name), varType = self.getValue(ctx.varType),
+            minimum = self.getValue(ctx.minimum), maximum = self.getValue(ctx.maximum), unit = self.getValue(ctx.unit),
+            initialValue = self.getValue(ctx.initialValue), envId = self.getValue(ctx.envId),
+            accessType = accessType, accessNodes = self.getValue(ctx.accNodes)
         )
 
     def exitAccessNodes(self, ctx):
@@ -500,16 +514,18 @@ class DbcListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitEnvironmentVariableData(self, ctx):
-        ctx.value = dict(name = ctx.varname.value, value = ctx.value.value)
+        ctx.value = dict(name = self.getValue(ctx.varname), value = self.getValue(ctx.value))
 
     def exitSignalTypes(self, ctx):
         ctx.value =[x.value for x in ctx.sigTypes]
         print("SIGNAL-TYPES", ctx.value)
 
     def exitSignalType(self, ctx):
-        ctx.value = dict(name = ctx.signalTypeName.value, size = ctx.signalSize.value, byteOrder = ctx.byteOrder.value,
-            valueType = ctx.valueType.value, factor = ctx.factor.value, offset = ctx.offset.value, minimum = ctx.minimum.value,
-            maximum = ctx.maximum.value, unit = ctx.unit.value, defaultValue = ctx.defaultValue.value, valTable = ctx.valTable.value,
+        ctx.value = dict(name = self.getValue(ctx.signalTypeName), size = self.getValue(ctx.signalSize),
+            byteOrder = self.getValue(ctx.byteOrder), valueType = self.getValue(ctx.valueType),
+            factor = self.getValue(ctx.factor), offset = self.getValue(ctx.offset), minimum = self.getValue(ctx.minimum),
+            maximum = self.getValue(ctx.maximum), unit = self.getValue(ctx.unit), defaultValue = self.getValue(ctx.defaultValue),
+            valTable = self.getValue(ctx.valTable),
         )
 
     def exitComments(self, ctx):
@@ -526,6 +542,9 @@ class DbcListener(parser.BaseListener):
                 obj.comment = text
             elif tp == 'SG':
                 rid = self.get_signal_by_name(*key)
+                if not rid:
+                    self.logger.error("Error while inserting comments: message signal '{}' does not exist.".format(key))
+                    continue
                 obj = self.db.session.query(Signal).filter(Signal.rid == rid).one()
                 obj.comment = text
             elif tp == 'EV':
@@ -538,19 +557,19 @@ class DbcListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitComment(self, ctx):
-        comment = ctx.s.value
+        comment = self.getValue(ctx.s)
         if ctx.c0:
             tp = "BU"
-            key = ctx.c0.value
+            key = self.getValue(ctx.c0)
         elif ctx.i1:
             tp = "BO"
-            key = ctx.i1.value
+            key = self.getValue(ctx.i1)
         elif ctx.i2:
             tp = "SG"
-            key = (ctx.i2.value, ctx.c2.value, )
+            key = (self.getValue(ctx.i2), self.getValue(ctx.c2), )
         elif ctx.c3:
             tp = "EV"
-            key = ctx.c3.value
+            key = self.getValue(ctx.c3)
         else:
             tp = "NETWORK"
             key = None
@@ -560,9 +579,9 @@ class DbcListener(parser.BaseListener):
         self.insertAttributeDefinitions(ctx)
 
     def exitAttributeDefinition(self, ctx):
-        objectType = ctx.objectType.text if ctx.objectType else None
-        attributeName = ctx.attrName.value
-        attributeValue = ctx.attrValue.value
+        objectType = self.getTerminal(ctx.objectType)
+        attributeName = self.getValue(ctx.attrName)
+        attributeValue = self.getValue(ctx.attrValue)
         ctx.value = dict(type = objectType, name = attributeName, value = attributeValue)
 
     def exitRelativeAttributeDefinitions(self, ctx):
@@ -570,27 +589,27 @@ class DbcListener(parser.BaseListener):
         self.insertAttributeDefinitions(ctx)
 
     def exitRelativeAttributeDefinition(self, ctx):
-        objectType = ctx.objectType.text if ctx.objectType else None
-        attributeName = ctx.attrName.value
-        attributeValue = ctx.attrValue.value
+        objectType = self.getTerminal(ctx.objectType)
+        attributeName = self.getValue(ctx.attrName)
+        attributeValue = self.getValue(ctx.attrValue)
         ctx.value = dict(type = objectType, name = attributeName, value = attributeValue)
 
     def exitAttributeValueType(self, ctx):
         if ctx.i00:
             tp = "INT"
-            value = (ctx.i00.value, ctx.i01.value, )
+            value = (self.getValue(ctx.i00), self.getValue(ctx.i01), )
         elif ctx.i10:
             tp = "HEX"
-            value = (ctx.i10.value, ctx.i11.value, )
+            value = (self.getValue(ctx.i10), self.getValue(ctx.i11), )
         elif ctx.f0:
             tp = "FLOAT"
-            value = (float(ctx.f0.value), float(ctx.f1.value), )
+            value = (float(self.getValue(ctx.f0)), float(self.getValue(ctx.f1)), )
         elif ctx.s0:
             tp = "STRING"
             value = None
         elif ctx.efirst:
             tp = "ENUM"
-            efirst = [ctx.efirst.value]
+            efirst = [self.getValue(ctx.efirst)]
             eitems = [x.value for x in ctx.eitems]
             value = efirst + eitems
         ctx.value = dict(type = tp, value = value)
@@ -599,23 +618,23 @@ class DbcListener(parser.BaseListener):
         self.insertAttributeDefaults(ctx)
 
     def exitAttributeDefault(self, ctx):
-        name = ctx.n.value
-        value = ctx.v.value
+        name = self.getValue(ctx.n)
+        value = self.getValue(ctx.v)
         ctx.value = (name, value)
 
     def exitRelativeAttributeDefaults(self, ctx):
         self.insertAttributeDefaults(ctx)
 
     def exitRelativeAttributeDefault(self, ctx):
-        name = ctx.n.value
-        value = ctx.v.value
+        name = self.getValue(ctx.n)
+        value = self.getValue(ctx.v)
         ctx.value = (name, value)
 
     def exitAttributeValue(self, ctx):
         if ctx.s:
-            ctx.value = ctx.s.value
+            ctx.value = self.getValue(ctx.s)
         elif ctx.n:
-            ctx.value = ctx.n.value
+            ctx.value = self.getValue(ctx.n)
 
     def exitAttributeValues(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -647,27 +666,27 @@ class DbcListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitAttributeValueForObject(self, ctx):
-        attributeName = ctx.attributeName.value
+        attributeName = self.getValue(ctx.attributeName)
         if ctx.nodeName:
-            nodeName = ctx.nodeName.value
-            attrValue = ctx.buValue.value
+            nodeName = self.getValue(ctx.nodeName)
+            attrValue = self.getValue(ctx.buValue)
             di = dict(attributeType = 'BU', nodeName = nodeName)
         elif ctx.mid1:
-            mid1 = ctx.mid1.value
-            attrValue = ctx.boValue.value
+            mid1 = self.getValue(ctx.mid1)
+            attrValue = self.getValue(ctx.boValue)
             di = dict(attributeType = 'BO', messageID = mid1)
         elif ctx.mid2:
-            mid2 = ctx.mid2.value
-            signalName = ctx.signalName.value
-            attrValue = ctx.sgValue.value
+            mid2 = self.getValue(ctx.mid2)
+            signalName = self.getValue(ctx.signalName)
+            attrValue = self.getValue(ctx.sgValue)
             di = dict(attributeType = 'SG', messageID = mid2, signalName = signalName)
         elif ctx.evName:
-            evName = ctx.evName.value
-            attrValue = ctx.evValue.value
+            evName = self.getValue(ctx.evName)
+            attrValue = self.getValue(ctx.evValue)
             di = dict(attributeType = 'EV', envVarname = evName)
         else:
             evName = None
-            attrValue = ctx.attrValue.value
+            attrValue = self.getValue(ctx.attrValue)
             di = dict(attributeType = "NETWORK")
         ctx.value = dict(name = attributeName, attributeValue = attrValue, **di)
 
@@ -709,25 +728,25 @@ class DbcListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitRelativeAttributeValueForObject(self, ctx):
-        attrType = ctx.attrType.text
-        attributeName = ctx.attributeName.value
-        nodeName = ctx.nodeName.value
+        attrType = self.getTerminal(ctx.attrType)
+        attributeName = self.getValue(ctx.attributeName)
+        nodeName = self.getValue(ctx.nodeName)
         if attrType == "BU_BO_REL_":
-            messageID = ctx.nodeAddress.value
+            messageID = self.getValue(ctx.nodeAddress)
             attributeType = "REL_NODE"
             parent = dict(messageID = messageID)
-            attrValue = ctx.attrValue.value
+            attrValue = self.getValue(ctx.attrValue)
         elif attrType == "BU_SG_REL_":
-            messageID = ctx.messageID.value
-            signalName = ctx.signalName.value
+            messageID = self.getValue(ctx.messageID)
+            signalName = self.getValue(ctx.signalName)
             attributeType = "REL_SIGNAL"
             parent = dict(messageID = messageID, signalName = signalName)
-            attrValue = ctx.attrValue.value
+            attrValue = self.getValue(ctx.attrValue)
         elif attrType == "BU_EV_REL_":
             evName = ctx.evName.value
             attributeType = "REL_ENV_VAR"
             parent = dict(evName = evName)
-            attrValue = ctx.evValue.value if ctx.evValue else "???"
+            attrValue = self.getValue(ctx.evValue)
         ctx.value = dict(
             attributeType = attributeType, attributeName = attributeName, attributeValue = attrValue,
             nodeName = nodeName, parent = parent
@@ -753,9 +772,9 @@ class DbcListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitSignalGroup(self, ctx):
-        messageID = ctx.messageID.value
-        groupName = ctx.groupName.value
-        gvalue = ctx.gvalue.value
+        messageID = self.getValue(ctx.messageID)
+        groupName = self.getValue(ctx.groupName)
+        gvalue = self.getValue(ctx.gvalue)
         signals = [x.value for x in ctx.signals]
         ctx.value = dict(messageID = messageID, groupName = groupName, gvalue = gvalue, signals = signals)
 
@@ -765,11 +784,10 @@ class DbcListener(parser.BaseListener):
             print("CAT-DEF", category)
             cd = Category_Definition(name = category['name'], key = category['category'], level = category['value'])
             self.db.session.add(cd)
-            print(cd)
         self.db.session.flush()
 
     def exitCategoryDefinition(self, ctx):
-        ctx.value = dict(name = ctx.name.value, category = ctx.cat.value, value = ctx.num.value)
+        ctx.value = dict(name = self.getValue(ctx.name), category = self.getValue(ctx.cat), value = self.getValue(ctx.num))
 
     def exitCategories(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -795,14 +813,14 @@ class DbcListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitCategory(self, ctx):
-        category = ctx.cat.value
+        category = self.getValue(ctx.cat)
         if ctx.nodeName:
-            nodeName = ctx.nodeName.value
+            nodeName = self.getValue(ctx.nodeName)
             di = dict(type = 'BU', nodeName = nodeName)
         elif ctx.mid1:
-            mid1 = ctx.mid1.value
+            mid1 = self.getValue(ctx.mid1)
             di = dict(type = 'BO', messageID = mid1)
         elif ctx.evName:
-            evName = ctx.evName.value
+            evName = self.getValue(ctx.evName)
             di = dict(type = 'EV', envVarname = evName)
         ctx.value = dict(category = category, **di)

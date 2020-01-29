@@ -204,24 +204,24 @@ class LdfListener(parser.BaseListener):
         self.db.session.commit()
 
     def exitLin_protocol_version_def(self, ctx):
-        ctx.value = ctx.s.value
+        ctx.value = self.getValue(ctx.s)
 
     def exitLin_language_version_def(self, ctx):
-        ctx.value = ctx.s.value
+        ctx.value = self.getValue(ctx.s)
 
     def exitLin_file_revision_def(self, ctx):
-        ctx.value = ctx.s.value
+        ctx.value = self.getValue(ctx.s)
 
     def exitLin_speed_def(self, ctx):
-        ctx.value = ctx.n.value if ctx.n else None
+        ctx.value = self.getValue(ctx.n)
 
     def exitChannel_name_def(self, ctx):
-        ctx.value = ctx.i.value
+        ctx.value = self.getValue(ctx.i)
 
     def exitNode_def(self, ctx):
-        mname = ctx.mname.value
-        tb = ctx.tb.value
-        j = ctx.j.value
+        mname = self.getValue(ctx.mname)
+        tb = self.getValue(ctx.tb)
+        j = self.getValue(ctx.j)
         snames = [x.value for x in ctx.snames]
         ctx.value = dict(master = mname, timeBase = tb, jitter = j, slaves = snames)
         nodes = ctx.value
@@ -283,24 +283,24 @@ class LdfListener(parser.BaseListener):
                     self.faultStateSignals[node].append(fs)
 
     def exitNode_attribute(self, ctx):
-        name = ctx.name.value
-        version = ctx.version.value
-        n0 = ctx.n0.value if ctx.n0 else None
-        n1 = ctx.n1.value if ctx.n1 else None
-        attrs = ctx.attrs.value if ctx.attrs else dict()
+        name = self.getValue(ctx.name)
+        version = self.getValue(ctx.version)
+        n0 = self.getValue(ctx.n0)
+        n1 = self.getValue(ctx.n1)
+        attrs = self.getValue(ctx.attrs, dict())
         ctx.value = dict(name = name, version = version, configuredNAD = n0, initialNAD = n1, **attrs)
 
     def exitAttributes_def(self, ctx):
-        sid = ctx.sid.value if ctx.sid else None
-        fid = ctx.fid.value if ctx.fid else None
-        v = ctx.v.value if ctx.v else None
-        sn0 = ctx.sn0.value if ctx.sn0 else None
+        sid = self.getValue(ctx.sid)
+        fid = self.getValue(ctx.fid)
+        v = self.getValue(ctx.v)
+        sn0 = self.getValue(ctx.sn0)
         sn1s = [x.value for x in ctx.sn1s]
-        cf = ctx.cf.value if ctx.cf else None
-        p2Min = ctx.p2Min.value if ctx.p2Min else None
-        stMin = ctx.stMin.value if ctx.stMin else None
-        nAs = ctx.nAs.value if ctx.nAs else None
-        nCr = ctx.nCr.value if ctx.nCr else None
+        cf = self.getValue(ctx.cf)
+        p2Min = self.getValue(ctx.p2Min)
+        stMin = self.getValue(ctx.stMin)
+        nAs = self.getValue(ctx.nAs)
+        nCr = self.getValue(ctx.nCr)
         ctx.value = dict(supplierID = sid, functionID = fid, variant = v, responseErrorSignal = sn0, faultStateSignals = sn1s,
             p2Min = p2Min, stMin = stMin, nAs = nAs, nCr = nCr, configurableFrames = cf
         )
@@ -309,20 +309,20 @@ class LdfListener(parser.BaseListener):
         ctx.value = [x.value for x in ctx.frames]
 
     def exitConfigurable_frame(self, ctx):
-        fname = ctx.fname.value
-        mid = ctx.mid.value if ctx.mid else None
+        fname = self.getValue(ctx.fname)
+        mid = self.getValue(ctx.mid)
         ctx.value = dict(frameName = fname, messageID = mid)
 
     def exitNode_composition_def(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
     def exitConfiguration(self, ctx):
-        cname = ctx.cname.value
+        cname = self.getValue(ctx.cname)
         items = [x.value for x in ctx.items]
         ctx.value = dict(configurationName = cname, items = items)
 
     def exitConfiguration_item(self, ctx):
-        cnode = ctx.cnode.value
+        cnode = self.getValue(ctx.cnode)
         lnodes = [x.value for x in ctx.lnodes]
         ctx.value = dict(compositeNode = cnode, logicalNodes = lnodes)
 
@@ -355,20 +355,20 @@ class LdfListener(parser.BaseListener):
             self.setAttributeValue(sig.rid, 'LIN_signal_initial_value', iv)
 
     def exitSignal_item(self, ctx):
-        sname = ctx.sname.value
-        ssize = ctx.ssize.value
-        initValue = ctx.initValue.value
-        pub = ctx.pub.value
+        sname = self.getValue(ctx.sname)
+        ssize = self.getValue(ctx.ssize)
+        initValue = self.getValue(ctx.initValue)
+        pub = self.getValue(ctx.pub)
         sub = [x.value for x in ctx.sub]
         ctx.value = dict(name = sname, size = ssize, initValue = initValue, publishedBy = pub, subscribedBy = sub)
 
     def exitInit_value(self, ctx):
-        scalar = ctx.s.value if ctx.s else None
-        array = ctx.a.value if ctx.a else None
+        scalar = self.getValue(ctx.s)
+        array = self.getValue(ctx.a)
         ctx.value = dict(scalar = scalar, array = array)
 
     def exitInit_value_scalar(self, ctx):
-        ctx.value = ctx.i.value
+        ctx.value = self.getValue(ctx.i)
 
     def exitInit_value_array(self, ctx):
         ctx.value = [x.value for x in ctx.vs]
@@ -377,23 +377,23 @@ class LdfListener(parser.BaseListener):
         ctx.value = [x.value for x in ctx.items]
 
     def exitDiagnostic_item(self, ctx):
-        name = ctx.name.value
-        size = ctx.size.value
-        initValue = ctx.initValue.value
+        name = self.getValue(ctx.name)
+        size = self.getValue(ctx.size)
+        initValue = self.getValue(ctx.initValue)
         ctx.value = dict(name = name, size = size, initValue = initValue)
 
     def exitSignal_groups_def(self, ctx):
         ctx.value = [x.value for x in ctx.items]
 
     def exitSignal_group(self, ctx):
-        sgname = ctx.sgname.value
-        gsize = ctx.gsize.value
+        sgname = self.getValue(ctx.sgname)
+        gsize = self.getValue(ctx.gsize)
         items = [x.value for x in ctx.items]
         ctx.value = dict(signalGroupName = sgname, groupSize = gsize, items = items)
 
     def exitSignal_group_item(self, ctx):
-        sname = ctx.sname.value
-        goffs = ctx.goffs.value
+        sname = self.getValue(ctx.sname)
+        goffs = self.getValue(ctx.goffs)
         ctx.value = dict(signalName = sname, groupOffset = goffs)
 
     def exitFrame_def(self, ctx):
@@ -420,16 +420,16 @@ class LdfListener(parser.BaseListener):
             self.db.session.flush()
 
     def exitFrame_item(self, ctx):
-        fname = ctx.fname.value
-        fid = ctx.fid.value
-        p = ctx.p.value
-        fsize = ctx.fsize.value
+        fname = self.getValue(ctx.fname)
+        fid = self.getValue(ctx.fid)
+        p = self.getValue(ctx.p)
+        fsize = self.getValue(ctx.fsize)
         items = [x.value for x in ctx.items]
         ctx.value = dict(frameName = fname, frameID = fid, publishedBy = p, frameSize = fsize, signals = items)
 
     def exitFrame_signal(self, ctx):
-        sname = ctx.sname.value
-        soffs = ctx.soffs.value
+        sname = self.getValue(ctx.sname)
+        soffs = self.getValue(ctx.soffs)
         ctx.value = dict(signalName = sname, signalOffset = soffs)
 
     def exitSporadic_frame_def(self, ctx):
@@ -470,22 +470,22 @@ class LdfListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitEvent_triggered_frame_item(self, ctx):
-        e = ctx.e.value
-        c = ctx.c.value
-        fid = ctx.fid.value
+        e = self.getValue(ctx.e)
+        c = self.getValue(ctx.c)
+        fid = self.getValue(ctx.fid)
         items = [x.value for x in ctx.items]
         ctx.value = dict(frameName = e, frameID = fid, scheduleTable = c, frameNames = items)
 
     def exitDiag_frame_def(self, ctx):
-        mid = ctx.mid.value
-        sid = ctx.sid.value
+        mid = self.getValue(ctx.mid)
+        sid = self.getValue(ctx.sid)
         mitems = [x.value for x in ctx.mitems]
         sitems = [x.value for x in ctx.sitems]
         ctx.value = dict(masterID = mid, slaveID = sid, masterSignals = mitems, slaveSignals = sitems)
 
     def exitDiag_frame_item(self, ctx):
-        sname = ctx.sname.value
-        soffs = ctx.soffs.value
+        sname = self.getValue(ctx.sname)
+        soffs = self.getValue(ctx.soffs)
         ctx.value = dict(signalName = sname, signalOffset = soffs)
 
     def exitSchedule_table_def(self, ctx):
@@ -571,13 +571,13 @@ class LdfListener(parser.BaseListener):
             self.db.session.flush()
 
     def exitSchedule_table_entry(self, ctx):
-        s = ctx.s.value
+        s = self.getValue(ctx.s)
         items = [x.value for x in ctx.items]
         ctx.value = dict(name = s, commands = items)
 
     def exitSchedule_table_command(self, ctx):
-        c = ctx.c.value
-        f = ctx.f.value
+        c = self.getValue(ctx.c)
+        f = self.getValue(ctx.f)
         ctx.value = dict(command = c, frameTime = f)
 
     def exitCommand(self, ctx):
@@ -673,17 +673,17 @@ class LdfListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitSignal_encoding_entry(self, ctx):
-        s = ctx.s.value
+        s = self.getValue(ctx.s)
         items = [x.value for x in ctx.items]
         ctx.value = dict(name = s, values = items)
 
 
     def exitSignal_encoding_value(self, ctx):
         if ctx.l:
-            value = ctx.l.value
+            value = self.getValue(ctx.l)
             vtype = "logical"
         elif ctx.p:
-            value = ctx.p.value
+            value = self.getValue(ctx.p)
             vtype = "range"
         elif ctx.b:
             value = None
@@ -694,18 +694,18 @@ class LdfListener(parser.BaseListener):
         ctx.value = dict(value = value, valueType = vtype)
 
     def exitLogical_value(self, ctx):
-        s = ctx.s.value
-        t = ctx.t.value if ctx.t else None
+        s = self.getValue(ctx.s)
+        t = self.getValue(ctx.t)
         ctx.value = dict(signalValue = s, text = t)
 
     def exitPhysical_range(self, ctx):
-        minValue = ctx.minValue.value
-        maxValue = ctx.maxValue.value
+        minValue = self.getValue(ctx.minValue)
+        maxValue = self.getValue(ctx.maxValue)
         #scale = ctx.scale.value if ctx.scale else None
         #offset = ctx.offset.value
-        scale = ctx.s.value
-        offset = ctx.o.value
-        t = ctx.t.value if ctx.t else None
+        scale = self.getValue(ctx.s)
+        offset = self.getValue(ctx.o)
+        t = self.getValue(ctx.t)
         ctx.value = dict(min = minValue, max = maxValue, scale = scale, offset = offset, text = t)
 
     def exitBcd_value(self, ctx):
@@ -727,6 +727,6 @@ class LdfListener(parser.BaseListener):
         self.db.session.flush()
 
     def exitSignal_representation_entry(self, ctx):
-        enc = ctx.enc.value
+        enc = self.getValue(ctx.enc)
         names = [x.value for x in ctx.names]
         ctx.value = dict(name = enc, signalNames = names)
