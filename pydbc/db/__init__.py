@@ -122,7 +122,7 @@ def set_sqlite3_pragmas(dbapi_connection, connection_record):
 
 class CanDatabase(object):
 
-    def __init__(self, filename, debug = False, logLevel = 'INFO'):
+    def __init__(self, filename = ":memory:", debug = False, logLevel = 'INFO', create = True):
         if filename == ':memory:':
             self.dbname = ""
         else:
@@ -134,12 +134,38 @@ class CanDatabase(object):
             connect_args={'detect_types': sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES}, native_datetime = True)
         self._session = orm.Session(self._engine, autoflush = True, autocommit = False)
         self._metadata = model.Base.metadata
-        model.Base.metadata.create_all(self.engine)
-        self.session.flush()
-        self.session.commit()
+        if create == True:
+            model.Base.metadata.create_all(self.engine)
+            self.session.flush()
+            self.session.commit()
         self.logger = Logger(__name__, level = logLevel)
 
+    @classmethod
+    def _open_or_create(cls, filename = ":memory:", debug = False, logLevel = 'INFO', create = True):
+        """
+
+        """
+        inst = cls(filename, debug, logLevel, create)
+        return inst
+
+    @classmethod
+    def create(cls, filename = ":memory:", debug = False, logLevel = 'INFO'):
+        """
+
+        """
+        return cls._open_or_create(filename, debug, logLevel, True)
+
+    @classmethod
+    def open(cls, filename = ":memory:", debug = False, logLevel = 'INFO'):
+        """
+
+        """
+        return cls._open_or_create(filename, debug, logLevel, False)
+
     def close(self):
+        """
+
+        """
         self.session.close()
         self.engine.dispose()
 
