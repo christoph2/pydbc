@@ -30,10 +30,10 @@ __version__ = '0.1.0'
 
 import re
 
+from sqlalchemy.sql.expression import literal
+
 from pydbc import parser
-
 from pydbc.types import AttributeType, BusType, CategoryType, ValueType
-
 from pydbc.db.model import (
     Dbc_Version, Message, Message_Signal, Network, Node, Signal, Value_Description,
     Valuetable, EnvironmentVariablesData, EnvVar, Attribute_Definition, Attribute_Value,
@@ -54,7 +54,7 @@ Before moving on, note that J1939 is a bit special in regards to the CAN DBC fil
 
 DIGITS = re.compile(r'(\d+)')
 
-CO_MPX = re.compile(r"^(?P<multiplexed>m)(?P<value>\d+)(?P<multiplexer>M)$")
+CO_MPX = re.compile(r"^(?P<multiplexed>m)?(?P<value>\d+)?(?P<multiplexer>M)?$")
 
 
 def extractAccessType(value):
@@ -63,47 +63,6 @@ def extractAccessType(value):
         return int(match.group())
     else:
         return None
-
-
-class Comments:
-    """This class contains the comments found in .dbc files.
-    """
-    def __init__(self):
-        self.bu = {}
-        self.bo = {}
-        self.sg = {}
-        self.ev = {}
-        self.nw = None
-
-    def addNode(self, key, value):
-        self.bu[key] = value
-
-    def addMessage(self, key, value):
-        self.bo[key] = value
-
-    def addSignal(self, key, value):
-        self.sg[key] = value
-
-    def addEnvVar(self, key, value):
-        self.ev[key] = value
-
-    def addNetwork(self, value):
-        self.nw = value
-
-    def node(self, key):
-        return self.bu.get(key)
-
-    def message(self, key):
-        return self.bo.get(key)
-
-    def signal(self, key):
-        return self.sg.get(key)
-
-    def envVar(self, key):
-        return self.ev.get(key)
-
-    def network(self):
-        return self.nw
 
 
 class DbcListener(parser.BaseListener):
@@ -137,20 +96,35 @@ class DbcListener(parser.BaseListener):
             return []
 
     def insertReceivers(self, messageId, signalId, receiver):
-        SignalReceivers = set()
         for rcv in receiver:
-            nodeId = self.db.session.query(Node.rid).filter(Node.name == rcv).scalar()
-            if not (messageId, signalId, nodeId) in SignalReceivers:
+            res = self.db.session.query(Node.rid).filter(Node.name == rcv).first()
+            if res:
+                nodeId = res.rid
+            else:
+                self.logger.error("Node '{}' does not exist.".format(rcv))
+                continue
+            exists = self.db.session.query(literal(True)).filter(
+                Node_RxSignal.node_id == nodeId, Node_RxSignal.message_id == messageId,
+                Node_RxSignal.signal_id == signalId).first()
+            if exists:
+                self.logger.error("Receiver messageId: {} signalId: {} nodeId: {} already exists.".
+                    format(messageId, signalId, nodeId)
+                )
+            else:
                 rxs = Node_RxSignal(node_id = nodeId, message_id = messageId, signal_id = signalId)
                 self.db.session.add(rxs)
-            SignalReceivers.add((messageId, signalId, nodeId))
         self.db.session.flush()
 
     def insertValueDescription(self, rid, description):
         objs = []
         for desc, value in description:
-            vd = Value_Description(valuetable_id = rid, value = value, value_description = desc)
-            objs.append(vd)
+            exists = self.db.session.query(literal(True)).filter(
+                Value_Description.valuetable_id == rid, Value_Description.value == value).first()
+            if exists:
+                pass
+            else:
+                vd = Value_Description(valuetable_id = rid, value = value, value_description = desc)
+                objs.append(vd)
         self.db.session.add_all(objs)
         self.db.session.flush()
 
@@ -196,9 +170,13 @@ class DbcListener(parser.BaseListener):
             elif vt == 'ENUM':
                 valueType = ValueType.ENUM
                 enumvalues = ';'.join(values)
-            ad = Attribute_Definition(name = name, objecttype = objType, valuetype = valueType, minimum = minimum,
-                maximum = maximum, enumvalues = enumvalues)
-            self.db.session.add(ad)
+            exists = self.db.session.query(literal(True)).filter(Attribute_Definition.name == name).first()
+            if exists:
+                self.logger.error("An attribute definition named '{}' already exists.".format(name))
+            else:
+                ad = Attribute_Definition(name = name, objecttype = objType, valuetype = valueType, minimum = minimum,
+                                          maximum = maximum, enumvalues = enumvalues)
+                self.db.session.add(ad)
         self.db.session.flush()
 
     def insertAttributeDefaults(self, ctx):
@@ -218,7 +196,12 @@ class DbcListener(parser.BaseListener):
         ctx.value = defaults
 
     def insertNetwork(self, specific = None):
-        network = Network(name = self.db.dbname)
+        name = self.db.dbname
+        exists = self.db.session.query(literal(True)).filter(Network.name == name).first()
+        if exists:
+            self.logger.error("An network named '{}' already exists.".format(name))
+            return
+        network = Network(name = name)
         self.db.session.add(network)
         proto = Vndb_Protocol(network = network, name = BusType.CAN.name, specific = specific)
         self.db.session.add(proto)
@@ -320,7 +303,7 @@ class DbcListener(parser.BaseListener):
                     match = CO_MPX.match(multiplexerIndicator)
                     if match:
                         gd = match.groupdict()
-                        print("MPX:", gd)
+                        #print("MPX:", gd)
                         gd['multiplexed'] == 'm'
                         multiplexorValue = gd['value']
                         multiplexorSignal = 1 if gd['multiplexer'] == 'M' else 0
@@ -535,23 +518,23 @@ class DbcListener(parser.BaseListener):
             text = comment['comment']
             key = comment['key']
             if tp == 'BU':
-                obj = self.db.session.query(Node).filter(Node.name == key).one()
+                obj = self.db.session.query(Node).filter(Node.name == key).first()
                 obj.comment = text
             elif tp == 'BO':
-                obj = self.db.session.query(Message).filter(Message.message_id == key).one()
+                obj = self.db.session.query(Message).filter(Message.message_id == key).first()
                 obj.comment = text
             elif tp == 'SG':
                 rid = self.get_signal_by_name(*key)
                 if not rid:
                     self.logger.error("Error while inserting comments: message signal '{}' does not exist.".format(key))
                     continue
-                obj = self.db.session.query(Signal).filter(Signal.rid == rid).one()
+                obj = self.db.session.query(Signal).filter(Signal.rid == rid).first()
                 obj.comment = text
             elif tp == 'EV':
-                obj = self.db.session.query(EnvVar).filter(EnvVar.name == key).one()
+                obj = self.db.session.query(EnvVar).filter(EnvVar.name == key).first()
                 obj.comment = text
             else:   # NW !?
-                obj = self.db.session.query(Network).filter(Network.rid == self.network_id).one()
+                obj = self.db.session.query(Network).filter(Network.rid == self.network_id).first()
                 obj.comment = text
                 print("NW-CMT", comment, "\n\t", obj)
         self.db.session.flush()
@@ -647,22 +630,34 @@ class DbcListener(parser.BaseListener):
             else:
                 numValue = value
             aname = attr['name']
-            ad = self.db.session.query(Attribute_Definition).filter(Attribute_Definition.name == attr['name']).one()
+            ad = self.db.session.query(Attribute_Definition).filter(Attribute_Definition.name == attr['name']).first()
             attrType = self.getAttributeType(attr['attributeType'])
             if attrType == AttributeType.MESSAGE:
-                rid = self.db.session.query(Message.rid).filter(Message.message_id == attr['messageID']).scalar()
+                key = attr['messageID']
+                msg = self.db.session.query(Message.rid).filter(Message.message_id == key).first()
+                rid = msg.rid
             elif attrType == AttributeType.SIGNAL:
-               rid = self.get_signal_by_name(attr['messageID'], attr['signalName']) #
+                key = attr['messageID'], attr['signalName'],
+                rid = self.get_signal_by_name(*key)
             elif attrType == AttributeType.NODE:
-                rid = self.db.session.query(Node.rid).filter(Node.name == attr['nodeName']).scalar()
+                key = attr['nodeName']
+                rid = self.db.session.query(Node.rid).filter(Node.name == key).scalar()
             elif attrType == AttributeType.ENV_VAR:
-                rid = self.db.session.query(EnvVar.rid).filter(EnvVar.name == attr['envVarname']).scalar()
+                key = attr['envVarname']
+                rid = self.db.session.query(EnvVar.rid).filter(EnvVar.name == key).scalar()
             elif attrType == AttributeType.NETWORK:
+                key = ''
                 rid = 0
             else:
                 rid = 0
-            av = Attribute_Value(object_id = rid, attribute_definition = ad, num_value = numValue, string_value = stringValue)
-            self.db.session.add(av)
+                key = ''
+            exists = self.db.session.query(literal(True)).filter(
+                Attribute_Value.object_id == rid, Attribute_Value.attribute_definition_id == ad.rid).first()
+            if exists:
+                self.logger.error("Attribute value for {} {} {} already exists.".format(AttributeType.SIGNAL.name, key, ad.name))
+            else:
+                av = Attribute_Value(object_id = rid, attribute_definition = ad, num_value = numValue, string_value = stringValue)
+                self.db.session.add(av)
         self.db.session.flush()
 
     def exitAttributeValueForObject(self, ctx):
