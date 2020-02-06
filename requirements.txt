@@ -2,6 +2,5 @@ pytest
 pytest-runner
 mako
 antlr4-python3-runtime == 4.7.2
-wxPython >= 4.0.0
 SQLAlchemy
 colorama
