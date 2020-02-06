@@ -7,7 +7,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-    ( C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
+   ( C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -32,19 +32,47 @@ __version__ = '0.1.0'
 
 import argparse
 
-import io
+import os
 import pathlib
 
-from pydbc.db.imex import createImporter
+from pydbc.parser import ParserWrapper
+from pydbc.dbcListener import DbcListener
+from pydbc.ldfListener import LdfListener
+from pydbc.ncfListener import NcfListener
+from pydbc.types import FileType
+
+
+def parseFile(pth, filetype, debug = False, remove_file = False):
+    if filetype == FileType.DBC:
+        grammar = 'dbc'
+        start_symbol = 'dbcfile'
+        listener = DbcListener
+    elif filetype == FileType.LDF:
+        grammar = 'ldf'
+        start_symbol = 'lin_description_file'
+        listener = ldfListener
+    elif filetype == FileType.NCF:
+        grammar = 'ncf'
+        start_symbol = 'toplevel'
+        listener = NcfListener
+    else:
+        raise ValueError("Invalid filetype '{}'".format(filetype))
+    parser = ParserWrapper(grammar, start_symbol, DbcListener, debug = debug)
+    print("Processing '{}'".format(pth))
+
+    dbfn = "{}.vndb".format(pth.stem)
+    if remove_file:
+        try:
+            os.unlink(dbfn)
+        except Exception:
+            pass
+    session = parser.parseFromFile(str(pth))
+    print("OK, done.\n", flush = True)
+    return session
+
 
 def importFile(pth):
-    fnext = pth.suffix[ 1 : ].lower()
-
-    importer = createImporter(fnext)
-    imp = importer(pth)
-    imp.run()
-
-    print("OK, done.\n", flush = True)
+    session = parseFile(pth, FileType.DBC, remove_file = True)
 
 
 def main():
@@ -65,4 +93,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
