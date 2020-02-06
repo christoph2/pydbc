@@ -75,7 +75,7 @@ INITIAL_DATA = {
         0,
         'Message');
 """
-# ${db.session.query(Node.name).filter(Node.rid == msg.sender).scalar()}
+
 def _inserter(data, target, conn, **kws):
     for row in data:
         k, v = row.keys(), row.values()

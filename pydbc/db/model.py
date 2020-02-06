@@ -79,10 +79,12 @@ def StdInteger(default = 0, primary_key = False, unique = False, nullable = Fals
     )
 """
 
+
 class Node(Base, RidMixIn, CommentableMixIn):
 
     name = Column(types.Unicode(255), nullable = False, unique = True, index= True)
     node_id = StdInteger()
+
 
 class Message_Signal(Base, MixInBase):
 
@@ -99,23 +101,25 @@ class Message_Signal(Base, MixInBase):
     multiplex_dependent = Column(types.Boolean)
     multiplexor_value    = Column(types.Integer)
 
-    #message = relationship("Message", backref = "signals")
-    #signal = relationship("Signal", backref = "messages")
     signal = relationship("Signal", lazy = "joined")
 
 
 class Message(Base, RidMixIn, CommentableMixIn):
 
-    name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
+    name = Column(types.Unicode(255), nullable = True, index = True)
     message_id = StdInteger(nullable = True, default = None)
     dlc = StdInteger()
     sender = StdInteger()
+
+    #transmitter_node_id
+
     type = Column(types.String(256))
 
     message_signals = relationship(
         "Message_Signal", cascade="all, delete-orphan", backref="message"
     )
     signals = association_proxy("message_signals", "signal")
+
 
     __mapper_args__ = {
         "polymorphic_identity": "Message",
@@ -136,11 +140,80 @@ class Signal(Base, RidMixIn, CommentableMixIn):
     maximum = Column(types.Float, default = 0.0)
     unit = Column(types.Unicode(255))
 
+
 class Network(Base, RidMixIn, CommentableMixIn):
 
     name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
     protocol = StdInteger()
     baudrate = StdInteger()
+
+
+class Node_RxSig(Base, MixInBase):
+
+    node = Column(types.Integer,
+        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
+        nullable = False, default = 0, primary_key = True
+    )
+    signal = Column(types.Integer,
+        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
+        nullable = False, default = 0, primary_key = True
+    )
+
+class Node_RxSignal(Base, MixInBase):
+
+    node_id = Column(types.Integer,
+        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
+        nullable = False, default = 0, primary_key = True
+    )
+    message_id = Column(types.Integer,
+        ForeignKey("message.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
+        nullable = False, default = 0, primary_key = True
+    )
+    signal_id = Column(types.Integer,
+        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
+        nullable = False, default = 0, primary_key = True
+    )
+    __table_args__ = (
+        ForeignKeyConstraint(columns = ["message_id", "signal_id"],
+            refcolumns = ["message_signal.message_id", "message_signal.signal_id"]
+        ),
+    )
+
+    #receiver_id = relationship(
+    #    "Node_RxSignal", cascade="all, delete-orphan", backref="signal"
+    #)
+    #receiver = association_proxy("receiver_id", "signal")
+
+    node = relationship("Node", uselist  = False, lazy = "joined")
+    message = relationship("Message", uselist  = False, lazy = "joined")
+    signal = relationship("Signal", uselist  = False, lazy = "joined")    # backref = "rx_signals", uselist  = False,
+
+
+class Node_TxMessage(Base, MixInBase):
+
+    node_id = Column(types.Integer,
+        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
+        nullable = False, default = 0, primary_key = True
+    )
+    message_id = Column(types.Integer,
+        ForeignKey("message.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
+        nullable = False, default = 0, primary_key = True
+    )
+    node = relationship("Node", backref = "tx_messages", uselist  = False)
+    message = relationship("Message", backref = "tx_messages", uselist  = False)
+
+class Node_TxSig(Base, MixInBase):
+
+    node_id = Column(types.Integer,
+        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
+        nullable = False, default = 0, primary_key = True
+    )
+    signal_id = Column(types.Integer,
+        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
+        nullable = False, default = 0, primary_key = True
+    )
+    node = relationship("Node", backref = "tx_sigs", uselist  = False)
+    signal = relationship("Signal", backref = "tx_sigs", uselist  = False)
 
 class Attribute_Definition(Base, RidMixIn, CommentableMixIn):
 
@@ -296,60 +369,6 @@ class Network_Node(Base, MixInBase):
         nullable = False, default = 0, primary_key = True
     )
 
-class Node_RxSig(Base, MixInBase):
-
-    node = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    signal = Column(types.Integer,
-        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-
-class Node_RxSignal(Base, MixInBase):
-
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    message_id = Column(types.Integer,
-        ForeignKey("message.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    signal_id = Column(types.Integer,
-        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "rx_signals", uselist  = False)
-    message = relationship("Message", backref = "rx_signals", uselist  = False)
-    signal = relationship("Signal", backref = "rx_signals", uselist  = False)
-
-class Node_TxMessage(Base, MixInBase):
-
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    message_id = Column(types.Integer,
-        ForeignKey("message.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "tx_messages", uselist  = False)
-    message = relationship("Message", backref = "tx_messages", uselist  = False)
-
-class Node_TxSig(Base, MixInBase):
-
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    signal_id = Column(types.Integer,
-        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "tx_sigs", uselist  = False)
-    signal = relationship("Signal", backref = "tx_sigs", uselist  = False)
 
 class Signal_Group(Base, RidMixIn):
 
