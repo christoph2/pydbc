@@ -28,7 +28,7 @@ __copyright__ = """
 import pydbc
 from pydbc.types import BusType
 import pydbc.db.model as model
-from pydbc.db import CanDatabase
+from pydbc.db import VNDB
 
 from sqlalchemy import event
 
@@ -43,9 +43,9 @@ DEBUG = False
 
 
 def main():
-    #cdb = CanDatabase.create("create_candb", debug = DEBUG)
-    cdb = CanDatabase.create(":memory:", debug = DEBUG)
-    #cdb = CanDatabase.open("create_candb", debug = DEBUG)
+    #cdb = VNDB.create("create_candb", debug = DEBUG)
+    cdb = VNDB.create(":memory:", debug = DEBUG)
+    #cdb = VNDB.open("create_candb", debug = DEBUG)
     session = cdb.session
 
     engine = model.Node(name = "Engine")

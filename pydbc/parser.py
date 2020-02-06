@@ -38,7 +38,7 @@ import antlr4
 import antlr4.tree
 
 from pydbc.logger import Logger
-from pydbc.db import CanDatabase
+from pydbc.db import VNDB
 
 def indent(level):
     print(" " * level,)
@@ -170,7 +170,7 @@ class ParserWrapper(object):
         return (module, klass, )
 
     def parse(self, input, trace = False):
-        self.db = CanDatabase(self.fnbase, debug = self.debug)
+        self.db = VNDB(self.fnbase, debug = self.debug)
         lexer = self.lexerClass(input)
         tokenStream = antlr4.CommonTokenStream(lexer)
         parser = self.parserClass(tokenStream)

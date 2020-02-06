@@ -120,8 +120,10 @@ def set_sqlite3_pragmas(dbapi_connection, connection_record):
     cursor.close()
 
 
-class CanDatabase(object):
+class VNDB(object):
+    """
 
+    """
     def __init__(self, filename = ":memory:", debug = False, logLevel = 'INFO', create = True):
         if filename == ':memory:':
             self.dbname = ""
