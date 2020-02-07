@@ -76,8 +76,6 @@ class DbcListener(parser.BaseListener):
         self.session = self.db.session
         self.insertNetwork()
         self.bakery = baked.bakery()
-        self.SIGNAL_BY_NAME = self.bakery(lambda session: session.query(Signal.rid).join(Message_Signal).join(Message).\
-                filter(Message.message_id == bindparam('messageID'), Signal.name == bindparam('signal_name')))
 
     def getAttributeType(self, value):
         ATS = {
@@ -93,7 +91,9 @@ class DbcListener(parser.BaseListener):
         return ATS.get(value)
 
     def get_signal_by_name(self, messageID, signal_name):
-        res = self.SIGNAL_BY_NAME(self.session).params(messageID = messageID,signal_name = signal_name).first()
+        SIGNAL_BY_NAME = self.bakery(lambda session: session.query(Signal.rid).join(Message_Signal).join(Message).\
+                filter(Message.message_id == bindparam('messageID'), Signal.name == bindparam('signal_name')))
+        res = SIGNAL_BY_NAME(self.session).params(messageID = messageID,signal_name = signal_name).first()
         if res:
             return res.rid
         else:

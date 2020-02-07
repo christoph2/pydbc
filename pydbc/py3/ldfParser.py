@@ -1,9 +1,13 @@
-# Generated from ldf.g4 by ANTLR 4.7
+# Generated from ldf.g4 by ANTLR 4.8
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
-from typing.io import TextIO
 import sys
+if sys.version_info[1] > 5:
+	from typing import TextIO
+else:
+	from typing.io import TextIO
+
 
 def serializedATN():
     with StringIO() as buf:
@@ -534,9 +538,10 @@ class ldfParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.7")
+        self.checkVersion("4.8")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
+
 
 
 
@@ -771,6 +776,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Lin_protocol_version_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -823,6 +829,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Lin_language_version_defContext(ParserRuleContext):
 
@@ -877,6 +884,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Lin_file_revision_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -929,6 +937,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Lin_speed_defContext(ParserRuleContext):
 
@@ -985,6 +994,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Channel_name_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1037,6 +1047,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Node_defContext(ParserRuleContext):
 
@@ -1146,6 +1157,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Node_attributes_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1212,6 +1224,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Node_attributeContext(ParserRuleContext):
 
@@ -1315,6 +1328,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Attributes_defContext(ParserRuleContext):
 
@@ -1523,6 +1537,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Configurable_framesContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1590,6 +1605,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Configurable_frameContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1654,6 +1670,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Node_composition_defContext(ParserRuleContext):
 
@@ -1721,6 +1738,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class ConfigurationContext(ParserRuleContext):
 
@@ -1796,6 +1814,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Configuration_itemContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1869,6 +1888,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Signal_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1935,6 +1955,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Signal_itemContext(ParserRuleContext):
 
@@ -2027,6 +2048,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Init_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2092,6 +2114,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Init_value_scalarContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2138,6 +2161,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Init_value_arrayContext(ParserRuleContext):
 
@@ -2209,6 +2233,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Diagnostic_signal_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2276,6 +2301,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Diagnostic_itemContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2341,6 +2367,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Signal_groups_defContext(ParserRuleContext):
 
@@ -2408,6 +2435,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Signal_groupContext(ParserRuleContext):
 
@@ -2490,6 +2518,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Signal_group_itemContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2547,6 +2576,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Frame_defContext(ParserRuleContext):
 
@@ -2614,6 +2644,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Frame_itemContext(ParserRuleContext):
 
@@ -2712,6 +2743,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Frame_signalContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2769,6 +2801,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Sporadic_frame_defContext(ParserRuleContext):
 
@@ -2836,6 +2869,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Sporadic_frame_itemContext(ParserRuleContext):
 
@@ -2910,6 +2944,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Event_triggered_frame_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2976,6 +3011,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Event_triggered_frame_itemContext(ParserRuleContext):
 
@@ -3058,6 +3094,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Diag_frame_defContext(ParserRuleContext):
 
@@ -3167,6 +3204,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Diag_frame_itemContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3224,6 +3262,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Schedule_table_defContext(ParserRuleContext):
 
@@ -3291,6 +3330,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Schedule_table_entryContext(ParserRuleContext):
 
@@ -3364,6 +3404,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Schedule_table_commandContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3423,6 +3464,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class CommandContext(ParserRuleContext):
 
@@ -3698,6 +3740,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Signal_encoding_type_defContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3764,6 +3807,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Signal_encoding_entryContext(ParserRuleContext):
 
@@ -3836,6 +3880,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Signal_encoding_valueContext(ParserRuleContext):
 
@@ -3922,6 +3967,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Logical_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3990,6 +4036,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Physical_rangeContext(ParserRuleContext):
 
@@ -4085,6 +4132,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Bcd_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4130,6 +4178,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Ascii_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4174,6 +4223,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Signal_representation_defContext(ParserRuleContext):
 
@@ -4241,6 +4291,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Signal_representation_entryContext(ParserRuleContext):
 
@@ -4315,6 +4366,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class IntValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4378,6 +4430,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class FloatValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4423,6 +4476,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class NumberContext(ParserRuleContext):
 
@@ -4489,6 +4543,7 @@ class ldfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class StringValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4534,6 +4589,7 @@ class ldfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class IdentifierValueContext(ParserRuleContext):
 

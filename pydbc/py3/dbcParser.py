@@ -1,9 +1,13 @@
-# Generated from dbc.g4 by ANTLR 4.7
+# Generated from dbc.g4 by ANTLR 4.8
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
-from typing.io import TextIO
 import sys
+if sys.version_info[1] > 5:
+	from typing import TextIO
+else:
+	from typing.io import TextIO
+
 
 def serializedATN():
     with StringIO() as buf:
@@ -443,9 +447,10 @@ class dbcParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.7")
+        self.checkVersion("4.8")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
+
 
 
 
@@ -621,6 +626,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class MessageTransmittersContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -682,6 +688,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class MessageTransmitterContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -741,6 +748,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class SignalExtendedValueTypeListContext(ParserRuleContext):
 
@@ -802,6 +810,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class SignalExtendedValueTypeContext(ParserRuleContext):
 
@@ -869,6 +878,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class MessagesContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -929,6 +939,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class MessageContext(ParserRuleContext):
 
@@ -1021,6 +1032,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class SignalContext(ParserRuleContext):
 
@@ -1159,6 +1171,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class ReceiverContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1228,6 +1241,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class TransmitterContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1294,6 +1308,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class MultiplexerIndicatorContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1340,6 +1355,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class ValueTablesContext(ParserRuleContext):
 
@@ -1401,6 +1417,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class ValueTableContext(ParserRuleContext):
 
@@ -1474,6 +1491,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class ValueDescriptionContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1527,6 +1545,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class NodesContext(ParserRuleContext):
 
@@ -1592,6 +1611,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class BitTimingContext(ParserRuleContext):
 
@@ -1663,6 +1683,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class NewSymbolsContext(ParserRuleContext):
 
@@ -1757,6 +1778,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class VersionContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1805,6 +1827,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class ObjectValueTablesContext(ParserRuleContext):
 
@@ -1866,6 +1889,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class ObjectValueTableContext(ParserRuleContext):
 
@@ -1970,6 +1994,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class EnvironmentVariablesContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2030,6 +2055,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class EnvironmentVariableContext(ParserRuleContext):
 
@@ -2138,6 +2164,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class AccessNodesContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2204,6 +2231,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class EnvironmentVariablesDataContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2265,6 +2293,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class EnvironmentVariableDataContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2324,6 +2353,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class SignalTypesContext(ParserRuleContext):
 
@@ -2385,6 +2415,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class SignalTypeContext(ParserRuleContext):
 
@@ -2506,6 +2537,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class CommentsContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2566,6 +2598,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class CommentContext(ParserRuleContext):
 
@@ -2664,6 +2697,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class AttributeDefinitionsContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2724,6 +2758,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class AttributeDefinitionContext(ParserRuleContext):
 
@@ -2799,6 +2834,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class RelativeAttributeDefinitionsContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2859,6 +2895,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class RelativeAttributeDefinitionContext(ParserRuleContext):
 
@@ -2933,6 +2970,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class AttributeValueTypeContext(ParserRuleContext):
 
@@ -3063,6 +3101,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class AttributeDefaultsContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3124,6 +3163,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class AttributeDefaultContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3181,6 +3221,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class RelativeAttributeDefaultsContext(ParserRuleContext):
 
@@ -3243,6 +3284,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class RelativeAttributeDefaultContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3300,6 +3342,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class AttributeValueContext(ParserRuleContext):
 
@@ -3366,6 +3409,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class AttributeValuesContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3426,6 +3470,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class AttributeValueForObjectContext(ParserRuleContext):
 
@@ -3544,6 +3589,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class RelativeAttributeValuesContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3604,6 +3650,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class RelativeAttributeValueForObjectContext(ParserRuleContext):
 
@@ -3719,6 +3766,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class SignalGroupsContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3779,6 +3827,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class SignalGroupContext(ParserRuleContext):
 
@@ -3863,6 +3912,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class CategoryDefinitionsContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3923,6 +3973,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class CategoryDefinitionContext(ParserRuleContext):
 
@@ -3988,6 +4039,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class CategoriesContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4048,6 +4100,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class CategoryContext(ParserRuleContext):
 
@@ -4134,6 +4187,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class IntValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4180,6 +4234,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class FloatValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4225,6 +4280,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class NumberContext(ParserRuleContext):
 
@@ -4291,6 +4347,7 @@ class dbcParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class StringValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4336,6 +4393,7 @@ class dbcParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class IdentifierValueContext(ParserRuleContext):
 

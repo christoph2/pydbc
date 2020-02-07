@@ -5,7 +5,7 @@ import sys
 from setuptools import find_packages, setup, Extension
 from glob import glob
 
-ANTLR_VERSION = '4.7.2'
+ANTLR_VERSION = '4.8'
 
 with open("README.md", "r") as fh:
     long_description = fh.read()

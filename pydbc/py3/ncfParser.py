@@ -1,9 +1,13 @@
-# Generated from ncf.g4 by ANTLR 4.7
+# Generated from ncf.g4 by ANTLR 4.8
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
-from typing.io import TextIO
 import sys
+if sys.version_info[1] > 5:
+	from typing import TextIO
+else:
+	from typing.io import TextIO
+
 
 def serializedATN():
     with StringIO() as buf:
@@ -404,9 +408,10 @@ class ncfParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.7")
+        self.checkVersion("4.8")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
+
 
 
 
@@ -482,6 +487,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Language_versionContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -532,6 +538,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Node_definitionContext(ParserRuleContext):
 
@@ -641,6 +648,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Node_nameContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -687,6 +695,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class General_definitionContext(ParserRuleContext):
 
@@ -887,6 +896,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Protocol_versionContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -933,6 +943,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Supplier_idContext(ParserRuleContext):
 
@@ -981,6 +992,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Function_idContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1028,6 +1040,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Variant_idContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1074,6 +1087,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Bitrate_definitionContext(ParserRuleContext):
 
@@ -1188,6 +1202,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class BitrateContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1236,6 +1251,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Diagnostic_definitionContext(ParserRuleContext):
 
@@ -1466,6 +1482,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Frame_definitionContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1532,6 +1549,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Single_frameContext(ParserRuleContext):
 
@@ -1611,6 +1629,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Frame_kindContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1662,6 +1681,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Frame_nameContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1708,6 +1728,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Frame_propertiesContext(ParserRuleContext):
 
@@ -1817,6 +1838,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Signal_definitionContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1884,6 +1906,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Signal_definition_entryContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1942,6 +1965,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Signal_nameContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1988,6 +2012,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Signal_propertiesContext(ParserRuleContext):
 
@@ -2079,6 +2104,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Init_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2144,6 +2170,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Init_value_scalarContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2194,6 +2221,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Init_value_arrayContext(ParserRuleContext):
 
@@ -2269,6 +2297,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Encoding_definitionContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2335,6 +2364,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Encoding_definition_entryContext(ParserRuleContext):
 
@@ -2407,6 +2437,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Encoding_definition_valueContext(ParserRuleContext):
 
@@ -2493,6 +2524,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Encoding_nameContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2539,6 +2571,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Logical_valueContext(ParserRuleContext):
 
@@ -2608,6 +2641,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Physical_rangeContext(ParserRuleContext):
 
@@ -2705,6 +2739,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Bcd_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2750,6 +2785,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Ascii_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2794,6 +2830,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Signal_valueContext(ParserRuleContext):
 
@@ -2842,6 +2879,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Min_valueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2888,6 +2926,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Max_valueContext(ParserRuleContext):
 
@@ -2936,6 +2975,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class ScaleContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2982,6 +3022,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class OffsetContext(ParserRuleContext):
 
@@ -3030,6 +3071,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Text_infoContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3076,6 +3118,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Status_managementContext(ParserRuleContext):
 
@@ -3170,6 +3213,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Published_signalContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3216,6 +3260,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Free_text_definitionContext(ParserRuleContext):
 
@@ -3269,6 +3314,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class IntValueContext(ParserRuleContext):
 
@@ -3333,6 +3379,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class FloatValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3378,6 +3425,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class NumberContext(ParserRuleContext):
 
@@ -3444,6 +3492,7 @@ class ncfParser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class StringValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3489,6 +3538,7 @@ class ncfParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class IdentifierValueContext(ParserRuleContext):
 
