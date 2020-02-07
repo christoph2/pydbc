@@ -93,11 +93,7 @@ class DbcListener(parser.BaseListener):
         return ATS.get(value)
 
     def get_signal_by_name(self, messageID, signal_name):
-
         res = self.SIGNAL_BY_NAME(self.session).params(messageID = messageID,signal_name = signal_name).first()
-
-        #res = self.db.session.query(Signal.rid).join(Message_Signal).join(Message).\
-        #        filter(Message.message_id == messageID, Signal.name == signal_name).first()
         if res:
             return res.rid
         else:
@@ -105,13 +101,13 @@ class DbcListener(parser.BaseListener):
 
     def insertReceivers(self, messageId, signalId, receiver):
         for rcv in receiver:
-            res = self.db.session.query(Node.rid).filter(Node.name == rcv).first()
+            res = self.session.query(Node.rid).filter(Node.name == rcv).first()
             if res:
                 nodeId = res.rid
             else:
                 self.logger.error("Node '{}' does not exist.".format(rcv))
                 continue
-            exists = self.db.session.query(literal(True)).filter(
+            exists = self.session.query(literal(True)).filter(
                 Node_RxSignal.node_id == nodeId, Node_RxSignal.message_id == messageId,
                 Node_RxSignal.signal_id == signalId).first()
             if exists:
@@ -120,21 +116,21 @@ class DbcListener(parser.BaseListener):
                 )
             else:
                 rxs = Node_RxSignal(node_id = nodeId, message_id = messageId, signal_id = signalId)
-                self.db.session.add(rxs)
-        self.db.session.flush()
+                self.session.add(rxs)
+        self.session.flush()
 
     def insertValueDescription(self, rid, description):
         objs = []
         for desc, value in description:
-            exists = self.db.session.query(literal(True)).filter(
+            exists = self.session.query(literal(True)).filter(
                 Value_Description.valuetable_id == rid, Value_Description.value == value).first()
             if exists:
                 pass
             else:
                 vd = Value_Description(valuetable_id = rid, value = value, value_description = desc)
                 objs.append(vd)
-        self.db.session.add_all(objs)
-        self.db.session.flush()
+        self.session.add_all(objs)
+        self.session.flush()
 
     def insertAttributeDefinitions(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -178,21 +174,21 @@ class DbcListener(parser.BaseListener):
             elif vt == 'ENUM':
                 valueType = ValueType.ENUM
                 enumvalues = ';'.join(values)
-            exists = self.db.session.query(literal(True)).filter(Attribute_Definition.name == name).first()
+            exists = self.session.query(literal(True)).filter(Attribute_Definition.name == name).first()
             if exists:
                 self.logger.error("An attribute definition named '{}' already exists.".format(name))
             else:
                 ad = Attribute_Definition(name = name, objecttype = objType, valuetype = valueType, minimum = minimum,
                                           maximum = maximum, enumvalues = enumvalues)
-                self.db.session.add(ad)
-        self.db.session.flush()
+                self.session.add(ad)
+        self.session.flush()
 
     def insertAttributeDefaults(self, ctx):
         defaults = {}
         for item in ctx.items:
             name, value = item.value
             defaults[name] = value
-            ad = self.db.session.query(Attribute_Definition).filter(Attribute_Definition.name == name).first()
+            ad = self.session.query(Attribute_Definition).filter(Attribute_Definition.name == name).first()
             if not ad:
                 self.logger.error("Error while inserting attribute default values: attribute '{}' does not exist.".format(name))
                 continue
@@ -200,24 +196,24 @@ class DbcListener(parser.BaseListener):
                 ad.default_number = value
             elif ad.valuetype in (ValueType.STRING, ValueType.ENUM):
                 ad.default_string = value
-        self.db.session.flush()
+        self.session.flush()
         ctx.value = defaults
 
     def insertNetwork(self, specific = None):
         name = self.db.dbname
-        exists = self.db.session.query(literal(True)).filter(Network.name == name).first()
+        exists = self.session.query(literal(True)).filter(Network.name == name).first()
         if exists:
             self.logger.error("An network named '{}' already exists.".format(name))
             return
         network = Network(name = name)
-        self.db.session.add(network)
+        self.session.add(network)
         proto = Vndb_Protocol(network = network, name = BusType.CAN.name, specific = specific)
-        self.db.session.add(proto)
-        self.db.session.flush()
+        self.session.add(proto)
+        self.session.flush()
         self.network_id = network.rid
 
     def exitDbcfile(self, ctx):
-        self.db.session.commit()
+        self.session.commit()
         self.value = dict(
             version = ctx.version().value,
             newSymbols = ctx.newSymbols().value,
@@ -247,12 +243,12 @@ class DbcListener(parser.BaseListener):
     def exitMessageTransmitters(self, ctx):
         ctx.value = [x.value for x in ctx.items]
         for transmitter in ctx.value:
-            mid = self.db.session.query(Message).filter(Message.message_id == transmitter['messageID']).scalar()
+            mid = self.session.query(Message).filter(Message.message_id == transmitter['messageID']).scalar()
             for name in transmitter['transmitters']:
-                nid = self.db.session.query(Node).filter(Node.name == name).scalar()
+                nid = self.session.query(Node).filter(Node.name == name).scalar()
                 ntm = Node_TxMessage(node = nid, message = mid)
-                self.db.session.add(ntm)
-        self.db.session.flush()
+                self.session.add(ntm)
+        self.session.flush()
 
     def exitMessageTransmitter(self, ctx):
         transmitters = self.getValue(ctx.tx)
@@ -266,9 +262,9 @@ class DbcListener(parser.BaseListener):
             sigName = item['signalName']
             vt = item['valueType']
             srid = self.get_signal_by_name(msgId, sigName)
-            signal = self.db.session.query(Signal).filter(Signal.rid == srid).one()
+            signal = self.session.query(Signal).filter(Signal.rid == srid).one()
             signal.valuetype = vt
-        self.db.session.flush()
+        self.session.flush()
 
     def exitSignalExtendedValueType(self, ctx):
         messageID = self.getValue(ctx.messageID)
@@ -287,9 +283,9 @@ class DbcListener(parser.BaseListener):
             dlc = msg['dlc']
             signals = msg['signals']
             transmitter = msg['transmitter']
-            tid = self.db.session.query(Node.rid).filter(Node.name == transmitter).scalar()
+            tid = self.session.query(Node.rid).filter(Node.name == transmitter).scalar()
             mm = Message(name = name, message_id = mid, dlc = dlc, sender = tid)
-            self.db.session.add(mm)
+            self.session.add(mm)
             for signal in signals:
                 name = signal['name']
                 startBit = signal['startBit']
@@ -338,13 +334,13 @@ class DbcListener(parser.BaseListener):
                 ss = Signal(name = name, bitsize = signalSize, byteorder = byteOrder, sign = sign,
                     formula_factor = factor, formula_offset = offset, minimum = minimum, maximum = maximum, unit = unit
                 )
-                self.db.session.add(ss)
+                self.session.add(ss)
                 srid = ss.rid
                 ms = Message_Signal(offset = startBit, multiplexor_signal = multiplexorSignal,
                     multiplex_dependent = multiplexDependent, multiplexor_value = multiplexorValue,
                     signal = ss, message = mm)
-                self.db.session.add(ms)
-                self.db.session.flush()
+                self.session.add(ms)
+                self.session.flush()
                 self.insertReceivers(mm.rid, ss.rid, receiver)
 
     def exitMessage(self, ctx):
@@ -390,10 +386,10 @@ class DbcListener(parser.BaseListener):
             name = table['name']
             description = table['description']
             vt = Valuetable(name = name)
-            self.db.session.add(vt)
-            self.db.session.flush()
+            self.session.add(vt)
+            self.session.flush()
             self.insertValueDescription(vt.rid, description)
-        self.db.session.flush()
+        self.session.flush()
 
     def exitValueTable(self, ctx):
         ctx.value = dict(name = ctx.name.value, description = [x.value for x in ctx.desc])
@@ -407,9 +403,9 @@ class DbcListener(parser.BaseListener):
         for name in ctx.value:
             if not name in nodeSet:
                 nn = Node(name = name)
-                self.db.session.add(nn)
+                self.session.add(nn)
             nodeSet.add(name)
-        self.db.session.flush()
+        self.session.flush()
 
     def exitBitTiming(self, ctx):
         ctx.value = dict(baudrate = self.getValue(ctx.baudrate), btr1 = self.getValue(ctx.btr1), btr2 = self.getValue(ctx.btr2))
@@ -422,8 +418,8 @@ class DbcListener(parser.BaseListener):
         version = ctx.value
         network = self.network_id
         vers = Dbc_Version(version_string = version, network = network)
-        self.db.session.add(vers)
-        self.db.session.flush()
+        self.session.add(vers)
+        self.session.flush()
 
     def exitObjectValueTables(self, ctx):
         ctx.value = [x.value for x in ctx.items]
@@ -438,13 +434,13 @@ class DbcListener(parser.BaseListener):
             elif tp == 'EV':
                 name = table['envVarName']
                 otype = 1
-                object_rid = self.db.session.query(EnvVar.rid).filter(EnvVar.name == name).scalar()
+                object_rid = self.session.query(EnvVar.rid).filter(EnvVar.name == name).scalar()
             vt = Valuetable(name = name)
-            self.db.session.add(vt)
-            self.db.session.flush()
+            self.session.add(vt)
+            self.session.flush()
             ovt = Object_Valuetable(object_type= otype, object_rid = object_rid, valuetable_id = vt.rid)
-            self.db.session.add(ovt)
-            self.db.session.flush()
+            self.session.add(ovt)
+            self.session.flush()
             self.insertValueDescription(vt.rid, description)
 
     def exitObjectValueTable(self, ctx):
@@ -472,14 +468,14 @@ class DbcListener(parser.BaseListener):
             envId = var['envId']
             varType = var['varType']
             name = var['name']
-            dataSize = self.db.session.query(EnvironmentVariablesData.value).filter(EnvironmentVariablesData.name == name).scalar()
+            dataSize = self.session.query(EnvironmentVariablesData.value).filter(EnvironmentVariablesData.name == name).scalar()
             envVar = EnvVar(name = name, type = varType, unit = unit, minimum = minimum, maximum = maximum,
                 access = accessType, startup_value = initialValue, size = dataSize)
-            self.db.session.add(envVar)
+            self.session.add(envVar)
             for node in accessNodes:
-                nn = self.db.session.query(Node).filter(Node.name == node).one()
+                nn = self.session.query(Node).filter(Node.name == node).one()
                 envVar.accessingNodes.append(nn)
-        self.db.session.flush()
+        self.session.flush()
 
     def exitEnvironmentVariable(self, ctx):
         accessType = extractAccessType(ctx.DUMMY_NODE_VECTOR().getText())
@@ -501,8 +497,8 @@ class DbcListener(parser.BaseListener):
             name = item['name']
             value = item['value']
             evd = EnvironmentVariablesData(name = name, value = value)
-            self.db.session.add(evd)
-        self.db.session.flush()
+            self.session.add(evd)
+        self.session.flush()
 
     def exitEnvironmentVariableData(self, ctx):
         ctx.value = dict(name = self.getValue(ctx.varname), value = self.getValue(ctx.value))
@@ -526,26 +522,26 @@ class DbcListener(parser.BaseListener):
             text = comment['comment']
             key = comment['key']
             if tp == 'BU':
-                obj = self.db.session.query(Node).filter(Node.name == key).first()
+                obj = self.session.query(Node).filter(Node.name == key).first()
                 obj.comment = text
             elif tp == 'BO':
-                obj = self.db.session.query(Message).filter(Message.message_id == key).first()
+                obj = self.session.query(Message).filter(Message.message_id == key).first()
                 obj.comment = text
             elif tp == 'SG':
                 rid = self.get_signal_by_name(*key)
                 if not rid:
                     self.logger.error("Error while inserting comments: message signal '{}' does not exist.".format(key))
                     continue
-                obj = self.db.session.query(Signal).filter(Signal.rid == rid).first()
+                obj = self.session.query(Signal).filter(Signal.rid == rid).first()
                 obj.comment = text
             elif tp == 'EV':
-                obj = self.db.session.query(EnvVar).filter(EnvVar.name == key).first()
+                obj = self.session.query(EnvVar).filter(EnvVar.name == key).first()
                 obj.comment = text
             else:   # NW !?
-                obj = self.db.session.query(Network).filter(Network.rid == self.network_id).first()
+                obj = self.session.query(Network).filter(Network.rid == self.network_id).first()
                 obj.comment = text
                 print("NW-CMT", comment, "\n\t", obj)
-        self.db.session.flush()
+        self.session.flush()
 
     def exitComment(self, ctx):
         comment = self.getValue(ctx.s)
@@ -639,39 +635,39 @@ class DbcListener(parser.BaseListener):
             else:
                 numValue = value
             aname = attr['name']
-            ad = self.db.session.query(Attribute_Definition).filter(Attribute_Definition.name == attr['name']).first()
+            ad = self.session.query(Attribute_Definition).filter(Attribute_Definition.name == attr['name']).first()
             if not ad:
                 self.logger.error("Attribute definition named '{}' does not exist.".format(attr['name']))
                 continue
             attrType = self.getAttributeType(attr['attributeType'])
             if attrType == AttributeType.MESSAGE:
                 key = attr['messageID']
-                msg = self.db.session.query(Message.rid).filter(Message.message_id == key).first()
+                msg = self.session.query(Message.rid).filter(Message.message_id == key).first()
                 rid = msg.rid
             elif attrType == AttributeType.SIGNAL:
                 key = attr['messageID'], attr['signalName'],
                 rid = self.get_signal_by_name(*key)
             elif attrType == AttributeType.NODE:
                 key = attr['nodeName']
-                rid = self.db.session.query(Node.rid).filter(Node.name == key).scalar()
+                rid = self.session.query(Node.rid).filter(Node.name == key).scalar()
             elif attrType == AttributeType.ENV_VAR:
                 key = attr['envVarname']
-                rid = self.db.session.query(EnvVar.rid).filter(EnvVar.name == key).scalar()
+                rid = self.session.query(EnvVar.rid).filter(EnvVar.name == key).scalar()
             elif attrType == AttributeType.NETWORK:
                 key = ''
                 rid = 0
             else:
                 rid = 0
                 key = ''
-            exists = self.db.session.query(literal(True)).filter(
+            exists = self.session.query(literal(True)).filter(
                 Attribute_Value.object_id == rid, Attribute_Value.attribute_definition_id == ad.rid).first()
             if exists:
                 self.logger.error("Attribute value for {} {} {} already exists.".format(AttributeType.SIGNAL.name, key, ad.name))
             else:
                 av = Attribute_Value(object_id = rid, attribute_definition = ad, num_value = numValue, string_value = stringValue)
                 values.append(av)
-        self.db.session.add_all(values)
-        self.db.session.flush()
+        self.session.add_all(values)
+        self.session.flush()
 
     def exitAttributeValueForObject(self, ctx):
         attributeName = self.getValue(ctx.attributeName)
@@ -705,8 +701,8 @@ class DbcListener(parser.BaseListener):
             attributeName = attr['attributeName']
             attributeValue = attr['attributeValue']
             attrributeType = self.getAttributeType(attr['attributeType'])
-            aid = self.db.session.query(Attribute_Definition).filter(Attribute_Definition.name == attr['attributeName']).scalar()
-            nodeId = self.db.session.query(Node.rid).filter(Node.name == attr['nodeName']).scalar()
+            aid = self.session.query(Attribute_Definition).filter(Attribute_Definition.name == attr['attributeName']).scalar()
+            nodeId = self.session.query(Node.rid).filter(Node.name == attr['nodeName']).scalar()
             parent = attr['parent']
             optOid1 = nodeId
             optOid2 = None
@@ -723,17 +719,17 @@ class DbcListener(parser.BaseListener):
                 rid = self.get_signal_by_name(messageID, parent['signalName'])
             elif attrributeType == AttributeType.REL_ENV_VAR:
                 evName = parent['evName']
-                rid = self.db.session.query(EnvVar.rid).filter(EnvVar.name == evName).scalar()
+                rid = self.session.query(EnvVar.rid).filter(EnvVar.name == evName).scalar()
                 #optOid2 = ???
             elif attrributeType == AttributeType.REL_NODE:
                 messageID = parent['messageID']
                 optOid2 = messageID
-                rid = self.db.session.query(Message.rid).filter(Message.message_id == messageID).scalar()
+                rid = self.session.query(Message.rid).filter(Message.message_id == messageID).scalar()
             arv = AttributeRel_Value(object_id = rid, attribute_definition = aid, num_value = numValue,
                 string_value = stringValue, opt_object_id_1 = optOid1, opt_object_id_2 = optOid2
             )
-            self.db.session.add(arv)
-        self.db.session.flush()
+            self.session.add(arv)
+        self.session.flush()
 
     def exitRelativeAttributeValueForObject(self, ctx):
         attrType = self.getTerminal(ctx.attrType)
@@ -768,16 +764,16 @@ class DbcListener(parser.BaseListener):
             gValue = group['gvalue']
             signalNames = group['signals']
             groupName = group['groupName']
-            msg = self.db.session.query(Message).filter(Message.message_id == messageID).first()
+            msg = self.session.query(Message).filter(Message.message_id == messageID).first()
             sg = Signal_Group(name = groupName, value = gValue, message = msg)
-            self.db.session.add(sg)
-            self.db.session.flush()
+            self.session.add(sg)
+            self.session.flush()
             for signalName in signalNames:
-                signal = self.db.session.query(Signal).join(Message_Signal).join(Message).\
+                signal = self.session.query(Signal).join(Message_Signal).join(Message).\
                 filter(Message.message_id == messageID, Signal.name == signalName).first()
                 sgs = Signal_Group_Signal(signal_group = sg, message = msg, signal = signal)
-                self.db.session.add(sgs)
-        self.db.session.flush()
+                self.session.add(sgs)
+        self.session.flush()
 
     def exitSignalGroup(self, ctx):
         messageID = self.getValue(ctx.messageID)
@@ -791,8 +787,8 @@ class DbcListener(parser.BaseListener):
         for category in ctx.value:
             print("CAT-DEF", category)
             cd = Category_Definition(name = category['name'], key = category['category'], level = category['value'])
-            self.db.session.add(cd)
-        self.db.session.flush()
+            self.session.add(cd)
+        self.session.flush()
 
     def exitCategoryDefinition(self, ctx):
         ctx.value = dict(name = self.getValue(ctx.name), category = self.getValue(ctx.cat), value = self.getValue(ctx.num))
@@ -806,19 +802,19 @@ class DbcListener(parser.BaseListener):
             if attrType == 'BU':
                 nodeName = category['nodeName']
                 objType = CategoryType.NODE
-                rid = self.db.session.query(Node.rid).filter(Node.name == nodeName).scalar()
+                rid = self.session.query(Node.rid).filter(Node.name == nodeName).scalar()
             elif attrType == 'BO':
                 objType = CategoryType.MESSAGE
                 messageID = category['messageID']
-                rid = self.db.session.query(Message.rid).filter(Message.message_id == messageID).scalar()
+                rid = self.session.query(Message.rid).filter(Message.message_id == messageID).scalar()
             elif attrType == 'EV':
                 envVarname = category['envVarname']
                 objType = CategoryType.ENV_VAR
-                rid = self.db.session.query(EnvVar.rid).filter(EnvVar.name == envVarname).scalar()
+                rid = self.session.query(EnvVar.rid).filter(EnvVar.name == envVarname).scalar()
             cv = Category_Value(object_id = rid, category_definition_id = catId, objecttype = objType)
-            self.db.session.add(cv)
+            self.session.add(cv)
             print(cv)
-        self.db.session.flush()
+        self.session.flush()
 
     def exitCategory(self, ctx):
         category = self.getValue(ctx.cat)
