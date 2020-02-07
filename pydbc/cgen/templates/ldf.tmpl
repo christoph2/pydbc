@@ -1,0 +1,211 @@
+<%
+networkAttrs = attributes['NETWORK'][0]
+nodeAttrs = attributes['NODE']
+signalAttrs = attributes['SIGNAL']
+%>\
+LIN_description_file;
+LIN_protocol_version = "${networkAttrs.get('LIN_protocol_version')}";
+LIN_language_version = "${networkAttrs.get('LIN_language_version')}";
+%if 'LDF_file_revision' in networkAttrs:
+LDF_file_revision = "${networkAttrs.get('LDF_file_revision')}";
+%endif
+LIN_speed = ${networkAttrs.get('LIN_speed')} kbps;
+%if 'LIN_channel_name' in networkAttrs:
+Channel_name = "${networkAttrs.get('LIN_channel_name')}";
+%endif
+
+Nodes {
+<%
+    isMaster = db.session.query(model.Attribute_Value).join(model.Attribute_Definition).\
+        filter(model.Attribute_Definition.name == "LIN_is_master").one()
+    masterNode = db.session.query(model.Node).filter(model.Node.rid == isMaster.object_id).one()
+    isSlave = db.session.query(model.Attribute_Value.object_id).join(model.Attribute_Definition).\
+        filter(model.Attribute_Definition.name == "LIN_is_slave")
+    slaveNodes = db.session.query(model.Node).filter(model.Node.rid.in_(isSlave)).all()
+    tb = nodeAttrs[masterNode.rid]['LIN_time_base']
+    jt = nodeAttrs[masterNode.rid]['LIN_jitter']
+%>\
+    Master: ${masterNode.name}, ${tb}ms, ${jt}ms;
+    Slaves: ${', '.join([s.name for s in slaveNodes])};
+}
+
+Signals {
+%for signal in db.session.query(model.Signal).order_by(model.Signal.rid).all():
+<% initialValue = signalAttrs[signal.rid]['LIN_signal_initial_value'] 
+publisher = db.session.query(model.Node.name).join(model.Node_TxSig).filter(model.Node_TxSig.signal == signal).scalar()
+subscribers = db.session.query(model.Node.name).join(model.Node_RxSignal).filter(model.Node_RxSignal.signal == signal).all()
+%>\
+    ${"{0:25s}".format(signal.name)}: ${signal.bitsize}, \
+    %if len(initialValue) > 1:
+{ ${', '.join(["0x{:02x}".format(x) for x in initialValue])} }, \
+    %else:
+${"0x{:02x}".format(initialValue[0])}, \
+    %endif
+${publisher}, ${', '.join([x[0] for x in subscribers])};
+%endfor
+}
+
+Diagnostic_signals {
+
+}
+
+Frames {
+<% FrameEntity = model.with_polymorphic(model.LinUnconditionalFrame, []) %>\
+%for frame in db.session.query(FrameEntity).order_by(FrameEntity.frame_id).all():
+<% senderName = db.session.query(model.Node.name).filter(model.Node.rid == frame.sender).scalar() %>\
+    ${frame.name}: ${"0x{:02x}".format(frame.message_id)}, ${senderName}, ${frame.dlc} {
+<% frame_signals = db.session.query(model.Signal.name, model.Message_Signal.offset).\
+    join(model.Message_Signal).filter(model.Message_Signal.message_id == frame.frame_id).\
+    order_by(model.Message_Signal.offset).all() %>\
+%for fs in frame_signals:
+        ${fs[0]}, ${fs[1]};
+%endfor
+    }
+%endfor
+}
+
+Sporadic_frames {
+%for frame in db.session.query(model.LinSporadicFrame).all():
+    ${frame.name}: ${', '.join([f.name for f in frame.associated_frames])};
+%endfor
+}
+
+Event_triggered_frames {
+%for frame in db.session.query(model.LinEventTriggeredFrame).all():
+    ${frame.name}: ${frame.collision_resolving_schedule_table}, ${frame.message_id}, ${', '.join([f.name for f in frame.associated_frames])};
+%endfor
+##  ETF_State: ETF_CollisionResolving, 9, Motor1_State, Motor2_State ;
+}
+
+Diagnostic_frames {
+
+}
+
+Node_attributes {
+%for node in slaveNodes:
+<% attrs = nodeAttrs[node.rid] 
+fault_state_signals = db.session.query(model.LinFaultStateSignal).filter(model.LinFaultStateSignal.node == node).all()
+%>\
+    ${node.name} {
+%if 'LIN_protocol' in attrs:
+        LIN_protocol = "${attrs['LIN_protocol']}";
+%endif
+%if 'LIN_configured_NAD' in attrs:
+        configured_NAD = ${"0x{:02x}".format(attrs['LIN_configured_NAD'])};
+%endif
+%if 'LIN_initial_NAD' in attrs:
+        initial_NAD = ${"0x{:02x}".format(attrs['LIN_initial_NAD'])};
+%endif
+%if 'LIN_supplier_id' in attrs:
+        product_id = ${"0x{:04x}".format(attrs['LIN_supplier_id'])},\
+%endif
+%if 'LIN_function_id' in attrs:
+ ${"0x{:04x}".format(attrs['LIN_function_id'])},\
+%endif
+%if 'LIN_variant' in attrs:
+ ${"0x{:04x}".format(attrs['LIN_variant'])};
+%endif
+%if 'LIN_response_error' in attrs:
+        response_error = ${attrs['LIN_response_error']};
+%endif
+%if fault_state_signals:
+        fault_state_signals = ${", ".join([s.signal.name for s in fault_state_signals])};
+%endif
+%if 'LIN_P2_min' in attrs:
+        P2_min = ${attrs['LIN_P2_min']} ms;
+%endif
+%if 'LIN_ST_min' in attrs:
+        ST_min = ${attrs['LIN_ST_min']} ms;
+%endif
+%if 'LIN_N_As_timeout' in attrs:
+        N_As_timeout = ${attrs['LIN_N_As_timeout']} ms;
+%endif
+%if 'LIN_N_Cr_timeout' in attrs:
+        N_Cr_timeout = ${attrs['LIN_N_Cr_timeout']} ms;
+%endif
+<% configurable_frames = db.session.query(model.LinConfigurableFrame).\
+    filter(model.LinConfigurableFrame.node == node).all() %>\
+%if configurable_frames:
+        configurable_frames {
+%for frame in configurable_frames:
+            ${frame.frame.name};
+%endfor
+        }
+%endif
+    }
+%endfor
+
+Schedule_tables {
+%for table in db.session.query(model.LinScheduleTable).order_by(model.LinScheduleTable.rid).all():
+    ${table.name} {
+%for command in table.commands:
+%if command.type == "LinScheduleTable_Command_Frame":
+        ${command.frame.name} delay ${command.frame_time} ms;
+%elif command.type == "LinScheduleTable_Command_MasterReq":
+        MasterReq delay ${command.frame_time} ms;
+%elif command.type == "LinScheduleTable_Command_SlaveResp":
+        SlaveResp delay ${command.frame_time} ms;
+%elif command.type == "LinScheduleTable_Command_AssignNad":
+        AssignNAD { ${command.node.name} } delay ${command.frame_time} ms;
+%elif command.type == "LinScheduleTable_Command_ConditionalChangeNad":
+        ConditionalChangeNAD { ${"0x{:02x}".format(command.nad)}, ${"0x{:02x}".format(command.id)}, \
+${"0x{:02x}".format(command.byte)}, ${"0x{:02x}".format(command.mask)}, ${"0x{:02x}".format(command.inv)}, \
+${"0x{:02x}".format(command.new_nad)} } delay ${command.frame_time} ms;
+%elif command.type == "LinScheduleTable_Command_DataDump":
+        DataDump { ${command.node.name}, ${"0x{:02x}".format(command.d1)}, ${"0x{:02x}".format(command.d2)}, \
+${"0x{:02x}".format(command.d3)}, ${"0x{:02x}".format(command.d4)}, ${"0x{:02x}".format(command.d5)} } \
+delay ${command.frame_time} ms;
+%elif command.type == "LinScheduleTable_Command_SaveConfiguration":
+        SaveConfiguration { ${command.node.name} } delay ${command.frame_time} ms;
+%elif command.type == "LinScheduleTable_Command_AssignFrameIdRange":
+        AssignFrameIdRange {${command.node.name}, ${command.frame_index} \
+%if command.frame_pid1:
+${"0x{:02x}".format(frame_pid1)} \
+%endif
+%if command.frame_pid2:
+, ${"0x{:02x}".format(frame_pid2)} \
+%endif
+%if command.frame_pid3:
+, ${"0x{:02x}".format(frame_pid3)} \
+%endif
+%if command.frame_pid4:
+, ${"0x{:02x}".format(frame_pid4)} \
+%endif
+} delay ${command.frame_time} ms;
+%elif command.type == "LinScheduleTable_Command_FreeFormat":
+        FreeFormat { ${"0x{:02x}".format(command.d1)}, ${"0x{:02x}".format(command.d2)}, \
+${"0x{:02x}".format(command.d3)}, ${"0x{:02x}".format(command.d4)}, ${"0x{:02x}".format(command.d5)}, \
+${"0x{:02x}".format(command.d6)}, ${"0x{:02x}".format(command.d7)}, ${"0x{:02x}".format(command.d8)} \
+} delay ${command.frame_time} ms;
+%elif command.type == "LinScheduleTable_Command_AssignFrameId":
+        AssignFrameId { ${command.node.name}, ${command.frame.name} } delay ${command.frame_time} ms;
+%endif
+%endfor
+    }
+%endfor
+}
+
+Signal_encoding_types {
+%for enc in db.session.query(model.LinSignalEncodingType).all():
+    ${enc.name} {
+%for entry in enc.entries:
+%if entry.type == "LinSignalEncodingEntry_Logical":
+        logical_value, ${int(entry.signal_value)}, "${entry.text_info}";
+%elif entry.type == "LinSignalEncodingEntry_Physical":
+        physical_value, ${int(entry.min_value)}, ${int(entry.max_value)}, ${entry.scale}, \
+${entry.offset}, "${entry.text_info}";
+%endif
+%endfor
+    }
+%endfor
+}
+
+Signal_representation {
+%for enc in db.session.query(model.LinSignalEncodingType).all():
+<% sr = db.session.query(model.Signal.name).join(model.LinSignalRepresentation).\
+filter(model.LinSignalRepresentation.lin_signal_encoding_type == enc).all() %>\
+%if sr:
+    ${enc.name}: ${', '.join([s[0] for s in sr])};
+%endif
+%endfor
+}
