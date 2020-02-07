@@ -99,8 +99,7 @@ BU_:
 <% ovt_ids = [v.valuetable_id for v in db.session.query(model.Object_Valuetable.valuetable_id).all()] %>\
 %for vt in db.session.query(model.Valuetable).filter(sa.not_(model.Valuetable.rid.in_(ovt_ids))).all():
 VAL_TABLE_ ${vt.name} \
-%for desc in db.session.query(model.Value_Description).filter(model.Value_Description.valuetable_id == vt.rid).\
-    order_by(sa.desc(model.Value_Description.value)).all():
+%for desc in db.session.query(model.Value_Description).filter(model.Value_Description.valuetable_id == vt.rid).order_by(sa.desc(model.Value_Description.value)).all():
 ${int(desc.value)} "${desc.value_description}" \
 %endfor
 ;
@@ -109,8 +108,7 @@ ${int(desc.value)} "${desc.value_description}" \
 
 %for msg in db.session.query(model.Message).all():
 BO_ ${msg.message_id} ${msg.name}: ${msg.dlc} ${db.session.query(model.Node.name).filter(model.Node.rid == msg.sender).scalar()}
-%for signal in db.session.query(*model.Message_Signal.__table__.columns + model.Signal.__table__.columns).\
-    filter(model.Message_Signal.signal_id == model.Signal.rid, model.Message_Signal.message_id == msg.rid).all():
+%for signal in db.session.query(*model.Message_Signal.__table__.columns + model.Signal.__table__.columns).  filter(model.Message_Signal.signal_id == model.Signal.rid, model.Message_Signal.message_id == msg.rid).all():
 <% receivers = db.session.query(model.Node.name).join(model.Node_RxSignal).\
     filter(model.Node_RxSignal.message_id == msg.rid, model.Node_RxSignal.signal_id == signal.rid).with_labels().all()
 %>\
@@ -265,16 +263,14 @@ ${int(attr.num_value)}\
 %endif
 ;
 %endfor
-%for vt in db.session.query(model.Object_Valuetable.object_type, model.Object_Valuetable.object_rid, model.Valuetable.rid, \
-    model.Valuetable.name). filter(model.Object_Valuetable.valuetable_id  == model.Valuetable.rid).all():
+%for vt in db.session.query(model.Object_Valuetable.object_type, model.Object_Valuetable.object_rid, model.Valuetable.rid, model.Valuetable.name). filter(model.Object_Valuetable.valuetable_id  == model.Valuetable.rid).all():
 VAL_ \
 %if vt.object_type == 0:
 ${vt.object_rid} ${vt.name} \
 %else:
 ${vt.name} \
 %endif
-%for desc in db.session.query(model.Value_Description).filter(model.Value_Description.valuetable_id == vt.rid).\
-    order_by(model.Value_Description.valuetable_id, sa.desc(model.Value_Description.value)).all():
+%for desc in db.session.query(model.Value_Description).filter(model.Value_Description.valuetable_id == vt.rid).order_by(model.Value_Description.valuetable_id, sa.desc(model.Value_Description.value)).all():
 ${int(desc.value)} "${desc.value_description}" \
 %endfor
 ;
