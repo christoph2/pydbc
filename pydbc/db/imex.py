@@ -38,7 +38,6 @@ import sqlalchemy as sa
 
 from pydbc.logger import Logger
 from pydbc.db import VNDB
-from pydbc.db.creator import Creator
 from pydbc import parser
 from pydbc.dbcListener import DbcListener
 from pydbc.ldfListener import LdfListener
