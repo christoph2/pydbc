@@ -621,6 +621,7 @@ class DbcListener(parser.BaseListener):
 
     def exitAttributeValues(self, ctx):
         ctx.value = [x.value for x in ctx.items]
+        values = []
         for attr in ctx.value:
             stringValue = None
             numValue = None
@@ -631,6 +632,9 @@ class DbcListener(parser.BaseListener):
                 numValue = value
             aname = attr['name']
             ad = self.db.session.query(Attribute_Definition).filter(Attribute_Definition.name == attr['name']).first()
+            if not ad:
+                self.logger.error("Attribute definition named '{}' does not exist.".format(attr['name']))
+                continue
             attrType = self.getAttributeType(attr['attributeType'])
             if attrType == AttributeType.MESSAGE:
                 key = attr['messageID']
@@ -657,7 +661,9 @@ class DbcListener(parser.BaseListener):
                 self.logger.error("Attribute value for {} {} {} already exists.".format(AttributeType.SIGNAL.name, key, ad.name))
             else:
                 av = Attribute_Value(object_id = rid, attribute_definition = ad, num_value = numValue, string_value = stringValue)
-                self.db.session.add(av)
+                values.append(av)
+                #self.db.session.add(av)
+        self.session.add_all(values)
         self.db.session.flush()
 
     def exitAttributeValueForObject(self, ctx):
