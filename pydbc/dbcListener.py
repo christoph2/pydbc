@@ -30,7 +30,8 @@ __version__ = '0.1.0'
 
 import re
 
-from sqlalchemy.sql.expression import literal
+from sqlalchemy.sql.expression import literal, bindparam
+from sqlalchemy.ext import baked
 
 from pydbc import parser
 from pydbc.types import AttributeType, BusType, CategoryType, ValueType
@@ -72,7 +73,11 @@ class DbcListener(parser.BaseListener):
 
     def __init__(self, database, *args, **kws):
         super(DbcListener, self).__init__(database, *args, **kws)
+        self.session = self.db.session
         self.insertNetwork()
+        self.bakery = baked.bakery()
+        self.SIGNAL_BY_NAME = self.bakery(lambda session: session.query(Signal.rid).join(Message_Signal).join(Message).\
+                filter(Message.message_id == bindparam('messageID'), Signal.name == bindparam('signal_name')))
 
     def getAttributeType(self, value):
         ATS = {
@@ -88,8 +93,11 @@ class DbcListener(parser.BaseListener):
         return ATS.get(value)
 
     def get_signal_by_name(self, messageID, signal_name):
-        res = self.db.session.query(Signal.rid).join(Message_Signal).join(Message).\
-                filter(Message.message_id == messageID, Signal.name == signal_name).first()
+
+        res = self.SIGNAL_BY_NAME(self.session).params(messageID = messageID,signal_name = signal_name).first()
+
+        #res = self.db.session.query(Signal.rid).join(Message_Signal).join(Message).\
+        #        filter(Message.message_id == messageID, Signal.name == signal_name).first()
         if res:
             return res.rid
         else:
@@ -662,8 +670,7 @@ class DbcListener(parser.BaseListener):
             else:
                 av = Attribute_Value(object_id = rid, attribute_definition = ad, num_value = numValue, string_value = stringValue)
                 values.append(av)
-                #self.db.session.add(av)
-        self.session.add_all(values)
+        self.db.session.add_all(values)
         self.db.session.flush()
 
     def exitAttributeValueForObject(self, ctx):
