@@ -42,7 +42,7 @@ from pydbc.ncfListener import NcfListener
 from pydbc.types import FileType
 
 
-def parseFile(pth, filetype, debug = False, remove_file = False):
+def parseFile(pth, filetype, debug = False, remove_file = False, logLevel = "WARN"):
     if filetype == FileType.DBC:
         grammar = 'dbc'
         start_symbol = 'dbcfile'
@@ -57,7 +57,7 @@ def parseFile(pth, filetype, debug = False, remove_file = False):
         listener = NcfListener
     else:
         raise ValueError("Invalid filetype '{}'".format(filetype))
-    parser = ParserWrapper(grammar, start_symbol, DbcListener, debug = debug)
+    parser = ParserWrapper(grammar, start_symbol, DbcListener, debug = debug, logLevel = logLevel)
     print("Processing '{}'".format(pth))
 
     dbfn = "{}.vndb".format(pth.stem)
@@ -71,8 +71,8 @@ def parseFile(pth, filetype, debug = False, remove_file = False):
     return session
 
 
-def importFile(pth):
-    session = parseFile(pth, FileType.DBC, remove_file = True)
+def importFile(pth, logLevel):
+    session = parseFile(pth, FileType.DBC, remove_file = True, logLevel = logLevel)
 
 
 def main():
@@ -89,7 +89,7 @@ def main():
     ucout = args.ucout
     for arg in args.vehicle_file:
         for pth in pathlib.Path().glob(arg):
-            importFile(pth)
+            importFile(pth, args.loglevel)
 
 if __name__ == '__main__':
     main()

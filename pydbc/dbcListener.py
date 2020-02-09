@@ -71,8 +71,8 @@ class DbcListener(parser.BaseListener):
 
     """
 
-    def __init__(self, database, *args, **kws):
-        super(DbcListener, self).__init__(database, *args, **kws)
+    def __init__(self, database, logLevel = 'INFO', *args, **kws):
+        super(DbcListener, self).__init__(database, logLevel, *args, **kws)
         self.session = self.db.session
         self.bakery = baked.bakery()
         self.bake_queries()

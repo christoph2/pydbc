@@ -94,8 +94,8 @@ LDF_ATTRS = {
 
 class LdfListener(parser.BaseListener):
 
-    def __init__(self, database, *args, **kws):
-        super(LdfListener, self).__init__(database, *args, **kws)
+    def __init__(self, database, logLevel = 'INFO', *args, **kws):
+        super(LdfListener, self).__init__(database, logLevel, *args, **kws)
         self.nodes = {}
         self.signals = {}
         self.frames = {}

@@ -84,10 +84,10 @@ class BaseListener(antlr4.ParseTreeListener):
     """
 
     value = []
-    logger = Logger(__name__)
 
-    def __init__(self, database):
+    def __init__(self, database, logLevel = 'INFO'):
         self.db = database
+        self.logger = Logger(__name__, level = logLevel)
         super(BaseListener, self).__init__()
         self.bake_common_queries()
 
@@ -157,13 +157,14 @@ class BaseListener(antlr4.ParseTreeListener):
 class ParserWrapper(object):
     """
     """
-    def __init__(self, grammarName, startSymbol, listenerClass, debug = False):
+    def __init__(self, grammarName, startSymbol, listenerClass, debug = False, logLevel = 'INFO'):
         self.grammarName = grammarName
         self.startSymbol = startSymbol
         self.lexerModule, self.lexerClass = self._load('Lexer')
         self.parserModule, self.parserClass = self._load('Parser')
         self.listenerClass = listenerClass
         self.debug = debug
+        self.logLevel = logLevel
 
     def __del__(self):
         pass
@@ -185,7 +186,7 @@ class ParserWrapper(object):
         self._syntaxErrors = parser._syntaxErrors
         tree = meth()
         if self.listenerClass:
-            listener = self.listenerClass(self.db)
+            listener = self.listenerClass(self.db, self.logLevel)
             walker = antlr4.ParseTreeWalker()
             walker.walk(listener, tree)
         self.db.session.commit()
