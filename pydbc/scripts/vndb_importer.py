@@ -46,18 +46,18 @@ def parseFile(pth, filetype, debug = False, remove_file = False, logLevel = "WAR
     if filetype == FileType.DBC:
         grammar = 'dbc'
         start_symbol = 'dbcfile'
-        listener = DbcListener
+        listenerClass = DbcListener
     elif filetype == FileType.LDF:
         grammar = 'ldf'
         start_symbol = 'lin_description_file'
-        listener = ldfListener
+        listenerClass = LdfListener
     elif filetype == FileType.NCF:
         grammar = 'ncf'
         start_symbol = 'toplevel'
-        listener = NcfListener
+        listenerClass = NcfListener
     else:
         raise ValueError("Invalid filetype '{}'".format(filetype))
-    parser = ParserWrapper(grammar, start_symbol, DbcListener, debug = debug, logLevel = logLevel)
+    parser = ParserWrapper(grammar, start_symbol, listenerClass, debug = debug, logLevel = logLevel)
     print("Processing '{}'".format(pth))
 
     dbfn = "{}.vndb".format(pth.stem)
@@ -70,9 +70,21 @@ def parseFile(pth, filetype, debug = False, remove_file = False, logLevel = "WAR
     print("OK, done.\n", flush = True)
     return session
 
+def get_file_type(pth):
+    suffix = pth.suffix.lower()
+    if suffix == '.dbc':
+        result = FileType.DBC
+    elif suffix == '.ldf':
+        result = FileType.LDF
+    elif suffix == '.ncf':
+        result = FileType.NCF
+    else:
+        result = None
+    return result
 
 def importFile(pth, logLevel):
-    session = parseFile(pth, FileType.DBC, remove_file = True, logLevel = logLevel)
+    file_type = get_file_type(pth)
+    session = parseFile(pth, file_type, remove_file = True, logLevel = logLevel)
 
 
 def main():
