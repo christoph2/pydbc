@@ -134,7 +134,7 @@ class VNDB(object):
                self.dbname = filename
         self._engine = create_engine("sqlite:///{}".format(self.dbname), echo = debug,
             connect_args={'detect_types': sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES}, native_datetime = True)
-        self._session = orm.Session(self._engine, autoflush = True, autocommit = False)
+        self._session = orm.Session(self._engine, autoflush = False, autocommit = False)
         self._metadata = model.Base.metadata
         if create == True:
             model.Base.metadata.create_all(self.engine)
