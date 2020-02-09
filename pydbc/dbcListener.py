@@ -74,8 +74,35 @@ class DbcListener(parser.BaseListener):
     def __init__(self, database, *args, **kws):
         super(DbcListener, self).__init__(database, *args, **kws)
         self.session = self.db.session
-        self.insertNetwork()
         self.bakery = baked.bakery()
+        self.bake_queries()
+        self.insertNetwork()
+
+    def bake_queries(self):
+        self.ATTRIBUTE_DEFINITION_BY_NAME = self.bakery(lambda session: self.session.query(Attribute_Definition).\
+            filter(Attribute_Definition.name == bindparam('name')))
+        self.MESSAGE_BY_MESSAGE_ID = self.bakery(lambda session: session.query(Message).filter(Message.message_id == bindparam('message_id')))
+        self.NODE_BY_NAME = self.bakery(lambda session: session.query(Node).filter(Node.name == bindparam('name')))
+        self.ENVVAR_BY_NAME = self.bakery(lambda session: session.query(EnvVar).filter(EnvVar.name == bindparam('name')))
+        self.ENVDATA_BY_NAME = self.bakery(lambda session: session.query(EnvironmentVariablesData).filter(
+            EnvironmentVariablesData.name == bindparam('name')))
+        self.MESSAGE_SIGNAL_BY_NAME = self.bakery(lambda session: session.query(Signal.rid).join(Message_Signal).join(Message).\
+                filter(Message.message_id == bindparam('messageID'), Signal.name == bindparam('signal_name')))
+        self.NETWORK_BY_RID = self.bakery(lambda session: session.query(Network).filter(Network.rid == bindparam('rid')))
+        self.SIGNAL_BY_RID = self.bakery(lambda session: session.query(Signal).filter(Signal.rid == bindparam('rid')))
+        self.EXISTS_ATTRIBUTE_DEFINITION = self.bakery(lambda session: session.query(literal(True)).filter(
+            Attribute_Definition.name == bindparam('name')))
+        self.EXISTS_ATTRIBUTE_VALUE = self.bakery(lambda session: session.query(literal(True)).filter(
+                Attribute_Value.object_id == bindparam('rid'), Attribute_Value.attribute_definition_id == bindparam('ad')))
+        self.EXISTS_NETWORK = self.bakery(lambda session: session.query(literal(True)).filter(Network.name == bindparam('name')))
+        self.EXISTS_NODE_RXSIGNAL = self.bakery(lambda session: session.query(literal(True)).filter(
+                Node_RxSignal.node_id == bindparam('nodeId'),
+                Node_RxSignal.message_id == bindparam('messageId'),
+                Node_RxSignal.signal_id == bindparam('signalId')))
+        self.EXISTS_VALUE_DESCRIPTION = self.bakery(lambda session: session.query(literal(True)).filter(
+                Value_Description.valuetable_id == bindparam('rid'), Value_Description.value == bindparam('value')))
+        self.MESSAGE_SIGNAL_BY_NAME2 = self.bakery(lambda session: session.query(Signal).join(Message_Signal).join(Message).\
+            filter(Message.message_id == boundparam('messageID'), Signal.name == boundparam('signalName')))
 
     def getAttributeType(self, value):
         ATS = {
@@ -91,27 +118,25 @@ class DbcListener(parser.BaseListener):
         return ATS.get(value)
 
     def get_signal_by_name(self, messageID, signal_name):
-        SIGNAL_BY_NAME = self.bakery(lambda session: session.query(Signal.rid).join(Message_Signal).join(Message).\
-                filter(Message.message_id == bindparam('messageID'), Signal.name == bindparam('signal_name')))
-        res = SIGNAL_BY_NAME(self.session).params(messageID = messageID,signal_name = signal_name).first()
+        res = self.MESSAGE_SIGNAL_BY_NAME(self.session).params(messageID = messageID,signal_name = signal_name).first()
         if res:
             return res.rid
         else:
+            self.logger.error("Message signal '{}'::'{}' does not exist.".format(messageID, signal_name))
             return []
 
     def insertReceivers(self, messageId, signalId, receiver):
         for rcv in receiver:
-            res = self.session.query(Node.rid).filter(Node.name == rcv).first()
+            res = self.NODE_BY_NAME(self.session).params(name = rcv).first()
             if res:
                 nodeId = res.rid
             else:
-                self.logger.error("Node '{}' does not exist.".format(rcv))
+                self.logger.error("While inserting signal receivers: node '{}' does not exist.".format(rcv))
                 continue
-            exists = self.session.query(literal(True)).filter(
-                Node_RxSignal.node_id == nodeId, Node_RxSignal.message_id == messageId,
-                Node_RxSignal.signal_id == signalId).first()
+            exists = self.EXISTS_NODE_RXSIGNAL(self.session).params(nodeId = nodeId, messageId = messageId,
+                signalId = signalId).first()
             if exists:
-                self.logger.error("Receiver messageId: {} signalId: {} nodeId: {} already exists.".
+                self.logger.error("While inserting signal receivers: receiver messageId: {} signalId: {} nodeId: {} already exists.".
                     format(messageId, signalId, nodeId)
                 )
             else:
@@ -122,8 +147,7 @@ class DbcListener(parser.BaseListener):
     def insertValueDescription(self, rid, description):
         objs = []
         for desc, value in description:
-            exists = self.session.query(literal(True)).filter(
-                Value_Description.valuetable_id == rid, Value_Description.value == value).first()
+            exists = self.EXISTS_VALUE_DESCRIPTION(self.session).params(rid = rid, value = value).first()
             if exists:
                 pass
             else:
@@ -174,9 +198,9 @@ class DbcListener(parser.BaseListener):
             elif vt == 'ENUM':
                 valueType = ValueType.ENUM
                 enumvalues = ';'.join(values)
-            exists = self.session.query(literal(True)).filter(Attribute_Definition.name == name).first()
+            exists = self.EXISTS_ATTRIBUTE_DEFINITION(self.session).params(name = name).first()
             if exists:
-                self.logger.error("An attribute definition named '{}' already exists.".format(name))
+                self.logger.error("While inserting attribute definitions: an attribute definition named '{}' already exists.".format(name))
             else:
                 ad = Attribute_Definition(name = name, objecttype = objType, valuetype = valueType, minimum = minimum,
                                           maximum = maximum, enumvalues = enumvalues)
@@ -188,9 +212,9 @@ class DbcListener(parser.BaseListener):
         for item in ctx.items:
             name, value = item.value
             defaults[name] = value
-            ad = self.session.query(Attribute_Definition).filter(Attribute_Definition.name == name).first()
+            ad = self.ATTRIBUTE_DEFINITION_BY_NAME(self.session).params(name = name).first()
             if not ad:
-                self.logger.error("Error while inserting attribute default values: attribute '{}' does not exist.".format(name))
+                self.logger.error("While inserting attribute default values: attribute '{}' does not exist.".format(name))
                 continue
             if ad.valuetype in (ValueType.INT, ValueType.HEX, ValueType.FLOAT):
                 ad.default_number = value
@@ -201,9 +225,9 @@ class DbcListener(parser.BaseListener):
 
     def insertNetwork(self, specific = None):
         name = self.db.dbname
-        exists = self.session.query(literal(True)).filter(Network.name == name).first()
+        exists = self.EXISTS_NETWORK(self.session).params(name = name).first()
         if exists:
-            self.logger.error("An network named '{}' already exists.".format(name))
+            self.logger.error("While inserting network: an network named '{}' already exists.".format(name))
             return
         network = Network(name = name)
         self.session.add(network)
@@ -243,10 +267,16 @@ class DbcListener(parser.BaseListener):
     def exitMessageTransmitters(self, ctx):
         ctx.value = [x.value for x in ctx.items]
         for transmitter in ctx.value:
-            mid = self.session.query(Message).filter(Message.message_id == transmitter['messageID']).scalar()
+            msg = self.MESSAGE_BY_MESSAGE_ID(self.session).params(message_id = transmitter['messageID']).first()
+            if not msg:
+                self.logger.error("While inserting message transmitters: message '{}' does not exist.".format(transmitter['messageID']))
+                continue
             for name in transmitter['transmitters']:
-                nid = self.session.query(Node).filter(Node.name == name).scalar()
-                ntm = Node_TxMessage(node = nid, message = mid)
+                node = self.NODE_BY_NAME(self.session).params(name = name).first()
+                if not node:
+                    self.logger.error("While inserting message transmitters: node '{}' does not exist.".format(name))
+                    continue
+                ntm = Node_TxMessage(node = node, message = msg)
                 self.session.add(ntm)
         self.session.flush()
 
@@ -262,7 +292,10 @@ class DbcListener(parser.BaseListener):
             sigName = item['signalName']
             vt = item['valueType']
             srid = self.get_signal_by_name(msgId, sigName)
-            signal = self.session.query(Signal).filter(Signal.rid == srid).one()
+            signal = self.SIGNAL_BY_RID(self.session).params(rid = srid).first()
+            if not signal:
+                self.logger.error("While inserting signal extended value types: signal '{}' does not exist.".format(srid))
+                continue
             signal.valuetype = vt
         self.session.flush()
 
@@ -271,7 +304,7 @@ class DbcListener(parser.BaseListener):
         signalName = self.getValue(ctx.signalName)
         valType = self.getValue(ctx.valType)
         if not valType in (0, 1, 2, 3):
-            self.logger.error("ValueType must be in range [0..3] - got '{}'.".format(valType))
+            self.logger.error("While parsing signal extended value type: value type must be in range [0..3] - got '{}', using 0.".format(valType))
             valType = 0
         ctx.value = dict(messageID = messageID, signalName = signalName, valueType = valType)
 
@@ -283,8 +316,11 @@ class DbcListener(parser.BaseListener):
             dlc = msg['dlc']
             signals = msg['signals']
             transmitter = msg['transmitter']
-            tid = self.session.query(Node.rid).filter(Node.name == transmitter).scalar()
-            mm = Message(name = name, message_id = mid, dlc = dlc, sender = tid)
+            tx_node = self.NODE_BY_NAME(self.session).params(name = transmitter).first()
+            if not tx_node:
+                self.logger.error("While inserting messages: node '{}' does not exist.".format(transmitter))
+                continue
+            mm = Message(name = name, message_id = mid, dlc = dlc, sender = tx_node.rid)
             self.session.add(mm)
             for signal in signals:
                 name = signal['name']
@@ -298,7 +334,6 @@ class DbcListener(parser.BaseListener):
                 maximum = signal['maximum']
                 unit = signal['unit']
                 receiver = signal['receiver']
-
                 multiplexorSignal = None
                 multiplexDependent = None
                 multiplexorValue = None
@@ -352,7 +387,7 @@ class DbcListener(parser.BaseListener):
     def exitSignal(self, ctx):
         byteOrder = self.getValue(ctx.byteOrder)
         if not byteOrder in (0, 1):
-            self.logger.error("Error while parsing signal '{}': byteorder must be either 0 or 1".format(ctx.signalName.value))
+            self.logger.error("While parsing signal: Error while parsing signal '{}': byteorder must be either 0 or 1 -- using 0".format(ctx.signalName.value))
             byteOrder = 0
         name = self.getValue(ctx.signalName)
         startBit = self.getValue(ctx.startBit)
@@ -424,7 +459,6 @@ class DbcListener(parser.BaseListener):
     def exitObjectValueTables(self, ctx):
         ctx.value = [x.value for x in ctx.items]
         for table in ctx.value:
-            #print("OVT:", table, end = "\n\n")
             tp = table['type']
             description = table['description']
             if tp == 'SG':
@@ -434,7 +468,11 @@ class DbcListener(parser.BaseListener):
             elif tp == 'EV':
                 name = table['envVarName']
                 otype = 1
-                object_rid = self.session.query(EnvVar.rid).filter(EnvVar.name == name).scalar()
+                env_var = self.ENVVAR_BY_NAME(self.session).params(name = name).first()
+                if not env_var:
+                    self.logger.error("While inserting object value tables: environment variable '{}' does not exist.".format(name))
+                    continue
+                object_rid = env_var.rid
             vt = Valuetable(name = name)
             self.session.add(vt)
             self.session.flush()
@@ -457,6 +495,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = dict(type = tp, description = items, **di)
 
     def exitEnvironmentVariables(self, ctx):
+        # TODO: Process after EVDATA!!!
         ctx.value = [x.value for x in ctx.evs]
         for var in ctx.value:
             unit = var['unit']
@@ -468,12 +507,21 @@ class DbcListener(parser.BaseListener):
             envId = var['envId']
             varType = var['varType']
             name = var['name']
-            dataSize = self.session.query(EnvironmentVariablesData.value).filter(EnvironmentVariablesData.name == name).scalar()
+            env_data = self.ENVDATA_BY_NAME(self.session).params(name = name).first()
+            if not env_data:
+                #self.logger.error("Environment variable data '{}' does not exist.".format(name))
+                #continue
+                dataSize = 0
+            else:
+                dataSize = env_data.value
             envVar = EnvVar(name = name, type = varType, unit = unit, minimum = minimum, maximum = maximum,
                 access = accessType, startup_value = initialValue, size = dataSize)
             self.session.add(envVar)
             for node in accessNodes:
-                nn = self.session.query(Node).filter(Node.name == node).one()
+                nn = self.NODE_BY_NAME(self.session).params(name = node).first()
+                if not nn:
+                    self.logger.error("While inserting environment variables: node '{}' does not exist.".format(name))
+                    continue
                 envVar.accessingNodes.append(nn)
         self.session.flush()
 
@@ -522,25 +570,36 @@ class DbcListener(parser.BaseListener):
             text = comment['comment']
             key = comment['key']
             if tp == 'BU':
-                obj = self.session.query(Node).filter(Node.name == key).first()
+                obj = self.NODE_BY_NAME(self.session).params(name = key).first()
+                if not obj:
+                    self.logger.error("While inserting comments: node '{}' does not exist.".format(key))
+                    continue
                 obj.comment = text
             elif tp == 'BO':
-                obj = self.session.query(Message).filter(Message.message_id == key).first()
+                obj = self.MESSAGE_BY_MESSAGE_ID(self.session).params(message_id = key).first()
+                if not obj:
+                    self.logger.error("While inserting comments: message '{}' does not exist.".format(key))
+                    continue
                 obj.comment = text
             elif tp == 'SG':
                 rid = self.get_signal_by_name(*key)
                 if not rid:
-                    self.logger.error("Error while inserting comments: message signal '{}' does not exist.".format(key))
+                    self.logger.error("While inserting comments: message signal '{}' does not exist.".format(key))
                     continue
                 obj = self.session.query(Signal).filter(Signal.rid == rid).first()
                 obj.comment = text
             elif tp == 'EV':
-                obj = self.session.query(EnvVar).filter(EnvVar.name == key).first()
+                obj = self.ENVVAR_BY_NAME(self.session).params(name = key).first()
+                if not obj:
+                    self.logger.error("While inserting comments: environment variable '{}' does not exist.".format(key))
+                    continue
                 obj.comment = text
             else:   # NW !?
-                obj = self.session.query(Network).filter(Network.rid == self.network_id).first()
+                obj = self.NETWORK_BY_RID(self.session).params(rid = self.network_id).first()
+                if not obj:
+                    self.logger.error("While inserting comments: network '{}' does not exist.".format(self.network_id))
+                    continue
                 obj.comment = text
-                print("NW-CMT", comment, "\n\t", obj)
         self.session.flush()
 
     def exitComment(self, ctx):
@@ -635,34 +694,44 @@ class DbcListener(parser.BaseListener):
             else:
                 numValue = value
             aname = attr['name']
-            ad = self.session.query(Attribute_Definition).filter(Attribute_Definition.name == attr['name']).first()
+            ad = self.ATTRIBUTE_DEFINITION_BY_NAME(self.session).params(name = attr['name']).first()
             if not ad:
-                self.logger.error("Attribute definition named '{}' does not exist.".format(attr['name']))
+                self.logger.error("While inserting attribute values: attribute definition named '{}' does not exist.".format(attr['name']))
                 continue
             attrType = self.getAttributeType(attr['attributeType'])
             if attrType == AttributeType.MESSAGE:
                 key = attr['messageID']
-                msg = self.session.query(Message.rid).filter(Message.message_id == key).first()
+                msg = self.MESSAGE_BY_MESSAGE_ID(self.session).params(message_id = key).first()
+                if not msg:
+                    self.logger.error("While inserting attribute values: message '{}' does not exist.".format(key))
+                    continue
                 rid = msg.rid
             elif attrType == AttributeType.SIGNAL:
                 key = attr['messageID'], attr['signalName'],
                 rid = self.get_signal_by_name(*key)
             elif attrType == AttributeType.NODE:
                 key = attr['nodeName']
-                rid = self.session.query(Node.rid).filter(Node.name == key).scalar()
+                node = self.NODE_BY_NAME(self.session).params(name = key).first()
+                if not node:
+                    self.logger.error("While inserting attribute values: node '{}' does not exist.".format(key))
+                    continue
+                rid = node.rid
             elif attrType == AttributeType.ENV_VAR:
                 key = attr['envVarname']
-                rid = self.session.query(EnvVar.rid).filter(EnvVar.name == key).scalar()
+                envvar = self.ENVVAR_BY_NAME(self.session).params(name = key).first()
+                if not envvar:
+                    self.logger.error("While inserting attribute values: environment variable '{}' does not exist.".format(key))
+                    continue
+                rid = envvar.rid
             elif attrType == AttributeType.NETWORK:
                 key = ''
                 rid = 0
             else:
                 rid = 0
                 key = ''
-            exists = self.session.query(literal(True)).filter(
-                Attribute_Value.object_id == rid, Attribute_Value.attribute_definition_id == ad.rid).first()
+            exists = self.EXISTS_ATTRIBUTE_VALUE(self.session).params(rid = rid, ad = ad.rid).first()
             if exists:
-                self.logger.error("Attribute value for {} {} {} already exists.".format(AttributeType.SIGNAL.name, key, ad.name))
+                self.logger.error("While inserting attribute values: attribute value for {} {} {} already exists.".format(AttributeType.SIGNAL.name, key, ad.name))
             else:
                 av = Attribute_Value(object_id = rid, attribute_definition = ad, num_value = numValue, string_value = stringValue)
                 values.append(av)
@@ -701,8 +770,15 @@ class DbcListener(parser.BaseListener):
             attributeName = attr['attributeName']
             attributeValue = attr['attributeValue']
             attrributeType = self.getAttributeType(attr['attributeType'])
-            aid = self.session.query(Attribute_Definition).filter(Attribute_Definition.name == attr['attributeName']).scalar()
-            nodeId = self.session.query(Node.rid).filter(Node.name == attr['nodeName']).scalar()
+            ad = self.ATTRIBUTE_DEFINITION_BY_NAME(self.session).params(name = attr['attributeName']).first()
+            if not ad:
+                self.logger.error("While inserting relative attribute values: attribute definition '{}' does not exist.".format(attr['attributeName']))
+                continue
+            node = self.NODE_BY_NAME(self.session).params(name = attr['nodeName']).first()
+            if not ad:
+                self.logger.error("While inserting relative attribute values: node '{}' does not exist.".format(attr['nodeName']))
+                continue
+            nodeId = node.rid
             parent = attr['parent']
             optOid1 = nodeId
             optOid2 = None
@@ -717,15 +793,26 @@ class DbcListener(parser.BaseListener):
                 messageID = parent['messageID']
                 optOid2 = messageID
                 rid = self.get_signal_by_name(messageID, parent['signalName'])
+                if not rid:
+                    self.logger.error("While inserting relative attribute values: message signal '{}'::'{}' does not exist".format(messageID, parent['signalName']))
+                    continue
             elif attrributeType == AttributeType.REL_ENV_VAR:
                 evName = parent['evName']
-                rid = self.session.query(EnvVar.rid).filter(EnvVar.name == evName).scalar()
+                env_var = self.ENVVAR_BY_NAME(self.session).params(name = evName).first()
+                if not env_var:
+                    self.logger.error("While inserting relative attribute values: environment variable '{}' does not exist.".format(evName))
+                    continue
+                rid = env_var.rid
                 #optOid2 = ???
             elif attrributeType == AttributeType.REL_NODE:
                 messageID = parent['messageID']
                 optOid2 = messageID
-                rid = self.session.query(Message.rid).filter(Message.message_id == messageID).scalar()
-            arv = AttributeRel_Value(object_id = rid, attribute_definition = aid, num_value = numValue,
+                msg = self.MESSAGE_BY_MESSAGE_ID(self.session).params(message_id = messageID).first()
+                if not msg:
+                    self.logger.error("While inserting relative attribute values: message '{}' does not exist.".format(messageID))
+                    continue
+                rid = msg.rid
+            arv = AttributeRel_Value(object_id = rid, attribute_definition = ad, num_value = numValue,
                 string_value = stringValue, opt_object_id_1 = optOid1, opt_object_id_2 = optOid2
             )
             self.session.add(arv)
@@ -764,13 +851,18 @@ class DbcListener(parser.BaseListener):
             gValue = group['gvalue']
             signalNames = group['signals']
             groupName = group['groupName']
-            msg = self.session.query(Message).filter(Message.message_id == messageID).first()
+            msg = self.MESSAGE_BY_MESSAGE_ID(self.session).params(message_id = messageID).first()
+            if not msg:
+                self.logger.error("While inserting signal groups: message '{}' does not exist.".format(messageID))
+                continue
             sg = Signal_Group(name = groupName, value = gValue, message = msg)
             self.session.add(sg)
             self.session.flush()
             for signalName in signalNames:
-                signal = self.session.query(Signal).join(Message_Signal).join(Message).\
-                filter(Message.message_id == messageID, Signal.name == signalName).first()
+                signal = self.MESSAGE_SIGNAL_BY_NAME2(self.session).params(messageID = messageID, signalName = signalName).first()
+                if not signal:
+                    self.logger.error("While inserting signal groups: message signal '{}'::'{}' does not exist.".format(messageID, signalName))
+                    continue
                 sgs = Signal_Group_Signal(signal_group = sg, message = msg, signal = signal)
                 self.session.add(sgs)
         self.session.flush()
@@ -802,15 +894,27 @@ class DbcListener(parser.BaseListener):
             if attrType == 'BU':
                 nodeName = category['nodeName']
                 objType = CategoryType.NODE
-                rid = self.session.query(Node.rid).filter(Node.name == nodeName).scalar()
+                node = self.NODE_BY_NAME(self.session).params(node = nodeName).first()
+                if not node:
+                    self.logger.error("While inserting categories: node '{}' does not exist.".format(nodeName))
+                    continue
+                rid = node.rid
             elif attrType == 'BO':
                 objType = CategoryType.MESSAGE
                 messageID = category['messageID']
-                rid = self.session.query(Message.rid).filter(Message.message_id == messageID).scalar()
+                msg = self.MESSAGE_BY_MESSAGE_ID(self.session).params(message_id = messageID).first()
+                if not msg:
+                    self.logger.error("While inserting categories: message '{}' does not exist.".format(messageID))
+                    continue
+                rid = msg.rid
             elif attrType == 'EV':
                 envVarname = category['envVarname']
                 objType = CategoryType.ENV_VAR
-                rid = self.session.query(EnvVar.rid).filter(EnvVar.name == envVarname).scalar()
+                env_var = self.ENVVAR_BY_NAME(self.session).params(name = envVarname)
+                if not env_var:
+                    self.logger.error("While inserting categories: environment variable '{}' does not exist.".format(envVarname))
+                    continue
+                rid = env_var.rid
             cv = Category_Value(object_id = rid, category_definition_id = catId, objecttype = objType)
             self.session.add(cv)
             print(cv)

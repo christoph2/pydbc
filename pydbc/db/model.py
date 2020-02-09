@@ -295,18 +295,6 @@ class ECU(Base, RidMixIn, CommentableMixIn):
 
     name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
 
-class EnvVar(Base, RidMixIn, CommentableMixIn):
-
-    name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
-    type = StdInteger()
-    unit = Column(types.Unicode(255), default = None)
-    minimum = Column(types.Float, default = 0.0)
-    maximum = Column(types.Float, default = 0.0)
-    startup_value = Column(types.Float, default = 0.0)
-    size = StdInteger()
-    access = StdInteger()
-    accessingNodes = relationship("Node", secondary = "envvar_accessnode")
-
 class ECU_EnvVar(Base, MixInBase):
 
     ecu = Column(types.Integer,
@@ -479,6 +467,18 @@ class Dbc_Version(Base, RidMixIn):
 
     version_string = Column(types.Unicode(255), nullable = False, default = '')
     network = Column(types.Integer, nullable = False, default = 0, unique = True)
+
+class EnvVar(Base, RidMixIn, CommentableMixIn):
+
+    name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
+    type = StdInteger()
+    unit = Column(types.Unicode(255), default = None)
+    minimum = Column(types.Float, default = 0.0)
+    maximum = Column(types.Float, default = 0.0)
+    startup_value = Column(types.Float, default = 0.0)
+    size = StdInteger()
+    access = StdInteger()
+    accessingNodes = relationship("Node", secondary = "envvar_accessnode")
 
 class EnvVar_AccessNode(Base, MixInBase):
 

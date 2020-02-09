@@ -37,6 +37,8 @@ import six
 import antlr4
 import antlr4.tree
 
+from sqlalchemy.ext import baked
+
 from pydbc.logger import Logger
 from pydbc.db import VNDB
 
@@ -87,6 +89,10 @@ class BaseListener(antlr4.ParseTreeListener):
     def __init__(self, database):
         self.db = database
         super(BaseListener, self).__init__()
+        self.bake_common_queries()
+
+    def bake_common_queries(self):
+        pass
 
     def getList(self, attr):
         return [x for x in attr] if attr else []
