@@ -129,7 +129,6 @@ class DbcListener(parser.BaseListener):
             return []
 
     def insertReceivers(self, messageId, signalId, receiver):
-        self.log_insertion("Node_RxSignal")
         for rcv in receiver:
             res = self.NODE_BY_NAME(self.session).params(name = rcv).first()
             if res:
@@ -434,7 +433,6 @@ class DbcListener(parser.BaseListener):
             vt = Valuetable(name = name)
             self.session.add(vt)
             self.session.flush()
-            self.log_insertion("\tValueDescription")
             self.insertValueDescription(vt.rid, description)
         self.session.flush()
 
