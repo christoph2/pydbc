@@ -102,7 +102,10 @@ class DbcListener(parser.BaseListener):
         self.EXISTS_VALUE_DESCRIPTION = self.bakery(lambda session: session.query(literal(True)).filter(
                 Value_Description.valuetable_id == bindparam('rid'), Value_Description.value == bindparam('value')))
         self.MESSAGE_SIGNAL_BY_NAME2 = self.bakery(lambda session: session.query(Signal).join(Message_Signal).join(Message).\
-            filter(Message.message_id == boundparam('messageID'), Signal.name == boundparam('signalName')))
+            filter(Message.message_id == bindparam('messageID'), Signal.name == bindparam('signalName')))
+
+    def log_insertion(self, table_name):
+        self.logger.debug("Inserting values for '{}'...".format(table_name))
 
     def getAttributeType(self, value):
         ATS = {
@@ -126,6 +129,7 @@ class DbcListener(parser.BaseListener):
             return []
 
     def insertReceivers(self, messageId, signalId, receiver):
+        self.log_insertion("Node_RxSignal")
         for rcv in receiver:
             res = self.NODE_BY_NAME(self.session).params(name = rcv).first()
             if res:
@@ -145,6 +149,7 @@ class DbcListener(parser.BaseListener):
         self.session.flush()
 
     def insertValueDescription(self, rid, description):
+        self.log_insertion("Value_Description")
         objs = []
         for desc, value in description:
             exists = self.EXISTS_VALUE_DESCRIPTION(self.session).params(rid = rid, value = value).first()
@@ -157,6 +162,7 @@ class DbcListener(parser.BaseListener):
         self.session.flush()
 
     def insertAttributeDefinitions(self, ctx):
+        self.log_insertion("Attribute_Definition")
         ctx.value = [x.value for x in ctx.items]
         for attr in ctx.value:
             attrType = attr['type']
@@ -208,6 +214,7 @@ class DbcListener(parser.BaseListener):
         self.session.flush()
 
     def insertAttributeDefaults(self, ctx):
+        self.log_insertion("Attribute_Defaults")
         defaults = {}
         for item in ctx.items:
             name, value = item.value
@@ -224,6 +231,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = defaults
 
     def insertNetwork(self, specific = None):
+        self.log_insertion("Network")
         name = self.db.dbname
         exists = self.EXISTS_NETWORK(self.session).params(name = name).first()
         if exists:
@@ -265,6 +273,7 @@ class DbcListener(parser.BaseListener):
         )
 
     def exitMessageTransmitters(self, ctx):
+        self.log_insertion("Node_TxMessage")
         ctx.value = [x.value for x in ctx.items]
         for transmitter in ctx.value:
             msg = self.MESSAGE_BY_MESSAGE_ID(self.session).params(message_id = transmitter['messageID']).first()
@@ -285,6 +294,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = dict(messageID = self.getValue(ctx.messageID), transmitters = transmitters)
 
     def exitSignalExtendedValueTypeList(self, ctx):
+        self.log_insertion("SignalExtendedValueType")
         ctx.value = [x.value for x in ctx.items]
         valueTypes = ctx.value
         for item in valueTypes:
@@ -309,6 +319,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = dict(messageID = messageID, signalName = signalName, valueType = valType)
 
     def exitMessages(self, ctx):
+        self.log_insertion("Messages and Signals")
         ctx.value = [x.value for x in ctx.items]
         for msg in ctx.value:
             name = msg['name']
@@ -416,6 +427,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = self.getValue(ctx.mind)
 
     def exitValueTables(self, ctx):
+        self.log_insertion("ValueTable")
         ctx.value = [x.value for x in ctx.items]
         for table in ctx.value:
             name = table['name']
@@ -433,6 +445,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = (ctx.name.value, ctx.val.value, )
 
     def exitNodes(self, ctx):
+        self.log_insertion("Nodes")
         ctx.value = [x.value for x in ctx.ids]
         nodeSet = set(['Vector__XXX'])
         for name in ctx.value:
@@ -449,6 +462,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = [x.text for x in ctx.ids]
 
     def exitVersion(self, ctx):
+        self.log_insertion("Version")
         ctx.value = self.getValue(ctx.vs)
         version = ctx.value
         network = self.network_id
@@ -457,6 +471,7 @@ class DbcListener(parser.BaseListener):
         self.session.flush()
 
     def exitObjectValueTables(self, ctx):
+        self.log_insertion("Object_Valuetable")
         ctx.value = [x.value for x in ctx.items]
         for table in ctx.value:
             tp = table['type']
@@ -495,6 +510,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = dict(type = tp, description = items, **di)
 
     def exitEnvironmentVariables(self, ctx):
+        self.log_insertion("EnvVar")
         # TODO: Process after EVDATA!!!
         ctx.value = [x.value for x in ctx.evs]
         for var in ctx.value:
@@ -539,6 +555,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = nodes
 
     def exitEnvironmentVariablesData(self, ctx):
+        self.log_insertion("EnvironmentVariablesData")
         ctx.value = [x.value for x in ctx.evars]
         for item in ctx.value:
             print("EVD", item)
@@ -552,6 +569,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = dict(name = self.getValue(ctx.varname), value = self.getValue(ctx.value))
 
     def exitSignalTypes(self, ctx):
+        self.log_insertion("Signal_Type")
         ctx.value =[x.value for x in ctx.sigTypes]
         print("SIGNAL-TYPES", ctx.value)
 
@@ -564,6 +582,7 @@ class DbcListener(parser.BaseListener):
         )
 
     def exitComments(self, ctx):
+        self.log_insertion("Comments")
         ctx.value = [x.value for x in ctx.items]
         for comment in ctx.value:
             tp = comment['type']
@@ -683,6 +702,7 @@ class DbcListener(parser.BaseListener):
             ctx.value = self.getValue(ctx.n)
 
     def exitAttributeValues(self, ctx):
+        self.log_insertion("AttributeValues")
         ctx.value = [x.value for x in ctx.items]
         values = []
         for attr in ctx.value:
@@ -764,6 +784,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = dict(name = attributeName, attributeValue = attrValue, **di)
 
     def exitRelativeAttributeValues(self, ctx):
+        self.log_insertion("RelativeAttributeValues")
         items = [x.value for x in ctx.items]
         ctx.value = items
         for attr in items:
@@ -844,6 +865,7 @@ class DbcListener(parser.BaseListener):
         )
 
     def exitSignalGroups(self, ctx):
+        self.log_insertion("SignalGroups")
         items = [x.value for x in ctx.items]
         ctx.value = items
         for group in ctx.value:
@@ -875,6 +897,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = dict(messageID = messageID, groupName = groupName, gvalue = gvalue, signals = signals)
 
     def exitCategoryDefinitions(self, ctx):
+        self.log_insertion("Category_Definition")
         ctx.value = [x.value for x in ctx.items]
         for category in ctx.value:
             print("CAT-DEF", category)
@@ -886,6 +909,7 @@ class DbcListener(parser.BaseListener):
         ctx.value = dict(name = self.getValue(ctx.name), category = self.getValue(ctx.cat), value = self.getValue(ctx.num))
 
     def exitCategories(self, ctx):
+        self.log_insertion("Categories")
         ctx.value = [x.value for x in ctx.items]
         for category in ctx.value:
             print("CAT-VALUE", category)
