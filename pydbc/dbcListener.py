@@ -105,7 +105,7 @@ class DbcListener(parser.BaseListener):
             filter(Message.message_id == bindparam('messageID'), Signal.name == bindparam('signalName')))
 
     def log_insertion(self, table_name):
-        self.logger.debug("Inserting values for '{}'...".format(table_name))
+        self.logger.debug("Inserting values for '{}'.".format(table_name))
 
     def getAttributeType(self, value):
         ATS = {
@@ -149,7 +149,6 @@ class DbcListener(parser.BaseListener):
         self.session.flush()
 
     def insertValueDescription(self, rid, description):
-        self.log_insertion("Value_Description")
         objs = []
         for desc, value in description:
             exists = self.EXISTS_VALUE_DESCRIPTION(self.session).params(rid = rid, value = value).first()
@@ -435,6 +434,7 @@ class DbcListener(parser.BaseListener):
             vt = Valuetable(name = name)
             self.session.add(vt)
             self.session.flush()
+            self.log_insertion("\tValueDescription")
             self.insertValueDescription(vt.rid, description)
         self.session.flush()
 
