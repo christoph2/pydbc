@@ -37,10 +37,17 @@ import six
 import antlr4
 import antlr4.tree
 
+from sqlalchemy.sql.expression import literal, bindparam
 from sqlalchemy.ext import baked
 
 from pydbc.logger import Logger
 from pydbc.db import VNDB
+from pydbc.db.model import (
+    Dbc_Version, Message, Message_Signal, Network, Node, Signal, Value_Description,
+    Valuetable, EnvironmentVariablesData, EnvVar, Attribute_Definition, Attribute_Value,
+    Node_TxMessage, Node_RxSignal, Category_Definition, Category_Value, AttributeRel_Value,
+    Signal_Group_Signal, Signal_Group, Vndb_Protocol, Object_Valuetable
+)
 
 def indent(level):
     print(" " * level,)
@@ -89,10 +96,21 @@ class BaseListener(antlr4.ParseTreeListener):
         self.db = database
         self.logger = Logger(__name__, level = logLevel)
         super(BaseListener, self).__init__()
+        self.session = database.session
+        self.bakery = baked.bakery()
         self.bake_common_queries()
 
     def bake_common_queries(self):
-        pass
+        self.ATTRIBUTE_DEFINITION_BY_NAME = self.bakery(lambda session: self.session.query(Attribute_Definition).\
+            filter(Attribute_Definition.name == bindparam('name')))
+        self.MESSAGE_BY_NAME = self.bakery(lambda session: session.query(Message).filter(Message.name == bindparam('name')))
+        self.NODE_BY_NAME = self.bakery(lambda session: session.query(Node).filter(Node.name == bindparam('name')))
+        self.NODE_BY_RID = self.bakery(lambda session: session.query(Node).filter(Node.rid == bindparam('rid')))
+        self.SIGNAL_BY_NAME = self.bakery(lambda session: session.query(Signal).filter(Signal.name == bindparam('name')))
+        self.SIGNAL_BY_RID = self.bakery(lambda session: session.query(Signal).filter(Signal.rid == bindparam('rid')))
+
+    def log_insertion(self, table_name):
+        self.logger.debug("Inserting values for '{}'.".format(table_name))
 
     def getList(self, attr):
         return [x for x in attr] if attr else []
@@ -107,7 +125,7 @@ class BaseListener(antlr4.ParseTreeListener):
         if ctx.i:
             ctx.value = toInt(ctx.i.text, 10)
         elif ctx.h:
-            ctx.value = toInt(ctx.i.text, 16)
+            ctx.value = toInt(ctx.h.text, 16)
         else:
             ctx.value = None
 

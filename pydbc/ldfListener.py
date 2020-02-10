@@ -29,10 +29,11 @@ __version__ = '0.1.0'
 
 from collections import namedtuple
 
+from sqlalchemy.sql.expression import literal, bindparam
+
+from pydbc.logger import Logger
 from pydbc import parser
-
 from pydbc.types import AttributeType, BusType, CategoryType, ValueType
-
 from pydbc.db.model import (
     Dbc_Version, Message, Message_Signal, Network, Node, Signal, Value_Description,
     Valuetable, EnvironmentVariablesData, EnvVar, Attribute_Definition, Attribute_Value,
@@ -96,11 +97,21 @@ class LdfListener(parser.BaseListener):
 
     def __init__(self, database, logLevel = 'INFO', *args, **kws):
         super(LdfListener, self).__init__(database, logLevel, *args, **kws)
+        self.logger = Logger(__name__, level = logLevel)
         self.nodes = {}
         self.signals = {}
         self.frames = {}
+        self.bake_queries()
         self.insertNetwork()
         self.insertAttributeDefinitions()
+
+    def bake_queries(self):
+        self.UNCONDITIONAL_FRAME_BY_NAME = self.bakery(lambda session: session.query(LinUnconditionalFrame).filter(
+            LinUnconditionalFrame.name == bindparam("name")))
+        self.SCHEDULE_TABLE_BY_NAME = self.bakery(lambda session: session.query(LinScheduleTable).filter(
+            LinScheduleTable.name == bindparam('name')))
+        self.ENCODING_TYPE_BY_NAME = self.bakery(lambda session: session.query(LinSignalEncodingType).filter(
+            LinSignalEncodingType.name == bindparam("name")))
 
     def insertAttributeDefinitions(self):
         for key, attr in LDF_ATTRS.items():
@@ -113,7 +124,6 @@ class LdfListener(parser.BaseListener):
         self.db.session.flush()
 
     def setAttributeValue(self, objID, attribute, value):
-        #print("S-A", objID, attribute, value)
         attr = LDF_ATTRS.get(attribute)
         if attr is None:
             raise KeyError("Invalid attribute '{}'".format(attribute))
@@ -126,12 +136,15 @@ class LdfListener(parser.BaseListener):
                 numValue = value
             elif attr.valueType == ValueType.STRING:
                 stringValue = value
-        ad = self.db.session.query(Attribute_Definition).filter(Attribute_Definition.name == attribute).one()
+        ad = self.ATTRIBUTE_DEFINITION_BY_NAME(self.session).params(name = attribute).first()
+        if not ad:
+            self.logger.error("While inserting attribute value for '{}': attribute definition '{}' does not exist.".format(objID, attribute))
         av = Attribute_Value(object_id = objID, attribute_definition = ad, num_value = numValue, string_value = stringValue)
         self.db.session.add(av)
         self.db.session.flush()
 
     def insertNetwork(self, specific = None):
+        self.log_insertion("Network")
         network = Network(name = self.db.dbname)
         self.db.session.add(network)
         self.network_id = network.rid
@@ -140,23 +153,31 @@ class LdfListener(parser.BaseListener):
         self.db.session.flush()
 
     def insertConfigurableFrames(self):
+        self.log_insertion("ConfigurableFrames")
         for node, frames in self.configurableFrames.items():
             for frameName, messageID in frames:
-                frame = self.db.session.query(LinUnconditionalFrame).\
-                    filter(LinUnconditionalFrame.name == frameName).scalar()
+                frame = self.UNCONDITIONAL_FRAME_BY_NAME(self.session).params(name = frameName).first()
+                if not frame:
+                    self.logger.error("While inserting configurable frames: frame '{}' does not exist.".format(frameName))
+                    continue
                 cf = LinConfigurableFrame(node = node, frame = frame, identifier = messageID)
                 self.db.session.add(cf)
         self.db.session.flush()
 
     def insertFaultStateSignals(self):
+        self.log_insertion("FaultStateSignals")
         for node, signals in self.faultStateSignals.items():
             for signalName in signals:
-                signal = self.db.session.query(Signal).filter(Signal.name == signalName).one()
+                signal = self.SIGNAL_BY_NAME(self.session).params(name = signalName).first()
+                if not signal:
+                    self.logger.error("While inserting fault state signals: signal '{}' does not exist.".format(signalName))
+                    continue
                 lfs = LinFaultStateSignal(node = node, signal = signal)
                 self.db.session.add(lfs)
         self.db.session.flush()
 
     def insertFrameSignalRelationships(self):
+        self.log_insertion("FrameSignalRelationships")
         for sigName, signal in self.signals.items():
             sgrid = signal['rid']
             for frameName in self.sendingFrameNames(sigName):
@@ -219,6 +240,7 @@ class LdfListener(parser.BaseListener):
         ctx.value = self.getValue(ctx.i)
 
     def exitNode_def(self, ctx):
+        self.log_insertion("Nodes")
         mname = self.getValue(ctx.mname)
         tb = self.getValue(ctx.tb)
         j = self.getValue(ctx.j)
@@ -227,7 +249,7 @@ class LdfListener(parser.BaseListener):
         nodes = ctx.value
         masterNode = nodes['master']
         master = Node(name = masterNode)
-        print("master", master)
+        #print("master", master)
         self.db.session.add(master)
         self.db.session.flush()
         mrid = master.rid
@@ -243,7 +265,7 @@ class LdfListener(parser.BaseListener):
             srid = slave.rid
             self.setAttributeValue(srid, "LIN_is_slave", 1)
             self.nodes[name] = srid
-            print("SlaveNode:", name, srid)
+            #print("SlaveNode:", name, srid)
 
     def exitNode_attributes_def(self, ctx):
         KEY_MAP = {
@@ -268,7 +290,10 @@ class LdfListener(parser.BaseListener):
         for attr in attrs:
             name = attr['name']
             nid = self.nodes.get(name)
-            node = self.db.session.query(Node).get(nid)
+            node = self.NODE_BY_RID(self.session).params(rid = nid).first()
+            if not node:
+                self.logger.error("While inserting attribute definition: node '{}' does not exist.".format(nid))
+                continue
             for key, mappedKey in KEY_MAP.items():
                 value = attr.get(key)
                 if value is not None:
@@ -327,9 +352,10 @@ class LdfListener(parser.BaseListener):
         ctx.value = dict(compositeNode = cnode, logicalNodes = lnodes)
 
     def exitSignal_def(self, ctx):
+        self.log_insertion("Signals")
         ctx.value = [x.value for x in ctx.items]
         for signal in ctx.value:
-            print("SIG:", signal)
+            #print("SIG:", signal)
             initValue = signal['initValue']
             name = signal['name']
             size = signal['size']
@@ -339,10 +365,13 @@ class LdfListener(parser.BaseListener):
             self.db.session.add(sig)
             self.db.session.flush()
             signal['rid'] = sig.rid
-            publisher = self.db.session.query(Node).filter(Node.name == publishedBy).one()
+            publisher = self.NODE_BY_NAME(self.session).params(name = publishedBy).first()
+            if not publisher:
+                self.logger.error("While inserting signals: publisher node '{}' does not exist.".format(publishedBy))
+                continue
             txs = Node_TxSig(node = publisher, signal = sig)
             self.db.session.add(txs)
-            self.db.session.flush()
+            #self.db.session.flush()
             self.signals[name] = signal
             # TODO: move to setAttributeValue
             if initValue['array'] is None:
@@ -353,6 +382,7 @@ class LdfListener(parser.BaseListener):
             else:
                 iv = ';'.join([str(x) for x in initValue['array']])
             self.setAttributeValue(sig.rid, 'LIN_signal_initial_value', iv)
+        self.db.session.flush()
 
     def exitSignal_item(self, ctx):
         sname = self.getValue(ctx.sname)
@@ -397,6 +427,7 @@ class LdfListener(parser.BaseListener):
         ctx.value = dict(signalName = sname, groupOffset = goffs)
 
     def exitFrame_def(self, ctx):
+        self.log_insertion("UnconditionalFrames")
         ctx.value = [x.value for x in ctx.items]
         for frame in ctx.value:
             frid = frame['frameID']
@@ -407,17 +438,20 @@ class LdfListener(parser.BaseListener):
             msg = LinUnconditionalFrame(name = name, message_id = frid, dlc = size, sender = sender)
             self.db.session.add(msg)
             self.db.session.flush()
-            print("FRAME:", msg)
+            #print("FRAME:", msg)
             frame['rid'] = msg.rid
             self.frames[name] = frame
             for signal in frame['signals']:
                 signalOffs = signal['signalOffset']
                 signalName = signal['signalName']
                 srid = self.signals[signalName]['rid']
-                sig = self.db.session.query(Signal).get(srid)
-                ms = Message_Signal(offset = signalOffs, signal = sig, message = msg)
+                sgn = self.SIGNAL_BY_RID(self.session).params(rid = srid).first()
+                if not sgn:
+                    self.logger.error("While inserting unconditional frames: signal '{}' does not exist.".format(srid))
+                    continue
+                ms = Message_Signal(offset = signalOffs, signal = sgn, message = msg)
                 self.db.session.add(ms)
-            self.db.session.flush()
+        self.db.session.flush()
 
     def exitFrame_item(self, ctx):
         fname = self.getValue(ctx.fname)
@@ -433,16 +467,20 @@ class LdfListener(parser.BaseListener):
         ctx.value = dict(signalName = sname, signalOffset = soffs)
 
     def exitSporadic_frame_def(self, ctx):
+        self.log_insertion("SporadicFrames")
         ctx.value = [x.value for x in ctx.items]
         for sf in ctx.value:
-            print("*SPOR", sf)
+            #print("*SPOR", sf)
             name = sf['sporadicFrameName']
             lsf = LinSporadicFrame(name = name)
             self.db.session.add(lsf)
             self.db.session.flush()
             for frameName in sf['frameNames']:
-                frame = self.db.session.query(Message).filter(Message.name == frameName).first()
-                print("\t*SP-FRAME", frame)
+                frame = self.MESSAGE_BY_NAME(self.session).params(name = frameName).first()
+                #print("\t*SP-FRAME", frame)
+                if not frame:
+                    self.logger.error("While inserting sporadic frames: frame '{}' does not exist.".format(frameName))
+                    continue
                 lsf.associated_frames.append(frame)
         self.db.session.flush()
 
@@ -452,20 +490,24 @@ class LdfListener(parser.BaseListener):
         ctx.value = dict(sporadicFrameName = name, frameNames = fnames)
 
     def exitEvent_triggered_frame_def(self, ctx):
+        self.log_insertion("EventTriggeredFrames")
         ctx.value = [x.value for x in ctx.items]
         for ef in ctx.value:
-            print("*ETF", ef)
+            #print("*ETF", ef)
             name = ef['frameName']
             scheduleTable = ef['scheduleTable']
-            lst = self.db.session.query(LinScheduleTable).filter(LinScheduleTable.name == scheduleTable).first()
-            print("SCH", scheduleTable, lst)
+            lst = self.SCHEDULE_TABLE_BY_NAME(self.session).params(name = scheduleTable).first()
+            #print("SCH", scheduleTable, lst)
             frameID = ef['frameID']
-            etf = LinEventTriggeredFrame(name = name, message_id = frameID,  collision_resolving_schedule_table = lst)
+            etf = LinEventTriggeredFrame(name = name, message_id = frameID, collision_resolving_schedule_table = lst)
             self.db.session.add(etf)
             self.db.session.flush()
             for frameName in ef['frameNames']:
-                frame = self.db.session.query(Message).filter(Message.name == frameName).first()
-                print("\t*ET-FRAME", frame)
+                frame = self.MESSAGE_BY_NAME(self.session).params(name = frameName).first()
+                if not frame:
+                    self.logger.error("While inserting event triggered frames: frame '{}' does not exist.".format(frameName))
+                    continue
+                #print("\t*ET-FRAME", frame)
                 etf.associated_frames.append(frame)
         self.db.session.flush()
 
@@ -489,6 +531,7 @@ class LdfListener(parser.BaseListener):
         ctx.value = dict(signalName = sname, signalOffset = soffs)
 
     def exitSchedule_table_def(self, ctx):
+        self.log_insertion("ScheduleTables")
         ctx.value = [x.value for x in ctx.items]
         for table in ctx.value:
             name = table['name']
@@ -501,7 +544,10 @@ class LdfListener(parser.BaseListener):
                 ct = cmd['type']
                 if ct == 'Frame':
                     name = cmd['frame_name']
-                    frame = self.db.session.query(Message).filter(Message.name == name).first()
+                    frame = self.MESSAGE_BY_NAME(self.session).params(name = name).first()
+                    if not frame:
+                        self.logger.error("While inserting schedule tables: frame '{}' does not exist.".format(name))
+                        continue
                     entry = LinScheduleTable_Command_Frame(frame_time = frame_time, frame = frame)
                 elif ct == 'MasterReq':
                     entry = LinScheduleTable_Command_MasterReq(frame_time = frame_time)
@@ -509,7 +555,10 @@ class LdfListener(parser.BaseListener):
                     entry = LinScheduleTable_Command_SlaveResp(frame_time = frame_time)
                 elif ct == 'AssignNAD':
                     name = cmd['node_name']
-                    node = self.db.session.query(Node).filter(Node.name == name).first()
+                    node = self.NODE_BY_NAME(self.session).params(name = name).first()
+                    if not node:
+                        self.logger.error("While inserting schedule tables: node '{}' does not exist.".format(name))
+                        continue
                     entry = LinScheduleTable_Command_AssignNad(frame_time = frame_time, node = node)
                 elif ct == 'ConditionalChangeNAD':
                     nad = cmd['nad']
@@ -523,7 +572,10 @@ class LdfListener(parser.BaseListener):
                     )
                 elif ct == 'DataDump':
                     name = cmd['node_name']
-                    node = self.db.session.query(Node).filter(Node.name == name).first()
+                    node = self.NODE_BY_NAME(self.session).params(name = name).first()
+                    if not node:
+                        self.logger.error("While inserting schedule tables: node '{}' does not exist.".format(name))
+                        continue
                     d1 = cmd['d1']
                     d2 = cmd['d2']
                     d3 = cmd['d3']
@@ -534,11 +586,17 @@ class LdfListener(parser.BaseListener):
                     )
                 elif ct == 'SaveConfiguration':
                     name = cmd['node_name']
-                    node = self.db.session.query(Node).filter(Node.name == name).first()
+                    node = self.NODE_BY_NAME(self.session).params(name = name).first()
+                    if not node:
+                        self.logger.error("While inserting schedule tables: node '{}' does not exist.".format(name))
+                        continue
                     entry = LinScheduleTable_Command_SaveConfiguration(frame_time = frame_time, node = node)
                 elif ct == 'AssignFrameIdRange':
                     name = cmd['node_name']
-                    node = self.db.session.query(Node).filter(Node.name == name).first()
+                    node = self.NODE_BY_NAME(self.session).params(name = name).first()
+                    if not node:
+                        self.logger.error("While inserting schedule tables: node '{}' does not exist.".format(name))
+                        continue
                     frame_index = cmd['frame_index']
                     frame_pid1 = cmd['pid1']
                     frame_pid2 = cmd['pid2']
@@ -563,8 +621,14 @@ class LdfListener(parser.BaseListener):
                 elif ct == 'AssignFrameId':
                     node_name = cmd['nodeName']
                     frame_name = cmd['frameName']
-                    node = self.db.session.query(Node).filter(Node.name == node_name).first()
-                    frame = self.db.session.query(Message).filter(Message.name == frame_name).first()
+                    node = self.NODE_BY_NAME(self.session).params(name = name).first()
+                    if not node:
+                        self.logger.error("While inserting schedule tables: node '{}' does not exist.".format(name))
+                        continue
+                    frame = self.MESSAGE_BY_NAME(self.session).params(name = frame_name).first()
+                    if not frame:
+                        self.logger.error("While inserting schedule tables: frame '{}' does not exist.".format(frame_name))
+                        continue
                     entry = LinScheduleTable_Command_AssignFrameId(frame_time = frame_time, node = node, frame = frame)
                 entry.lin_schedule_table = lst
                 self.db.session.add(entry)
@@ -644,6 +708,7 @@ class LdfListener(parser.BaseListener):
         ctx.value = cmd
 
     def exitSignal_encoding_type_def(self, ctx):
+        self.log_insertion("SignalEncodings")
         items = [x.value for x in ctx.items]
         ctx.value = items
         tps = set()
@@ -715,13 +780,20 @@ class LdfListener(parser.BaseListener):
         pass
 
     def exitSignal_representation_def(self, ctx):
+        self.log_insertion("SignalRepresentations")
         items = [x.value for x in ctx.items]
         ctx.value = items
         for sr in items:
             name = sr['name']
-            lse = self.db.session.query(LinSignalEncodingType).filter(LinSignalEncodingType.name == name).first()
+            lse = self.ENCODING_TYPE_BY_NAME(self.session).params(name = name).first()
+            if not lse:
+                self.logger.error("While inserting signal representations: encoding type '{}' does not exist.".format(name))
+                continue
             for signal_name in sr['signalNames']:
-                signal = self.db.session.query(Signal).filter(Signal.name == signal_name).first()
+                signal = self.SIGNAL_BY_NAME(self.session).params(name = signal_name).first()
+                if not signal:
+                    self.logger.error("While inserting signal representations: signal '{}' does not exist.".format(signal_name))
+                    continue
                 lsr = LinSignalRepresentation(lin_signal_encoding_type = lse, signal = signal)
                 self.db.session.add(lsr)
         self.db.session.flush()
