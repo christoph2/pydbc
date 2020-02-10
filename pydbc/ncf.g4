@@ -91,8 +91,8 @@ toplevel:
     ;
 
 language_version:
-    'LIN_language_version' '='
-    s = stringValue ;
+    'LIN_language_version' '=' s = stringValue ';'
+    ;
 
 node_definition:
     'node' name = node_name '{'
