@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2019 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -176,7 +176,7 @@ class NcfListener(parser.BaseListener):
         items = [x.value for x in ctx.items]
         ctx.value = dict(name = name, values = items)
 
-    def exitSignal_encoding_value(self, ctx):
+    def exitEncoding_definition_value(self, ctx):
         if ctx.l:
             value = ctx.l.value
             vtype = "logical"
@@ -192,6 +192,9 @@ class NcfListener(parser.BaseListener):
         ctx.value = dict(value = value, valueType = vtype)
 
     def exitSignal_encoding_type_name(self, ctx):
+        ctx.value = ctx.i.value
+
+    def exitEncoding_name(self, ctx):
         ctx.value = ctx.i.value
 
     def exitLogical_value(self, ctx):
