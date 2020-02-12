@@ -3,7 +3,6 @@ from pydbc import types
 
 def test_j1939_address():
     j0 = types.J1939Address.from_int(217056510)
-    print(j0)
     assert j0.priority == 3
     assert j0.reserved == 0
     assert j0.datapage == 0
@@ -30,4 +29,22 @@ def test_j1939_repr(capsys):
     print(repr(j0))
     captured = capsys.readouterr()
     assert captured.out == "J1939Address(priority = 6, reserved = 0, datapage = 0, pdu_format = 253, pdu_specific = 193, source_address = 254)\n"
+
+def test_lin_product_id():
+    lp = types.LinProductIdType(0x3e, 2, 4)
+    assert lp.supplier_id == 0x3e
+    assert lp.function_id == 2
+    assert lp.variant == 4
+
+def test_lin_product_id_str(capsys):
+    lp = types.LinProductIdType(0x3e, 2, 4)
+    print(str(lp))
+    captured = capsys.readouterr()
+    assert captured.out == "LinProductIdType(supplier_id = 62, function_id = 2, variant = 4)\n"
+
+def test_lin_product_id_repr(capsys):
+    lp = types.LinProductIdType(0x3e, 2, 4)
+    print(repr(lp))
+    captured = capsys.readouterr()
+    assert captured.out == "LinProductIdType(supplier_id = 62, function_id = 2, variant = 4)\n"
 

@@ -30,6 +30,7 @@ __version__ = '0.1.0'
 
 import enum
 
+CAN_EXTENDED_IDENTIFIER = 0x80000000
 
 class VndbType(enum.IntEnum):
     SINGLE_NETWORK = 0
@@ -152,20 +153,76 @@ class CANAddress(AddressBaseType):
 
 
 class J1939Address(AddressBaseType):
+    """
 
-    def __init__(self, rawId):
+    """
+
+    def __init__(self, priority, reserved, datapage, pdu_format, pdu_specific, source_address):
+        self.priority = priority
+        self.reserved = reserved
+        self.datapage = datapage
+        self.pdu_format = pdu_format
+        self.pdu_specific = pdu_specific
+        self.source_address = source_address
+
+    @classmethod
+    def from_int(klass, canID):
         # TODO: check for extID
-        rawId &= (~0x80000000)
-        self.priority = (rawId & 0x1c000000) >> 26
-        self.reserved = (rawId & 0x2000000) >> 25
-        self.datapage = (rawId & 0x1000000) >> 24
-        self.pduFormat = (rawId & 0xff0000) >> 16
-        self.pduSpecific = (rawId & 0xff00) >> 8
-        self.sourceAddress = rawId & 0xff
+        canID &= (~CAN_EXTENDED_IDENTIFIER)
+        priority = (canID & 0x1c000000) >> 26
+        reserved = (canID & 0x2000000) >> 25
+        datapage = (canID & 0x1000000) >> 24
+        pdu_format = (canID & 0xff0000) >> 16
+        pdu_specific = (canID & 0xff00) >> 8
+        source_address = canID & 0xff
+        return klass(priority, reserved, datapage, pdu_format, pdu_specific, source_address)
+
+    @property
+    def pgn(self):
+        return (self.pdu_format << 8) | self.pdu_specific
+
+    @pgn.setter
+    def pgn(self, value):
+        """
+
+        """
+        self.pdu_format = (value & 0xff00) >> 8
+        self.pdu_specific = (value & 0xff)
+
+
+    @property
+    def canID(self):
+        """
+        """
+        return ((self.priority & 0x07) << 26) | ((self.reserved & 0x01) << 25) | ((self.datapage & 0x01) << 24) | \
+            ((self.pdu_format & 0xff) << 16) |  ((self.pdu_specific & 0xff) << 8) | (self.source_address & 0xff)
+
+
+    @canID.setter
+    def canID(self, value):
+        pass
 
     def __str__(self):
-        return "{}(prio = {} r = {} dp = {} pf = {:02x} ps = {:02x} sa = {:02x} )".format(self.__class__.__name__,
-            self.priority, self.reserved, self.datapage, self.pduFormat, self.pduSpecific, self.sourceAddress
+        return "{}(priority = {}, reserved = {}, datapage = {}, pdu_format = {}, pdu_specific = {}, source_address = {})".\
+            format(self.__class__.__name__, self.priority, self.reserved, self.datapage, self.pdu_format,
+            self.pdu_specific, self.source_address
         )
+
+    __repr__ = __str__
+
+
+class LinProductIdType(object):
+    """
+
+    """
+
+    def __init__(self, supplier_id, function_id, variant):
+        self.supplier_id = supplier_id & 0xffff
+        self.function_id = function_id & 0xffff
+        self.variant = variant & 0xff
+
+    def __str__(self):
+        return "LinProductIdType(supplier_id = {}, function_id = {}, variant = {})".format(
+            self.supplier_id, self.function_id, self.variant)
 
     __repr__ = __str__
