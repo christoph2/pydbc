@@ -242,10 +242,14 @@ class LdfListener(parser.BaseListener):
     def exitNode_def(self, ctx):
         self.log_insertion("Nodes")
         mname = self.getValue(ctx.mname)
-        tb = self.getValue(ctx.tb)
-        j = self.getValue(ctx.j)
+        timebase = self.getValue(ctx.tb)
+        jitter = self.getValue(ctx.j)
+        bit_length = self.getValue(ctx.bit_length)
+        tolerant = self.getValue(ctx.tolerant)
         snames = [x.value for x in ctx.snames]
-        ctx.value = dict(master = mname, timeBase = tb, jitter = j, slaves = snames)
+        ctx.value = dict(
+            master = mname, timeBase = timebase, jitter = jitter, slaves = snames, bit_length = bit_length, tolerant = tolerant
+        )
         nodes = ctx.value
         masterNode = nodes['master']
         master = Node(name = masterNode)
@@ -326,8 +330,9 @@ class LdfListener(parser.BaseListener):
         stMin = self.getValue(ctx.stMin)
         nAs = self.getValue(ctx.nAs)
         nCr = self.getValue(ctx.nCr)
+        response_tolerance = self.getValue(ctx.response_tolerance)
         ctx.value = dict(supplierID = sid, functionID = fid, variant = v, responseErrorSignal = sn0, faultStateSignals = sn1s,
-            p2Min = p2Min, stMin = stMin, nAs = nAs, nCr = nCr, configurableFrames = cf
+            p2Min = p2Min, stMin = stMin, nAs = nAs, nCr = nCr, configurableFrames = cf, response_tolerance = response_tolerance
         )
 
     def exitConfigurable_frames(self, ctx):

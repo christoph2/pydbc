@@ -122,7 +122,9 @@ channel_name_def:
 
 node_def:
     'Nodes' '{'
-        'Master' ':' mname = identifierValue ',' tb = number 'ms' ',' j = number 'ms' ';'
+        'Master' ':' mname = identifierValue ',' tb = number 'ms' ',' j = number 'ms'
+        (',' bit_length = number 'bits' ',' tolerant = number '%')? // Only SAE J2602.
+        ';'
         'Slaves' ':' snames += identifierValue (',' snames += identifierValue)* ';'
     '}'
     ;
@@ -151,6 +153,7 @@ attributes_def:
     ('N_As_timeout' '=' nAs = number 'ms' ';')?
     ('N_Cr_timeout' '=' nCr = number 'ms' ';')?
     cf = configurable_frames?
+    ('response_tolerance' '=' response_tolerance = number '%' ';')?
     ;
 
 
