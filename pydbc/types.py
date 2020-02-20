@@ -216,7 +216,7 @@ class LinProductIdType(object):
 
     """
 
-    def __init__(self, supplier_id, function_id, variant):
+    def __init__(self, supplier_id, function_id, variant = 0):
         self.supplier_id = supplier_id & 0xffff
         self.function_id = function_id & 0xffff
         self.variant = variant & 0xff
