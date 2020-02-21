@@ -1,47 +1,35 @@
 <%
-networkAttrs = attributes['NETWORK'][0]
-nodeAttrs = attributes['NODE']
-signalAttrs = attributes['SIGNAL']
+network = db.session.query(model.LinNetwork).first()
 %>\
 LIN_description_file;
-LIN_protocol_version = "${networkAttrs.get('LIN_protocol_version')}";
-LIN_language_version = "${networkAttrs.get('LIN_language_version')}";
-%if 'LDF_file_revision' in networkAttrs:
-LDF_file_revision = "${networkAttrs.get('LDF_file_revision')}";
+LIN_protocol_version = "${network.protocol_version}";
+LIN_language_version = "${network.language_version}";
+%if not network.file_revision is None:
+LDF_file_revision = "${network.file_revision}";
 %endif
-LIN_speed = ${networkAttrs.get('LIN_speed')} kbps;
-%if 'LIN_channel_name' in networkAttrs:
-Channel_name = "${networkAttrs.get('LIN_channel_name')}";
+LIN_speed = ${network.speed} kbps;
+%if not network.channel_name is None:
+Channel_name = ${network.channel_name};
 %endif
 
 Nodes {
 <%
-    isMaster = db.session.query(model.Attribute_Value).join(model.Attribute_Definition).\
-        filter(model.Attribute_Definition.name == "LIN_is_master").one()
-    masterNode = db.session.query(model.Node).filter(model.Node.rid == isMaster.object_id).one()
-    isSlave = db.session.query(model.Attribute_Value.object_id).join(model.Attribute_Definition).\
-        filter(model.Attribute_Definition.name == "LIN_is_slave")
-    slaveNodes = db.session.query(model.Node).filter(model.Node.rid.in_(isSlave)).all()
-    tb = nodeAttrs[masterNode.rid]['LIN_time_base']
-    jt = nodeAttrs[masterNode.rid]['LIN_jitter']
+    masterNode = db.session.query(model.LinMasterNode).first()
+    slaveNodes = db.session.query(model.LinSlaveNode).all()
 %>\
-    Master: ${masterNode.name}, ${tb}ms, ${jt}ms;
+    Master: ${masterNode.name}, ${masterNode.timebase}ms, ${masterNode.jitter}ms;
     Slaves: ${', '.join([s.name for s in slaveNodes])};
 }
 
 Signals {
-%for signal in db.session.query(model.Signal).order_by(model.Signal.rid).all():
-<% initialValue = signalAttrs[signal.rid]['LIN_signal_initial_value'] 
-publisher = db.session.query(model.Node.name).join(model.Node_TxSig).filter(model.Node_TxSig.signal == signal).scalar()
-subscribers = db.session.query(model.Node.name).join(model.Node_RxSignal).filter(model.Node_RxSignal.signal == signal).all()
-%>\
+%for signal in db.session.query(model.LinSignal).order_by(model.LinSignal.rid).all():
     ${"{0:25s}".format(signal.name)}: ${signal.bitsize}, \
-    %if len(initialValue) > 1:
-{ ${', '.join(["0x{:02x}".format(x) for x in initialValue])} }, \
+    %if isinstance(signal.init_value, list) :
+{ ${', '.join(["0x{:02x}".format(x) for x in signal.init_value])} }, \
     %else:
-${"0x{:02x}".format(initialValue[0])}, \
+${"0x{:02x}".format(signal.init_value)}, \
     %endif
-${publisher}, ${', '.join([x[0] for x in subscribers])};
+${signal.publisher.name}, ${', '.join([s.name for s in signal.subscribers])};
 %endfor
 }
 
@@ -50,15 +38,16 @@ Diagnostic_signals {
 }
 
 Frames {
-<% FrameEntity = model.with_polymorphic(model.LinUnconditionalFrame, []) %>\
-%for frame in db.session.query(FrameEntity).order_by(FrameEntity.frame_id).all():
+%for frame in db.session.query(model.LinUnconditionalFrame).filter(\
+model.LinUnconditionalFrame.type == "LinUnconditionalFrame").order_by(model.LinUnconditionalFrame.lin_unconditional_frame_id).all():
 <% senderName = db.session.query(model.Node.name).filter(model.Node.rid == frame.sender).scalar() %>\
-    ${frame.name}: ${"0x{:02x}".format(frame.message_id)}, ${senderName}, ${frame.dlc} {
+    ${frame.name}: ${"0x{:02x}".format(frame.frame_id)}, ${frame.publisher.name}, ${frame.dlc} {
 <% frame_signals = db.session.query(model.Signal.name, model.Message_Signal.offset).\
-    join(model.Message_Signal).filter(model.Message_Signal.message_id == frame.frame_id).\
+    join(model.Message_Signal).filter(model.Message_Signal.message_id == frame.message_id).\
     order_by(model.Message_Signal.offset).all() %>\
-%for fs in frame_signals:
-        ${fs[0]}, ${fs[1]};
+%for fs in frame.signals:
+        ${fs.name}, 
+##${fs[1]};
 %endfor
     }
 %endfor
@@ -72,9 +61,8 @@ Sporadic_frames {
 
 Event_triggered_frames {
 %for frame in db.session.query(model.LinEventTriggeredFrame).all():
-    ${frame.name}: ${frame.collision_resolving_schedule_table}, ${frame.message_id}, ${', '.join([f.name for f in frame.associated_frames])};
+    ${frame.name}: ${frame.collision_resolving_schedule_table}, ${frame.frame_id}, ${', '.join([f.name for f in frame.associated_frames])};
 %endfor
-##  ETF_State: ETF_CollisionResolving, 9, Motor1_State, Motor2_State ;
 }
 
 Diagnostic_frames {
@@ -83,45 +71,47 @@ Diagnostic_frames {
 
 Node_attributes {
 %for node in slaveNodes:
-<% attrs = nodeAttrs[node.rid] 
+<% #attrs = nodeAttrs[node.rid] 
 fault_state_signals = db.session.query(model.LinFaultStateSignal).filter(model.LinFaultStateSignal.node == node).all()
+response_error = db.session.query(model.LinResponseErrorSignal).filter(model.LinResponseErrorSignal.node == node).first()
 %>\
     ${node.name} {
-%if 'LIN_protocol' in attrs:
-        LIN_protocol = "${attrs['LIN_protocol']}";
+%if not node.protocol_version is None:
+        LIN_protocol = "${node.protocol_version}";
 %endif
-%if 'LIN_configured_NAD' in attrs:
-        configured_NAD = ${"0x{:02x}".format(attrs['LIN_configured_NAD'])};
+%if not node.configured_NAD is None:
+        configured_NAD = ${"0x{:02x}".format(node.configured_NAD)};
 %endif
-%if 'LIN_initial_NAD' in attrs:
-        initial_NAD = ${"0x{:02x}".format(attrs['LIN_initial_NAD'])};
+%if not node.initial_NAD is None:
+        initial_NAD = ${"0x{:02x}".format(node.initial_NAD)};
 %endif
-%if 'LIN_supplier_id' in attrs:
-        product_id = ${"0x{:04x}".format(attrs['LIN_supplier_id'])},\
+%if not node.supplier_id is None:
+        product_id = ${"0x{:04x}".format(node.supplier_id)},\
 %endif
-%if 'LIN_function_id' in attrs:
- ${"0x{:04x}".format(attrs['LIN_function_id'])},\
+%if not node.function_id is None:
+ ${"0x{:04x}".format(node.function_id)}\
 %endif
-%if 'LIN_variant' in attrs:
- ${"0x{:04x}".format(attrs['LIN_variant'])};
+%if not node.variant is None:
+, ${"0x{:04x}".format(node.variant)}\
 %endif
-%if 'LIN_response_error' in attrs:
-        response_error = ${attrs['LIN_response_error']};
+;
+%if not response_error is None:
+        response_error = ${response_error.signal.name};
 %endif
 %if fault_state_signals:
         fault_state_signals = ${", ".join([s.signal.name for s in fault_state_signals])};
 %endif
-%if 'LIN_P2_min' in attrs:
-        P2_min = ${attrs['LIN_P2_min']} ms;
+%if not node.p2_min is None:
+        P2_min = ${node.p2_min} ms;
 %endif
-%if 'LIN_ST_min' in attrs:
-        ST_min = ${attrs['LIN_ST_min']} ms;
+%if not node.st_min is None:
+        ST_min = ${node.st_min} ms;
 %endif
-%if 'LIN_N_As_timeout' in attrs:
-        N_As_timeout = ${attrs['LIN_N_As_timeout']} ms;
+%if not node.n_as_timeout is None:
+        N_As_timeout = ${node.n_as_timeout} ms;
 %endif
-%if 'LIN_N_Cr_timeout' in attrs:
-        N_Cr_timeout = ${attrs['LIN_N_Cr_timeout']} ms;
+%if not node.n_cr_timeout is None:
+        N_Cr_timeout = ${node.n_cr_timeout} ms;
 %endif
 <% configurable_frames = db.session.query(model.LinConfigurableFrame).\
     filter(model.LinConfigurableFrame.node == node).all() %>\
@@ -138,7 +128,7 @@ fault_state_signals = db.session.query(model.LinFaultStateSignal).filter(model.L
 Schedule_tables {
 %for table in db.session.query(model.LinScheduleTable).order_by(model.LinScheduleTable.rid).all():
     ${table.name} {
-%for command in table.commands:
+%for command in table.entries:
 %if command.type == "LinScheduleTable_Command_Frame":
         ${command.frame.name} delay ${command.frame_time} ms;
 %elif command.type == "LinScheduleTable_Command_MasterReq":
