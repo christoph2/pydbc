@@ -36,48 +36,6 @@ identifier          An identifier. Typically used to name objects. Identifiers s
 integer             An integer. Integers can be in decimal or hexadecimal (prefixed with 0x) format.
 real_or_integer     A real or integer number. A real number is always in decimal and has an embedded decimal point.
 */
-
-/*
-LIN_description_file;
-LIN_protocol_version = "2.2";
-LIN_language_version = "2.2";
-LIN_speed = 19.2 kbps;
-Channel_name = "DB"
-Nodes {
-  Master: CEM, 5 ms, 0.1 ms;
-  Slaves: LSM, RSM;
-}
-Signals {
-  InternalLightsRequest: 2, 0, CEM, LSM, RSM;
-  RightIntLightsSwitch: 8, 0, RSM, CEM;
-  LeftIntLightsSwitch: 8, 0, LSM, CEM;
-  LSMerror: 1, 0, LSM, CEM;
-  RSMerror: 1, 0, RSM, CEM;
-  IntTest: 2, 0, LSM, CEM;
-}
-Frames {
-  CEM_Frm1: 0x01, CEM, 1 {
-    InternalLightsRequest, 0;
-  }
-  LSM_Frm1: 0x02, LSM, 2 {
-    LeftIntLightsSwitch, 8;
-  }
-  LSM_Frm2: 0x03, LSM, 1 {
-    LSMerror, 0;
-    IntTest, 1;
-  }
-  RSM_Frm1: 0x04, RSM, 2 {
-    RightIntLightsSwitch, 8;
-  }
-  RSM_Frm2: 0x05, RSM, 1 {
-    RSMerror, 0;
-  }
-}
-Event_triggered_frames {
-  Node_Status_Event : Collision_resolver, 0x06, RSM_Frm1, LSM_Frm1;
-}
-*/
-
 lin_description_file:
     'LIN_description_file' ';'
     pv = lin_protocol_version_def
@@ -345,7 +303,7 @@ command:
     | c = 'AssignFrameIdRange' '{' nodeName = identifierValue ',' frameIndex = intValue (',' pids += intValue ',' pids += intValue ',' pids += intValue ',' pids += intValue)? '}'
     | c = 'FreeFormat' '{' d1 = intValue ',' d2 = intValue ',' d3 = intValue ',' d4 = intValue ',' d5 = intValue ',' d6 = intValue ','
         d7 = intValue ',' d8 = intValue '}'
-    | c = 'AssignFrameId' '{' nodeName = identifierValue ',' frameName = identifierValue  '}'
+    | c = 'AssignFrameId' '{' nodeName = identifierValue ',' frName = identifierValue  '}'
     ;
 
 signal_encoding_type_def:

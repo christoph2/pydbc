@@ -3541,6 +3541,7 @@ class ldfParser ( Parser ):
             self.d6 = None # IntValueContext
             self.d7 = None # IntValueContext
             self.d8 = None # IntValueContext
+            self.frName = None # IdentifierValueContext
 
         def identifierValue(self, i:int=None):
             if i is None:
@@ -3775,7 +3776,7 @@ class ldfParser ( Parser ):
                 self.state = 659
                 self.match(ldfParser.T__13)
                 self.state = 660
-                localctx.frameName = self.identifierValue()
+                localctx.frName = self.identifierValue()
                 self.state = 661
                 self.match(ldfParser.T__18)
                 pass

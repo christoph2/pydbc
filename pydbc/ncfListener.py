@@ -28,10 +28,33 @@ __author__  = 'Christoph Schueler'
 __version__ = '0.1.0'
 
 
+from sqlalchemy.sql.expression import literal, bindparam
+
+from pydbc.logger import Logger
 from pydbc import parser
+from pydbc.types import AttributeType, BusType, CategoryType, ValueType
+from pydbc.db.model import (
+    Dbc_Version, Message, Message_Signal, Network, Node, Signal, Value_Description,
+    Valuetable, EnvironmentVariablesData, EnvVar, Attribute_Definition, Attribute_Value,
+    Node_TxMessage, Node_RxSignal, Category_Definition, Category_Value, AttributeRel_Value,
+    Signal_Group_Signal, Signal_Group, Node_TxSig, LinSignalEncodingType, LinSignalEncodingEntry_Value,
+    LinSignalEncodingEntry_Logical, LinSignalEncodingEntry_Physical, LinSignalRepresentation,
+    LinScheduleTable, LinScheduleTable_Command_Frame, LinScheduleTable_Command_MasterReq,
+    LinScheduleTable_Command_SlaveResp, LinScheduleTable_Command_AssignNad,
+    LinScheduleTable_Command_ConditionalChangeNad, LinScheduleTable_Command_DataDump,
+    LinScheduleTable_Command_SaveConfiguration, LinScheduleTable_Command_AssignFrameIdRange,
+    LinScheduleTable_Command_FreeFormat, LinScheduleTable_Command_AssignFrameId, LinSporadicFrame,
+    LinUnconditionalFrame, LinEventTriggeredFrame, LinConfigurableFrame, LinFaultStateSignal,
+    Vndb_Protocol
+)
 
 
 class NcfListener(parser.BaseListener):
+
+    def __init__(self, database, logLevel = 'INFO', *args, **kws):
+        super(NcfListener, self).__init__(database, logLevel, *args, **kws)
+        self.logger = Logger(__name__, level = logLevel)
+        #self.bake_queries()
 
     def exitToplevel(self, ctx):
         v = ctx.v.value
@@ -246,4 +269,3 @@ class NcfListener(parser.BaseListener):
     def exitFree_text_definition(self, ctx):
         text = ctx.f.value
         ctx.value = text
-
