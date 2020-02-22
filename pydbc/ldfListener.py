@@ -103,6 +103,7 @@ class LdfListener(parser.BaseListener):
         self.nodes = {}
         self.signals = {}
         self.frames = {}
+        self.event_trigged_frames = []
         self.bake_queries()
         self.insertNetwork()
 
@@ -215,6 +216,15 @@ class LdfListener(parser.BaseListener):
                 result.append(frameName)
         return result
 
+    def updateEventTriggeredFrames(self):
+        for etf, name in self.event_trigged_frames:
+            lst = self.SCHEDULE_TABLE_BY_NAME(self.session).params(name = name).first()
+            if not lst:
+                self.logger.error("While updating event triggered frames: schedult table '{}' does not exist.".format(name))
+                continue
+            etf.collision_resolving_schedule_table = lst
+        self.session.flush()
+
     def exitLin_description_file(self, ctx):
         self.value = dict(
             protocolVersion = ctx.pv.value,
@@ -240,6 +250,7 @@ class LdfListener(parser.BaseListener):
         self.insertConfigurableFrames()
         self.insertFaultStateSignals()
         self.insertResponseErrorSignals()
+        self.updateEventTriggeredFrames()
         self.session.commit()
 
     def exitLin_protocol_version_def(self, ctx):
@@ -517,13 +528,10 @@ class LdfListener(parser.BaseListener):
         for ef in ctx.value:
             name = ef['frameName']
             scheduleTable = ef['scheduleTable']
-            lst = self.SCHEDULE_TABLE_BY_NAME(self.session).params(name = scheduleTable).first()
             frameID = ef['frameID']
-            etf = LinEventTriggeredFrame(name = name, master_node = self.master_node, frame_id = frameID,
-                collision_resolving_schedule_table = lst
-            )
+            etf = LinEventTriggeredFrame(name = name, master_node = self.master_node, frame_id = frameID)
             self.session.add(etf)
-            self.session.flush()
+            self.event_trigged_frames.append((etf, scheduleTable))
             for frameName in ef['frameNames']:
                 frame = self.MESSAGE_BY_NAME(self.session).params(name = frameName).first()
                 if not frame:
@@ -651,8 +659,8 @@ class LdfListener(parser.BaseListener):
                         self.logger.error("While inserting schedule tables: frame '{}' does not exist.".format(frame_name))
                         continue
                     entry = LinScheduleTable_Command_AssignFrameId(frame_time = frame_time, node = node, frame = frame)
-                entry.lin_schedule_table = lst
                 self.session.add(entry)
+                lst.entries.append(entry)
             self.session.flush()
 
     def exitSchedule_table_entry(self, ctx):
@@ -815,7 +823,7 @@ class LdfListener(parser.BaseListener):
                 if not signal:
                     self.logger.error("While inserting signal representations: signal '{}' does not exist.".format(signal_name))
                     continue
-                lsr = LinSignalRepresentation(lin_signal_encoding_type = lse, signal = signal)
+                lsr = LinSignalRepresentation(signal_encoding_type = lse, signal = signal)
                 self.session.add(lsr)
         self.session.flush()
 
