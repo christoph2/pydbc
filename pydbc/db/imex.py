@@ -90,7 +90,7 @@ def fetch_attributes(db):
 class Exporter:
     """
     """
-    def __init__(self, name, encoding = "latin-1"):
+    def __init__(self, name, encoding = "latin-1", debug = False):
         self.logger = Logger(__name__)
         self.encoding = encoding
         self.fname = name.parts[-1]
@@ -98,7 +98,7 @@ class Exporter:
         self.fnext = name.suffix[ 1 : ].lower()
         self.fabsolute = name.absolute()
 
-        self.db = VNDB(r"{}.vndb".format(self.fnbase))
+        self.db = VNDB(r"{}.vndb".format(self.fnbase), debug = debug)
         #res = renderTemplateFromText(self.TEMPLATE, namespace, formatExceptions = True, encoding = "utf-8" if ucout else "latin-1")
 
     def run(self):
