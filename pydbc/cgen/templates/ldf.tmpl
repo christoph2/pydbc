@@ -46,8 +46,9 @@ model.LinUnconditionalFrame.type == "LinUnconditionalFrame").order_by(model.LinU
     join(model.Message_Signal).filter(model.Message_Signal.message_id == frame.message_id).\
     order_by(model.Message_Signal.offset).all() %>\
 %for fs in frame.signals:
-        ${fs.name}, 
-##${fs[1]};
+<% fs_assoc = db.session.query(model.LinUnconditionalFrameSignal).filter(
+    model.LinUnconditionalFrameSignal.unconditional_frame == frame, model.LinUnconditionalFrameSignal.signal == fs).first() %>\
+        ${fs.name}, ${fs_assoc.signal_offset};
 %endfor
     }
 %endfor
@@ -61,7 +62,7 @@ Sporadic_frames {
 
 Event_triggered_frames {
 %for frame in db.session.query(model.LinEventTriggeredFrame).all():
-    ${frame.name}: ${frame.collision_resolving_schedule_table}, ${frame.frame_id}, ${', '.join([f.name for f in frame.associated_frames])};
+    ${frame.name}: ${frame.collision_resolving_schedule_table.name}, ${frame.frame_id}, ${', '.join([f.name for f in frame.associated_frames])};
 %endfor
 }
 
@@ -193,7 +194,7 @@ ${entry.offset}, "${entry.text_info}";
 Signal_representation {
 %for enc in db.session.query(model.LinSignalEncodingType).all():
 <% sr = db.session.query(model.Signal.name).join(model.LinSignalRepresentation).\
-filter(model.LinSignalRepresentation.lin_signal_encoding_type == enc).all() %>\
+filter(model.LinSignalRepresentation.signal_encoding_type == enc).all() %>\
 %if sr:
     ${enc.name}: ${', '.join([s[0] for s in sr])};
 %endif
