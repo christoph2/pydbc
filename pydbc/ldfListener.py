@@ -397,7 +397,7 @@ class LdfListener(parser.BaseListener):
                 continue
             if not initValue['scalar'] is None:
                 iv = initValue['scalar']
-            elif initValue['array'] is None:
+            elif not initValue['array'] is None:
                 iv = initValue['array']
             else:
                 self.logger.error("While inserting signals: no initial value for signal '{}'.".format(signal))
