@@ -985,6 +985,15 @@ class LinSignalEncodingEntry_Logical(LinSignalEncodingEntry):
         "polymorphic_identity": "LinSignalEncodingEntry_Logical"
     }
 
+    def __init__(self, signal_value, text_info):
+        self.signal_value = signal_value
+        self.text_info = text_info
+
+    def __repr__(self):
+        return 'LinSignalEncodingEntry_Logical(signal_value = {}, text_info = "{}")'.format(self.signal_value, self.text_info)
+
+    __str__ = __repr__
+
 
 class LinSignalEncodingEntry_Physical(LinSignalEncodingEntry):
 
@@ -999,7 +1008,19 @@ class LinSignalEncodingEntry_Physical(LinSignalEncodingEntry):
     offset = Column(types.Float, nullable = False)
     text_info = Column(types.Unicode(1024), nullable = True)
 
-    __mapper_args__ = {"polymorphic_identity": "LinSignalEncodingEntry_Physical"}
+    __mapper_args__ = {
+        "polymorphic_identity": "LinSignalEncodingEntry_Physical"
+    }
+
+    def __init__(self, min_value, max_value, scale, offset, text_info):
+        min_value, max_value, scale, offset, text_info
+
+    def __repr__(self):
+        return 'LinSignalEncodingEntry_Physical(min_value = {}, max_value = {}, scale = {}, offset = {}, text_info = "{}")'.format(
+            self.min_value, self.max_value, self.scale, self.offset, self.text_info
+        )
+
+    __str__ = __repr__
 
 
 class LinScheduleTable(Base, RidMixIn):

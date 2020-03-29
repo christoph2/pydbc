@@ -118,36 +118,6 @@ class LdfListener(parser.BaseListener):
         self.LIN_SIGNAL_BY_NAME = self.bakery(lambda session: session.query(LinSignal).filter(LinSignal.name == bindparam('name')))
         self.LIN_SIGNAL_BY_RID = self.bakery(lambda session: session.query(LinSignal).filter(LinSignal.rid == bindparam('rid')))
 
-    def insertAttributeDefinitions(self):
-        for key, attr in LDF_ATTRS.items():
-            ad = Attribute_Definition(
-                name = attr.name, objecttype = attr.objType, valuetype = attr.valueType, array = attr.array
-            )
-            self.session.add(ad)
-            self.session.flush()
-            attr.attrDef = ad.rid
-        self.session.flush()
-
-    def setAttributeValue(self, objID, attribute, value):
-        attr = LDF_ATTRS.get(attribute)
-        if attr is None:
-            raise KeyError("Invalid attribute '{}'".format(attribute))
-        numValue = None
-        stringValue = None
-        if attr.array:
-            stringValue = value
-        else:
-            if attr.valueType in (ValueType.FLOAT, ValueType.INT):
-                numValue = value
-            elif attr.valueType == ValueType.STRING:
-                stringValue = value
-        ad = self.ATTRIBUTE_DEFINITION_BY_NAME(self.session).params(name = attribute).first()
-        if not ad:
-            self.logger.error("While inserting attribute value for '{}': attribute definition '{}' does not exist.".format(objID, attribute))
-        av = Attribute_Value(object_id = objID, attribute_definition = ad, num_value = numValue, string_value = stringValue)
-        self.session.add(av)
-        self.session.flush()
-
     def insertNetwork(self, specific = None):
         self.log_insertion("Network")
         network = LinNetwork(name = self.db.dbname)
@@ -305,7 +275,7 @@ class LdfListener(parser.BaseListener):
         self.faultStateSignals = {}
         self.responseErrorSignals = {}
         for attr in attrs:
-            print("ATTR:", attr)
+            #print("ATTR:", attr)
             name = attr['name']
             node = self.nodes.get(name)
             if not node:
@@ -400,7 +370,7 @@ class LdfListener(parser.BaseListener):
             elif not initValue['array'] is None:
                 iv = initValue['array']
             else:
-                self.logger.error("While inserting signals: no initial value for signal '{}'.".format(signal))
+                self.logger.error("While inserting signals: no initial value for signal '{}'.".format(name))
                 iv = None
             sig = LinSignal(name = name, signal_size = size, init_value = iv, publisher = publisher)
             self.session.add(sig)

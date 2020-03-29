@@ -32,6 +32,7 @@ import enum
 from functools import partial
 import mmap
 import os
+import re
 import sqlite3
 import sys
 
