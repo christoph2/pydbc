@@ -42,7 +42,8 @@ def exportFile(pth):
     fnext = pth.suffix[ 1 : ].lower()
 
     print("Processing '{}'".format(pth))
-    exporter = DbcExporter(pth)
+    #exporter = DbcExporter(pth)
+    exporter = LdfExporter(pth, debug = False)
 
     exporter.run()
     print("OK, done.\n", flush = True)

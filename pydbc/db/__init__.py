@@ -58,8 +58,13 @@ PAGE_SIZE       = mmap.PAGESIZE
 def calculateCacheSize(value):
     return -(value // PAGE_SIZE)
 
-def regexer(expr, value):
-    return re.match(expr, value, re.UNICODE) is not None
+REGEXER_CACHE = {}
+
+def regexer(value, expr):
+    if not REGEXER_CACHE.get(expr):
+        REGEXER_CACHE[expr] = re.compile(expr, re.UNICODE)
+    re_expr = REGEXER_CACHE[expr]
+    return re_expr.match(value) is not None
 
 INITIAL_DATA = {
     'node': (
