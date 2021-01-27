@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2021 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -33,7 +33,6 @@ import os
 from pprint import pprint
 import sys
 
-import six
 import antlr4
 import antlr4.tree
 
@@ -189,7 +188,7 @@ class ParserWrapper(object):
 
     def _load(self, name):
         className = '{0}{1}'.format(self.grammarName, name)
-        moduleName = 'pydbc.py{0}.{1}'.format(2 if six.PY2 else 3, className)
+        moduleName = 'pydbc.py{0}.{1}'.format(2 if sys.version_info.major == 2 else 3, className)
         module = importlib.import_module(moduleName)
         klass = getattr(module, className)
         return (module, klass, )
