@@ -35,3 +35,11 @@ jobs:
       run: |
         pip install pytest
         pytest
+    - name: Publish package to PyPi
+      uses: casperdcl/deploy-pypi@v1
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      with:
+          password: ${{ secrets.PYPI_PASSWORD }}
+          user: ${{ secrets.PYPI_USER_NAME }}
+          build: true
+          skip_existing: true
