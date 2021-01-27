@@ -18,7 +18,7 @@ if (sys.version_info.major == 3 and sys.version_info.minor < 4) or (sys.version_
     sys.exit(1)
 
 setup(
-    name = 'pydbc',
+    name = 'pyvndb',
     version = '0.1.0',
     description = "Vehicle description file handling for Python",
     long_description=long_description,
