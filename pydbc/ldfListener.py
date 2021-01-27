@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2021 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -279,7 +279,7 @@ class LdfListener(parser.BaseListener):
             name = attr['name']
             node = self.nodes.get(name)
             if not node:
-                self.logger.error("While inserting attribute definition: node '{}' does not exist.".format(nid))
+                self.logger.error("While inserting attribute definition: node '{}' does not exist.".format(name))
                 continue
             node.protocol_version = attr['version']
             node.configured_NAD = attr['configuredNAD']
