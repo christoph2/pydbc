@@ -25,7 +25,7 @@ __copyright__ = """
    s. FLOSS-EXCEPTION.txt
 """
 __author__  = 'Christoph Schueler'
-__version__ = '0.4.4'
+__version__ = '0.4.5'
 
 #import pkg_resources
 #pkg_resources.declare_namespace(__name__)
