@@ -47,6 +47,7 @@ from pydbc.db.model import (
     Node_TxMessage, Node_RxSignal, Category_Definition, Category_Value, AttributeRel_Value,
     Signal_Group_Signal, Signal_Group, Vndb_Protocol, Object_Valuetable
 )
+from pydbc.utils import detect_encoding
 
 def indent(level):
     print(" " * level,)
@@ -220,7 +221,7 @@ class ParserWrapper(object):
 
     @staticmethod
     def stringStream(fname, encoding = 'latin-1'):
-        return antlr4.InputStream(codecs.open(fname, encoding = encoding).read())
+        return antlr4.InputStream(codecs.open(fname, encoding = detect_encoding(fname)).read())
 
     def _getNumberOfSyntaxErrors(self):
         return self._syntaxErrors

@@ -1,5 +1,6 @@
 pytest
 pytest-runner
 mako
+chardet
 antlr4-python3-runtime == 4.8
 colorama

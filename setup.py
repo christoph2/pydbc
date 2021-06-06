@@ -10,7 +10,7 @@ ANTLR_VERSION = '4.8'
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'mako', 'colorama', 'SQLAlchemy']
+INSTALL_REQUIRES = ["antlr4-python3-runtime=={}".format(ANTLR_VERSION), 'chardet', 'mako', 'colorama', 'SQLAlchemy']
 
 
 if (sys.version_info.major == 3 and sys.version_info.minor < 4) or (sys.version_info.minor < 3):

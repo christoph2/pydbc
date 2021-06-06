@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2021 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -38,13 +38,12 @@ import sys
 
 from sqlalchemy import (MetaData, schema, types, orm, event,
     create_engine, Column, ForeignKey, ForeignKeyConstraint, func,
-    PassiveDefault, UniqueConstraint, inspect
+    UniqueConstraint, inspect
 )
 
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.engine import Engine
 from sqlalchemy.sql import exists
-#from sqlalchemy.ext.automap import automap_base
 
 from pydbc.logger import Logger
 from pydbc.db import model

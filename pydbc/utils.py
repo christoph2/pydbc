@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2018 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2021 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -29,6 +29,8 @@ __version__ = '0.1.0'
 
 import itertools
 import os
+
+from chardet.universaldetector import UniversalDetector
 
 def slicer(iterable, sliceLength, converter = None):
     if converter is None:
@@ -131,4 +133,27 @@ def nfc_equal(str1, str2):
 
 def fold_equal(str1, str2):
     return (normalize('NFC', str1).casefold() == normalize('NFC', str2).casefold())
+
+def detect_encoding(file_name: str) -> str:
+    """Detect encoding of a text file.
+
+     Parameters
+    ----------
+    file_name: str
+
+    Returns
+    -------
+    str: Useable as `encoding` paramter to `open`.
+    """
+    detector = UniversalDetector()
+    if isinstance(file_name, pathlib.WindowsPath):
+        file_name = str(file_name)
+    for line in open(file_name, "rb"):
+        detector.feed(line)
+        if detector.done:
+            break
+    result = detector.result['encoding'] if detector.done else "ascii"
+    detector.close()
+    return result
+
 

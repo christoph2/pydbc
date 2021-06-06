@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2020 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2021 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -34,7 +34,7 @@ import re
 
 from sqlalchemy import (MetaData, schema, types, orm, event,
     create_engine, Column, ForeignKey, ForeignKeyConstraint, func,
-    PassiveDefault, UniqueConstraint, CheckConstraint, select
+    UniqueConstraint, CheckConstraint, select
 )
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
