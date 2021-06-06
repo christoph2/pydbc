@@ -25,7 +25,7 @@ __copyright__ = """
    s. FLOSS-EXCEPTION.txt
 """
 __author__  = 'Christoph Schueler'
-__version__ = '0.4.5'
+__version__ = '0.4.6'
 
 
 VNDB_SCHEMA_VERSION = 1
