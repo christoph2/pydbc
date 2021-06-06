@@ -29,7 +29,7 @@ __version__ = '0.1.0'
 
 import itertools
 import os
-
+import pathlib
 from chardet.universaldetector import UniversalDetector
 
 def slicer(iterable, sliceLength, converter = None):
