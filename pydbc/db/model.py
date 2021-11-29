@@ -94,10 +94,10 @@ class Node(Base, RidMixIn, CommentableMixIn):
 
     name = Column(types.Unicode(255), nullable = False, unique = True, index= True)
     node_id = StdInteger()
-    type = Column(types.String(256))
+    type_ = Column(types.String(256))
     __mapper_args__ = {
         "polymorphic_identity": "Node",
-        "polymorphic_on": type,
+        "polymorphic_on": type_,
     }
 
 class Message_Signal(Base, MixInBase):
