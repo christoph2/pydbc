@@ -1,4 +1,4 @@
-# Generated from ncf.g4 by ANTLR 4.8
+# Generated from ncf.g4 by ANTLR 4.9.3
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -409,7 +409,7 @@ class ncfParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.8")
+        self.checkVersion("4.9.3")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
@@ -417,6 +417,7 @@ class ncfParser ( Parser ):
 
 
     class ToplevelContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -490,6 +491,7 @@ class ncfParser ( Parser ):
 
 
     class Language_versionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -544,6 +546,7 @@ class ncfParser ( Parser ):
 
 
     class Node_definitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -653,6 +656,7 @@ class ncfParser ( Parser ):
 
 
     class Node_nameContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -701,6 +705,7 @@ class ncfParser ( Parser ):
 
 
     class General_definitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -901,6 +906,7 @@ class ncfParser ( Parser ):
 
 
     class Protocol_versionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -949,6 +955,7 @@ class ncfParser ( Parser ):
 
 
     class Supplier_idContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -997,6 +1004,7 @@ class ncfParser ( Parser ):
 
 
     class Function_idContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1045,6 +1053,7 @@ class ncfParser ( Parser ):
 
 
     class Variant_idContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1093,6 +1102,7 @@ class ncfParser ( Parser ):
 
 
     class Bitrate_definitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1207,6 +1217,7 @@ class ncfParser ( Parser ):
 
 
     class BitrateContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1257,6 +1268,7 @@ class ncfParser ( Parser ):
 
 
     class Diagnostic_definitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1487,6 +1499,7 @@ class ncfParser ( Parser ):
 
 
     class Frame_definitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1555,6 +1568,7 @@ class ncfParser ( Parser ):
 
 
     class Single_frameContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1634,6 +1648,7 @@ class ncfParser ( Parser ):
 
 
     class Frame_kindContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1686,6 +1701,7 @@ class ncfParser ( Parser ):
 
 
     class Frame_nameContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1734,6 +1750,7 @@ class ncfParser ( Parser ):
 
 
     class Frame_propertiesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1843,6 +1860,7 @@ class ncfParser ( Parser ):
 
 
     class Signal_definitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1911,6 +1929,7 @@ class ncfParser ( Parser ):
 
 
     class Signal_definition_entryContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1970,6 +1989,7 @@ class ncfParser ( Parser ):
 
 
     class Signal_nameContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2018,6 +2038,7 @@ class ncfParser ( Parser ):
 
 
     class Signal_propertiesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2109,6 +2130,7 @@ class ncfParser ( Parser ):
 
 
     class Init_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2175,6 +2197,7 @@ class ncfParser ( Parser ):
 
 
     class Init_value_scalarContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2227,6 +2250,7 @@ class ncfParser ( Parser ):
 
 
     class Init_value_arrayContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2302,6 +2326,7 @@ class ncfParser ( Parser ):
 
 
     class Encoding_definitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2370,6 +2395,7 @@ class ncfParser ( Parser ):
 
 
     class Encoding_definition_entryContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2443,6 +2469,7 @@ class ncfParser ( Parser ):
 
 
     class Encoding_definition_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2529,6 +2556,7 @@ class ncfParser ( Parser ):
 
 
     class Encoding_nameContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2577,6 +2605,7 @@ class ncfParser ( Parser ):
 
 
     class Logical_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2647,6 +2676,7 @@ class ncfParser ( Parser ):
 
 
     class Physical_rangeContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2744,6 +2774,7 @@ class ncfParser ( Parser ):
 
 
     class Bcd_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2790,6 +2821,7 @@ class ncfParser ( Parser ):
 
 
     class Ascii_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2836,6 +2868,7 @@ class ncfParser ( Parser ):
 
 
     class Signal_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2884,6 +2917,7 @@ class ncfParser ( Parser ):
 
 
     class Min_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2932,6 +2966,7 @@ class ncfParser ( Parser ):
 
 
     class Max_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2980,6 +3015,7 @@ class ncfParser ( Parser ):
 
 
     class ScaleContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3028,6 +3064,7 @@ class ncfParser ( Parser ):
 
 
     class OffsetContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3076,6 +3113,7 @@ class ncfParser ( Parser ):
 
 
     class Text_infoContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3124,6 +3162,7 @@ class ncfParser ( Parser ):
 
 
     class Status_managementContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3218,6 +3257,7 @@ class ncfParser ( Parser ):
 
 
     class Published_signalContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3266,6 +3306,7 @@ class ncfParser ( Parser ):
 
 
     class Free_text_definitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3320,6 +3361,7 @@ class ncfParser ( Parser ):
 
 
     class IntValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3384,6 +3426,7 @@ class ncfParser ( Parser ):
 
 
     class FloatValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3431,6 +3474,7 @@ class ncfParser ( Parser ):
 
 
     class NumberContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3497,6 +3541,7 @@ class ncfParser ( Parser ):
 
 
     class StringValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3544,6 +3589,7 @@ class ncfParser ( Parser ):
 
 
     class IdentifierValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
