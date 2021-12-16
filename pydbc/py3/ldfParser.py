@@ -1,4 +1,4 @@
-# Generated from ldf.g4 by ANTLR 4.8
+# Generated from ldf.g4 by ANTLR 4.9.3
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -551,7 +551,7 @@ class ldfParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.8")
+        self.checkVersion("4.9.3")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
@@ -559,6 +559,7 @@ class ldfParser ( Parser ):
 
 
     class Lin_description_fileContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -791,6 +792,7 @@ class ldfParser ( Parser ):
 
 
     class Lin_protocol_version_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -845,6 +847,7 @@ class ldfParser ( Parser ):
 
 
     class Lin_language_version_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -899,6 +902,7 @@ class ldfParser ( Parser ):
 
 
     class Lin_file_revision_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -953,6 +957,7 @@ class ldfParser ( Parser ):
 
 
     class Lin_speed_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1009,6 +1014,7 @@ class ldfParser ( Parser ):
 
 
     class Channel_name_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1063,6 +1069,7 @@ class ldfParser ( Parser ):
 
 
     class Node_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1192,6 +1199,7 @@ class ldfParser ( Parser ):
 
 
     class Node_attributes_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1260,6 +1268,7 @@ class ldfParser ( Parser ):
 
 
     class Node_attributeContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1364,6 +1373,7 @@ class ldfParser ( Parser ):
 
 
     class Attributes_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1589,6 +1599,7 @@ class ldfParser ( Parser ):
 
 
     class Configurable_framesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1657,6 +1668,7 @@ class ldfParser ( Parser ):
 
 
     class Configurable_frameContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1723,6 +1735,7 @@ class ldfParser ( Parser ):
 
 
     class Node_composition_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1791,6 +1804,7 @@ class ldfParser ( Parser ):
 
 
     class ConfigurationContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1866,6 +1880,7 @@ class ldfParser ( Parser ):
 
 
     class Configuration_itemContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1940,6 +1955,7 @@ class ldfParser ( Parser ):
 
 
     class Signal_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2008,6 +2024,7 @@ class ldfParser ( Parser ):
 
 
     class Signal_itemContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2100,6 +2117,7 @@ class ldfParser ( Parser ):
 
 
     class Init_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2166,6 +2184,7 @@ class ldfParser ( Parser ):
 
 
     class Init_value_scalarContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2214,6 +2233,7 @@ class ldfParser ( Parser ):
 
 
     class Init_value_arrayContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2285,6 +2305,7 @@ class ldfParser ( Parser ):
 
 
     class Diagnostic_signal_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2353,6 +2374,7 @@ class ldfParser ( Parser ):
 
 
     class Diagnostic_itemContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2420,6 +2442,7 @@ class ldfParser ( Parser ):
 
 
     class Signal_groups_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2488,6 +2511,7 @@ class ldfParser ( Parser ):
 
 
     class Signal_groupContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2570,6 +2594,7 @@ class ldfParser ( Parser ):
 
 
     class Signal_group_itemContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2629,6 +2654,7 @@ class ldfParser ( Parser ):
 
 
     class Frame_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2697,6 +2723,7 @@ class ldfParser ( Parser ):
 
 
     class Frame_itemContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2795,6 +2822,7 @@ class ldfParser ( Parser ):
 
 
     class Frame_signalContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2854,6 +2882,7 @@ class ldfParser ( Parser ):
 
 
     class Sporadic_frame_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2922,6 +2951,7 @@ class ldfParser ( Parser ):
 
 
     class Sporadic_frame_itemContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2996,6 +3026,7 @@ class ldfParser ( Parser ):
 
 
     class Event_triggered_frame_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3064,6 +3095,7 @@ class ldfParser ( Parser ):
 
 
     class Event_triggered_frame_itemContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3147,6 +3179,7 @@ class ldfParser ( Parser ):
 
 
     class Diag_frame_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3256,6 +3289,7 @@ class ldfParser ( Parser ):
 
 
     class Diag_frame_itemContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3315,6 +3349,7 @@ class ldfParser ( Parser ):
 
 
     class Schedule_table_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3383,6 +3418,7 @@ class ldfParser ( Parser ):
 
 
     class Schedule_table_entryContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3456,6 +3492,7 @@ class ldfParser ( Parser ):
 
 
     class Schedule_table_commandContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3517,6 +3554,7 @@ class ldfParser ( Parser ):
 
 
     class CommandContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3793,6 +3831,7 @@ class ldfParser ( Parser ):
 
 
     class Signal_encoding_type_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3861,6 +3900,7 @@ class ldfParser ( Parser ):
 
 
     class Signal_encoding_entryContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3934,6 +3974,7 @@ class ldfParser ( Parser ):
 
 
     class Signal_encoding_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4020,6 +4061,7 @@ class ldfParser ( Parser ):
 
 
     class Logical_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4090,6 +4132,7 @@ class ldfParser ( Parser ):
 
 
     class Physical_rangeContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4185,6 +4228,7 @@ class ldfParser ( Parser ):
 
 
     class Bcd_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4231,6 +4275,7 @@ class ldfParser ( Parser ):
 
 
     class Ascii_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4277,6 +4322,7 @@ class ldfParser ( Parser ):
 
 
     class Signal_representation_defContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4345,6 +4391,7 @@ class ldfParser ( Parser ):
 
 
     class Signal_representation_entryContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4419,6 +4466,7 @@ class ldfParser ( Parser ):
 
 
     class IntValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4483,6 +4531,7 @@ class ldfParser ( Parser ):
 
 
     class FloatValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4530,6 +4579,7 @@ class ldfParser ( Parser ):
 
 
     class NumberContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4596,6 +4646,7 @@ class ldfParser ( Parser ):
 
 
     class StringValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4643,6 +4694,7 @@ class ldfParser ( Parser ):
 
 
     class IdentifierValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)

@@ -1,4 +1,4 @@
-# Generated from dbc.g4 by ANTLR 4.8
+# Generated from dbc.g4 by ANTLR 4.9.3
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -447,7 +447,7 @@ class dbcParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.8")
+        self.checkVersion("4.9.3")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
@@ -455,6 +455,7 @@ class dbcParser ( Parser ):
 
 
     class DbcfileContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -628,6 +629,7 @@ class dbcParser ( Parser ):
 
 
     class MessageTransmittersContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -690,6 +692,7 @@ class dbcParser ( Parser ):
 
 
     class MessageTransmitterContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -751,6 +754,7 @@ class dbcParser ( Parser ):
 
 
     class SignalExtendedValueTypeListContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -813,6 +817,7 @@ class dbcParser ( Parser ):
 
 
     class SignalExtendedValueTypeContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -880,6 +885,7 @@ class dbcParser ( Parser ):
 
 
     class MessagesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -942,6 +948,7 @@ class dbcParser ( Parser ):
 
 
     class MessageContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1035,6 +1042,7 @@ class dbcParser ( Parser ):
 
 
     class SignalContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1173,6 +1181,7 @@ class dbcParser ( Parser ):
 
 
     class ReceiverContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1243,6 +1252,7 @@ class dbcParser ( Parser ):
 
 
     class TransmitterContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1310,6 +1320,7 @@ class dbcParser ( Parser ):
 
 
     class MultiplexerIndicatorContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1358,6 +1369,7 @@ class dbcParser ( Parser ):
 
 
     class ValueTablesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1420,6 +1432,7 @@ class dbcParser ( Parser ):
 
 
     class ValueTableContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1493,6 +1506,7 @@ class dbcParser ( Parser ):
 
 
     class ValueDescriptionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1548,6 +1562,7 @@ class dbcParser ( Parser ):
 
 
     class NodesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1614,6 +1629,7 @@ class dbcParser ( Parser ):
 
 
     class BitTimingContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1686,6 +1702,7 @@ class dbcParser ( Parser ):
 
 
     class NewSymbolsContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1780,6 +1797,7 @@ class dbcParser ( Parser ):
 
 
     class VersionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1830,6 +1848,7 @@ class dbcParser ( Parser ):
 
 
     class ObjectValueTablesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1892,6 +1911,7 @@ class dbcParser ( Parser ):
 
 
     class ObjectValueTableContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1996,6 +2016,7 @@ class dbcParser ( Parser ):
 
 
     class EnvironmentVariablesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2058,6 +2079,7 @@ class dbcParser ( Parser ):
 
 
     class EnvironmentVariableContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2166,6 +2188,7 @@ class dbcParser ( Parser ):
 
 
     class AccessNodesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2233,6 +2256,7 @@ class dbcParser ( Parser ):
 
 
     class EnvironmentVariablesDataContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2295,6 +2319,7 @@ class dbcParser ( Parser ):
 
 
     class EnvironmentVariableDataContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2356,6 +2381,7 @@ class dbcParser ( Parser ):
 
 
     class SignalTypesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2418,6 +2444,7 @@ class dbcParser ( Parser ):
 
 
     class SignalTypeContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2539,6 +2566,7 @@ class dbcParser ( Parser ):
 
 
     class CommentsContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2601,6 +2629,7 @@ class dbcParser ( Parser ):
 
 
     class CommentContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2699,6 +2728,7 @@ class dbcParser ( Parser ):
 
 
     class AttributeDefinitionsContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2761,6 +2791,7 @@ class dbcParser ( Parser ):
 
 
     class AttributeDefinitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2836,6 +2867,7 @@ class dbcParser ( Parser ):
 
 
     class RelativeAttributeDefinitionsContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2898,6 +2930,7 @@ class dbcParser ( Parser ):
 
 
     class RelativeAttributeDefinitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -2973,6 +3006,7 @@ class dbcParser ( Parser ):
 
 
     class AttributeValueTypeContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3103,6 +3137,7 @@ class dbcParser ( Parser ):
 
 
     class AttributeDefaultsContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3165,6 +3200,7 @@ class dbcParser ( Parser ):
 
 
     class AttributeDefaultContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3224,6 +3260,7 @@ class dbcParser ( Parser ):
 
 
     class RelativeAttributeDefaultsContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3286,6 +3323,7 @@ class dbcParser ( Parser ):
 
 
     class RelativeAttributeDefaultContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3345,6 +3383,7 @@ class dbcParser ( Parser ):
 
 
     class AttributeValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3411,6 +3450,7 @@ class dbcParser ( Parser ):
 
 
     class AttributeValuesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3473,6 +3513,7 @@ class dbcParser ( Parser ):
 
 
     class AttributeValueForObjectContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3591,6 +3632,7 @@ class dbcParser ( Parser ):
 
 
     class RelativeAttributeValuesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3653,6 +3695,7 @@ class dbcParser ( Parser ):
 
 
     class RelativeAttributeValueForObjectContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3768,6 +3811,7 @@ class dbcParser ( Parser ):
 
 
     class SignalGroupsContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3830,6 +3874,7 @@ class dbcParser ( Parser ):
 
 
     class SignalGroupContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3914,6 +3959,7 @@ class dbcParser ( Parser ):
 
 
     class CategoryDefinitionsContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3976,6 +4022,7 @@ class dbcParser ( Parser ):
 
 
     class CategoryDefinitionContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4041,6 +4088,7 @@ class dbcParser ( Parser ):
 
 
     class CategoriesContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4103,6 +4151,7 @@ class dbcParser ( Parser ):
 
 
     class CategoryContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4189,6 +4238,7 @@ class dbcParser ( Parser ):
 
 
     class IntValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4236,6 +4286,7 @@ class dbcParser ( Parser ):
 
 
     class FloatValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4283,6 +4334,7 @@ class dbcParser ( Parser ):
 
 
     class NumberContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4349,6 +4401,7 @@ class dbcParser ( Parser ):
 
 
     class StringValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -4396,6 +4449,7 @@ class dbcParser ( Parser ):
 
 
     class IdentifierValueContext(ParserRuleContext):
+        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
