@@ -269,7 +269,7 @@ class ParserWrapper(object):
         self.db.session.commit()
         return self.db.session
 
-    def parseFromFile(self, filename: str, encoding: str = 'latin-1', trace: bool = False) -> object:
+    def parseFromFile(self, filename: str, encoding: str = 'ISO-8859-1', trace: bool = False) -> object:   # str = 'latin-1'
         """Parse a file using the configured grammar and listener.
 
         Args:
@@ -284,7 +284,7 @@ class ParserWrapper(object):
         self.fnbase = os.path.splitext(fname)[0]
         return self.parse(ParserWrapper.stringStream(filename, encoding), trace)
 
-    def parseFromString(self, buf: str, encoding: str = 'latin-1', trace: bool = False, 
+    def parseFromString(self, buf: str, encoding: str = 'ISO-8859-1', trace: bool = False, # str = 'latin-1'
                         dbname: str = ":memory:") -> object:
         """Parse a string using the configured grammar and listener.
 
@@ -301,7 +301,7 @@ class ParserWrapper(object):
         return self.parse(antlr4.InputStream(buf), trace)
 
     @staticmethod
-    def stringStream(fname: str, encoding: str = 'latin-1') -> antlr4.InputStream:
+    def stringStream(fname: str, encoding: str = 'ISO-8859-1') -> antlr4.InputStream:
         """Create an ANTLR4 input stream from a file.
 
         Args:
@@ -311,7 +311,8 @@ class ParserWrapper(object):
         Returns:
             ANTLR4 input stream
         """
-        detected_encoding = detect_encoding(fname)
+        # detected_encoding = detect_encoding(fname)
+        detected_encoding = encoding
         with codecs.open(fname, encoding=detected_encoding) as f:
             return antlr4.InputStream(f.read())
 
