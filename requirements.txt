@@ -1,7 +1,8 @@
-pytest
-pytest-runner
-mako
-chardet
-antlr4-python3-runtime == 4.9.4
-SQLAlchemy
-colorama
+pytest>=7.0.0
+pytest-runner>=6.0.0
+mako>=1.2.0
+chardet>=5.0.0
+antlr4-python3-runtime==4.9.4
+SQLAlchemy>=2.0.0
+colorama>=0.4.6
+typing-extensions>=4.0.0

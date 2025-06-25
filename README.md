@@ -18,7 +18,8 @@ pyDBC is hosted on Github, get the latest release: [https://github.com/christoph
 
 ### Requirements
 
-- Python >= 3.4
+- Python >= 3.10
+- SQLAlchemy >= 2.0.0
 
 ## First steps
 

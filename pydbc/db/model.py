@@ -25,63 +25,73 @@ __copyright__ = """
    s. FLOSS-EXCEPTION.txt
 """
 __author__  = 'Christoph Schueler'
-__version__ = '0.1.0'
+__version__ = '0.2.0'  # Updated to Python 3.10 and SQLAlchemy 2.0
 
 import datetime
 from functools import partial
 import mmap
 import re
+from typing import Optional, List, Dict, Any, Union
 
-from sqlalchemy import (MetaData, schema, types, orm, event,
-    create_engine, Column, ForeignKey, ForeignKeyConstraint, func,
-    UniqueConstraint, CheckConstraint, select
+from sqlalchemy import (MetaData, Column, ForeignKey, ForeignKeyConstraint, 
+    UniqueConstraint, CheckConstraint, select, func, event, create_engine
 )
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy import String, Integer, Float, Boolean, Unicode
+from sqlalchemy.orm import (
+    DeclarativeBase, declared_attr, relationship, 
+    Mapped, mapped_column, validates, with_polymorphic
+)
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.ext.mutable import Mutable
-from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relationship, with_polymorphic, validates
 
 from pydbc.types import (J1939Address, LinProductIdType, ByteOrderType, ValueType)
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    """Base class for all models"""
+    pass
 
-INIT_VALUE = re.compile("(?P<array>\d+(?:,\d+)+) | (?P<scalar>\d+)", re.VERBOSE)
+# Regular expression to match initial values (either array of integers or a single integer)
+INIT_VALUE = re.compile(r"(?P<array>\d+(?:,\d+)+) | (?P<scalar>\d+)", re.VERBOSE)
 
-class MixInBase(object):
+class MixInBase:
+    """Base mixin for all models"""
 
-    @declared_attr
-    def __tablename__(cls):
+    @declared_attr.directive
+    def __tablename__(cls) -> str:
         return cls.__name__.lower()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         columns = [c.name for c in self.__class__.__table__.c]
         result = []
         for name, value in [(n, getattr(self, n)) for n in columns]:
             if isinstance(value, str):
-                result.append("{} = '{}'".format(name, value))
+                result.append(f"{name} = '{value}'")
             else:
-                result.append("{} = {}".format(name, value))
-        return "{}({})".format(self.__class__.__name__, ", ".join(result))
+                result.append(f"{name} = {value}")
+        return f"{self.__class__.__name__}({', '.join(result)})"
 
-class CommentableMixIn(object):
-    comment = Column(types.Unicode(255), default = None)
+class CommentableMixIn:
+    """Mixin for models with comments"""
+    comment: Mapped[Optional[str]] = mapped_column(Unicode(255), default=None)
 
-class MinMaxMixIn(object):
-    minimum = Column(types.Float, default = 0.0)
-    maximum = Column(types.Float, default = 0.0)
+class MinMaxMixIn:
+    """Mixin for models with min/max values"""
+    minimum: Mapped[float] = mapped_column(Float, default=0.0)
+    maximum: Mapped[float] = mapped_column(Float, default=0.0)
 
 class RidMixIn(MixInBase):
-    rid = Column("rid", types.Integer, primary_key = True)
+    """Mixin for models with a primary key 'rid'"""
+    rid: Mapped[int] = mapped_column("rid", Integer, primary_key=True)
 
-def StdInteger(default = 0, primary_key = False, unique = False, nullable = False):
-    return Column(types.Integer, default = default, nullable = nullable,    # PassiveDefault(str(default))
-        primary_key = primary_key, unique = unique)
+def StdInteger(default: int = 0, primary_key: bool = False, unique: bool = False, nullable: bool = False) -> mapped_column:
+    """Helper function to create a standard integer column using SQLAlchemy 2.0 style"""
+    return mapped_column(Integer, default=default, nullable=nullable,
+        primary_key=primary_key, unique=unique)
 
-def StdFloat(default = 0.0, primary_key = False, unique = False, nullable = False):
-    return Column(types.Integer, default = default, nullable = nullable,
-        primary_key = primary_key, unique = unique)
+def StdFloat(default: float = 0.0, primary_key: bool = False, unique: bool = False, nullable: bool = False) -> mapped_column:
+    """Helper function to create a standard float column using SQLAlchemy 2.0 style"""
+    return mapped_column(Float, default=default, nullable=nullable,
+        primary_key=primary_key, unique=unique)
 
 """
     order_items = relationship(
@@ -91,34 +101,42 @@ def StdFloat(default = 0.0, primary_key = False, unique = False, nullable = Fals
 
 
 class Node(Base, RidMixIn, CommentableMixIn):
+    """Node model representing a network node"""
 
-    name = Column(types.Unicode(255), nullable = False, unique = True, index= True)
-    node_id = StdInteger()
-    type_ = Column(types.String(256))
+    name: Mapped[str] = mapped_column(Unicode(255), nullable=False, unique=True, index=True)
+    node_id: Mapped[int] = mapped_column(Integer, default=0)
+    type_: Mapped[str] = mapped_column(String(256))
+
     __mapper_args__ = {
         "polymorphic_identity": "Node",
         "polymorphic_on": type_,
     }
 
 class Message_Signal(Base, MixInBase):
+    """Association model between Message and Signal"""
 
-    message_id = Column(types.Integer,
-        ForeignKey("message.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
+    message_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("message.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+        nullable=False, default=0, primary_key=True
     )
-    signal_id = Column(types.Integer,
-        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
+    signal_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("signal.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+        nullable=False, default=0, primary_key=True
     )
-    offset = Column(types.Integer, nullable = False, default = 0)
-    multiplexor_signal = Column(types.Integer, default = 0)
-    multiplex_dependent = Column(types.Boolean)
-    multiplexor_value = Column(types.Integer)
+    offset: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    multiplexor_signal: Mapped[Optional[int]] = mapped_column(Integer, default=0)
+    multiplex_dependent: Mapped[Optional[bool]] = mapped_column(Boolean)
+    multiplexor_value: Mapped[Optional[int]] = mapped_column(Integer)
 
-    signal = relationship("Signal", lazy = "joined")
+    signal: Mapped["Signal"] = relationship("Signal", lazy="joined")
+    message: Mapped["Message"] = relationship("Message", back_populates="signals")
 
-    def __init__(self, signal, message, offset, multiplexor_signal = None,
-            multiplex_dependent = None, multiplexor_value = None):
+    def __init__(self, signal: "Signal", message: "Message", offset: int, 
+                 multiplexor_signal: Optional[int] = None,
+                 multiplex_dependent: Optional[bool] = None, 
+                 multiplexor_value: Optional[int] = None):
         self.signal = signal
         self.message = message
         self.offset = offset
@@ -128,18 +146,20 @@ class Message_Signal(Base, MixInBase):
 
 
 class Message(Base, RidMixIn, CommentableMixIn):
+    """Message model representing a network message"""
 
-    name = Column(types.Unicode(255), nullable = True, index = True)
-    message_id = StdInteger(nullable = True, default = None)
-    dlc = StdInteger()
-    sender = StdInteger()
+    name: Mapped[Optional[str]] = mapped_column(Unicode(255), nullable=True, index=True)
+    message_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=None)
+    dlc: Mapped[int] = mapped_column(Integer, default=0)
+    sender: Mapped[int] = mapped_column(Integer, default=0)
 
     #transmitter_node_id
 
-    type = Column(types.String(256))
+    type: Mapped[str] = mapped_column(String(256))
 
-    message_signals = relationship(
-        "Message_Signal", cascade="all, delete-orphan", backref="message"
+    # Relationships
+    message_signals: Mapped[List["Message_Signal"]] = relationship(
+        "Message_Signal", cascade="all, delete-orphan", back_populates="message"
     )
     signals = association_proxy("message_signals", "signal")
 
@@ -150,20 +170,19 @@ class Message(Base, RidMixIn, CommentableMixIn):
 
 
 class Signal(Base, RidMixIn, CommentableMixIn):
-    """
+    """Signal model representing a network signal"""
 
-    """
-    name = Column(types.Unicode(255), nullable = False, index = True)
-    bitsize = StdInteger()
-    byteorder = StdInteger(default = 1)
-    sign = StdInteger(default = 1)
-    valuetype = StdInteger(default = 0)
-    formula_factor = Column(types.Float, default = 1.0)
-    formula_offset = Column(types.Float, default = 0.0)
-    minimum = Column(types.Float, default = 0.0)
-    maximum = Column(types.Float, default = 0.0)
-    unit = Column(types.Unicode(255))
-    type = Column(types.String(256))
+    name: Mapped[str] = mapped_column(Unicode(255), nullable=False, index=True)
+    bitsize: Mapped[int] = mapped_column(Integer, default=0)
+    byteorder: Mapped[int] = mapped_column(Integer, default=1)
+    sign: Mapped[int] = mapped_column(Integer, default=1)
+    valuetype: Mapped[int] = mapped_column(Integer, default=0)
+    formula_factor: Mapped[float] = mapped_column(Float, default=1.0)
+    formula_offset: Mapped[float] = mapped_column(Float, default=0.0)
+    minimum: Mapped[float] = mapped_column(Float, default=0.0)
+    maximum: Mapped[float] = mapped_column(Float, default=0.0)
+    unit: Mapped[Optional[str]] = mapped_column(Unicode(255))
+    type: Mapped[str] = mapped_column(String(256))
 
     __mapper_args__ = {
         "polymorphic_identity": "Signal",
@@ -172,13 +191,13 @@ class Signal(Base, RidMixIn, CommentableMixIn):
 
 
 class Network(Base, RidMixIn, CommentableMixIn):
-    """
-    """
+    """Network model representing a communication network"""
 
-    name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
-    protocol = StdInteger()
-    baudrate = StdInteger()
-    type = Column(types.String(256))
+    name: Mapped[str] = mapped_column(Unicode(255), nullable=False, unique=True, index=True)
+    protocol: Mapped[int] = mapped_column(Integer, default=0)
+    baudrate: Mapped[int] = mapped_column(Integer, default=0)
+    type: Mapped[str] = mapped_column(String(256))
+
     __mapper_args__ = {
         "polymorphic_identity": "Network",
         "polymorphic_on": type,
@@ -560,26 +579,27 @@ class EnvironmentVariablesData(Base, MixInBase):
 ##  LIN specific classses.
 ##
 class LinNetwork(Network):
-    """
+    """LIN (Local Interconnect Network) network model"""
 
-    """
-    lin_network_id = Column(
-        types.Integer,
+    lin_network_id: Mapped[int] = mapped_column(
+        Integer,
         ForeignKey("network.rid"),
-        primary_key = True
+        primary_key=True
     )
     __mapper_args__ = {
         "polymorphic_identity": "LinNetwork"
     }
 
-    protocol_version = Column(types.Unicode(255), nullable = True, default = None)
-    language_version = Column(types.Unicode(255), nullable = True, default = None)
-    file_revision = Column(types.Unicode(255), nullable = True, default = None)
-    speed = StdFloat(default = None, nullable = True)
-    channel_name = Column(types.Unicode(255), nullable = True, default = None)
+    protocol_version: Mapped[Optional[str]] = mapped_column(Unicode(255), nullable=True, default=None)
+    language_version: Mapped[Optional[str]] = mapped_column(Unicode(255), nullable=True, default=None)
+    file_revision: Mapped[Optional[str]] = mapped_column(Unicode(255), nullable=True, default=None)
+    speed: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=None)
+    channel_name: Mapped[Optional[str]] = mapped_column(Unicode(255), nullable=True, default=None)
 
-    def __init__(self, name, protocol_version = None, language_version = None, speed = None,
-                 file_revision = None, channel_name = None):
+    def __init__(self, name: str, protocol_version: Optional[str] = None, 
+                 language_version: Optional[str] = None, speed: Optional[float] = None,
+                 file_revision: Optional[str] = None, channel_name: Optional[str] = None):
+        super().__init__()
         self.name = name
         self.protocol_version = protocol_version
         self.language_version = language_version
@@ -587,11 +607,9 @@ class LinNetwork(Network):
         self.speed = speed
         self.channel_name = channel_name
 
-    def __str__(self):
-        return 'LinNetwork(name = "{}", protocol_version = "{}", language_version = "{}",'\
-            'file_revision = "{}", speed = {}, channel_name = "{}")'.format(self.name, self.protocol_version,
-            self.language_version, self.file_revision or "", self.speed, self.channel_name or ""
-        )
+    def __str__(self) -> str:
+        return f'LinNetwork(name = "{self.name}", protocol_version = "{self.protocol_version}", language_version = "{self.language_version}",'\
+            f'file_revision = "{self.file_revision or ""}", speed = {self.speed}, channel_name = "{self.channel_name or ""}")'
 
     __repr__ = __str__
 
@@ -725,24 +743,24 @@ class LinSlaveNode(LinNode):
 
 
 class LinSignal(Signal):
-    """
+    """LIN (Local Interconnect Network) signal model"""
 
-    """
-    lin_signal_id = Column(
-        types.Integer,
+    lin_signal_id: Mapped[int] = mapped_column(
+        Integer,
         ForeignKey("signal.rid"),
-        primary_key = True
+        primary_key=True
     )
-    _init_value = Column(types.Unicode(255), default = "0")
+    _init_value: Mapped[str] = mapped_column(Unicode(255), default="0")
 
-    publisher_id =  Column(types.Integer,
-        ForeignKey("linnode.lin_node_id", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False
+    publisher_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("linnode.lin_node_id", onupdate="CASCADE", ondelete="RESTRICT"),
+        nullable=False
     )
-    publisher = relationship("LinNode", backref = "signals")
+    publisher: Mapped["LinNode"] = relationship("LinNode", back_populates="signals")
 
-    signal_subscribers = relationship(
-        "LinSignalSubscriber", cascade="all, delete-orphan", backref="signal"
+    signal_subscribers: Mapped[List["LinSignalSubscriber"]] = relationship(
+        "LinSignalSubscriber", cascade="all, delete-orphan", back_populates="signal"
     )
     subscribers = association_proxy("signal_subscribers", "subscriber")
 
@@ -750,7 +768,8 @@ class LinSignal(Signal):
         "polymorphic_identity": "LinSignal"
     }
 
-    def __init__(self, name, signal_size, init_value, publisher):
+    def __init__(self, name: str, signal_size: int, init_value: Union[int, List[int]], publisher: "LinNode"):
+        super().__init__()
         self.name = name
         self.bitsize = signal_size
         self.byteorder = ByteOrderType.MOTOROLA
@@ -759,29 +778,35 @@ class LinSignal(Signal):
         self.publisher = publisher
 
     @hybrid_property
-    def init_value(self):
+    def init_value(self) -> Union[int, List[int]]:
+        """Get the initial value of the signal"""
         value = self._init_value
         match = INIT_VALUE.match(value)
-        if match:
-            gd = match.groupdict()
-            if gd['array']:
-                value = [int(v) for v in value.split(",")]
-            else:
-                value = int(value)
-        else:
-            raise ValueError("Malformed initial value '{}'.".format(value))
-        return value
+        if not match:
+            raise ValueError(f"Malformed initial value '{value}'.")
+
+        gd = match.groupdict()
+        match gd:
+            case {'array': array} if array:
+                return [int(v) for v in value.split(",")]
+            case {'scalar': scalar} if scalar:
+                return int(value)
+            case _:
+                raise ValueError(f"Malformed initial value '{value}'.")
 
     @init_value.setter
-    def init_value(self, value):
-        if isinstance(value, int):
-            value = str(value)
-        elif isinstance(value, (list, tuple)):
-            value = ','.join([str(x) for x in value])
-        self._init_value = value
+    def init_value(self, value: Union[int, List[int], tuple]) -> None:
+        """Set the initial value of the signal"""
+        match value:
+            case int():
+                self._init_value = str(value)
+            case list() | tuple():
+                self._init_value = ','.join([str(x) for x in value])
+            case _:
+                raise TypeError(f"Expected int, list, or tuple, got {type(value).__name__}")
 
-    def __str__(self):
-        return 'LinSignal(name = "{}", signal_size = {}, init_value = {})'.format(self.name, self.bitsize, self.init_value)
+    def __str__(self) -> str:
+        return f'LinSignal(name = "{self.name}", signal_size = {self.bitsize}, init_value = {self.init_value})'
 
     __repr__ = __str__
 
