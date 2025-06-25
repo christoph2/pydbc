@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyvndb"
-version = "0.4.8"
+version = "0.5.0"
 description = "Vehicle description file handling for Python"
 authors = ["Christoph Schueler <cpu12.gems@googlemail.com>"]
 readme = "README.md"
