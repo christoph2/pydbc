@@ -38,7 +38,7 @@ import sys
 
 from sqlalchemy import (MetaData, schema, types, orm, event,
     create_engine, Column, ForeignKey, ForeignKeyConstraint, func,
-    UniqueConstraint, inspect
+    UniqueConstraint, inspect, text
 )
 
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -67,7 +67,7 @@ def regexer(value, expr):
 
 INITIAL_DATA = {
     'node': (
-        {"rid": 0, "node_id": 0, "name": 'Vector__XXX', "comment": 'Dummy node for non-existent senders/receivers.'},
+        {"rid": 0, "node_id": 0, "name": 'Vector__XXX', "comment": 'Dummy node for non-existent senders/receivers.', "type_": 'Node'},
     ),
 }
 """
@@ -86,7 +86,7 @@ def _inserter(data, target, conn, **kws):
         k, v = row.keys(), row.values()
         keys = ', '.join([x for x in k])
         values = ', '.join([repr(x) for x in v])
-        stmt = "INSERT INTO {}({}) VALUES ({})".format(target.name, keys, values)
+        stmt = text("INSERT INTO {}({}) VALUES ({})".format(target.name, keys, values))
         conn.execute(stmt)
 
 def loadInitialData(target):

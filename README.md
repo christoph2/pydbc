@@ -16,10 +16,23 @@ pyDBC is a library for editing .dbc files, which is a widespread description for
 
 pyDBC is hosted on Github, get the latest release: [https://github.com/christoph2/pydbc](https://github.com/christoph2/pydbc)
 
+### Using Poetry (recommended)
+
+This project uses [Poetry](https://python-poetry.org/) for dependency management and packaging. If you don't have Poetry installed, you can install it by following the instructions on the [Poetry website](https://python-poetry.org/docs/#installation).
+
+```bash
+# Install the package
+poetry install
+
+# Run the tests
+poetry run pytest
+```
+
 ### Requirements
 
 - Python >= 3.10
 - SQLAlchemy >= 2.0.0
+- Other dependencies are managed by Poetry
 
 ## First steps
 

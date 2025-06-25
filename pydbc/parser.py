@@ -160,22 +160,59 @@ class BaseListener(antlr4.ParseTreeListener):
             method(msg)
 
     def info(self, msg, location = None):
-        self._log(self.info.warn, msg, location)
+        """Log an info message.
+
+        Args:
+            msg: The message to log
+            location: Optional location information
+        """
+        self._log(self.logger.info, msg, location)
 
     def warn(self, msg, location = None):
-        self._log(self.logger.warn, msg, location)
+        """Log a warning message.
+
+        Args:
+            msg: The message to log
+            location: Optional location information
+        """
+        self._log(self.logger.warning, msg, location)
 
     def error(self, msg, location = None):
-        self._log(self.logger.warn, msg, location)
+        """Log an error message.
+
+        Args:
+            msg: The message to log
+            location: Optional location information
+        """
+        self._log(self.logger.error, msg, location)
 
     def debug(self, msg, location = None):
-        self._log(self.logger.warn, msg, location)
+        """Log a debug message.
+
+        Args:
+            msg: The message to log
+            location: Optional location information
+        """
+        self._log(self.logger.debug, msg, location)
 
 
 class ParserWrapper(object):
+    """Wrapper for ANTLR4 parsers.
+
+    This class provides a convenient interface for parsing files using ANTLR4 grammars.
+    It dynamically loads the appropriate lexer and parser classes based on the grammar name.
     """
-    """
-    def __init__(self, grammarName, startSymbol, listenerClass, debug = False, logLevel = 'INFO'):
+    def __init__(self, grammarName: str, startSymbol: str, listenerClass: type, 
+                 debug: bool = False, logLevel: str = 'INFO'):
+        """Initialize the parser wrapper.
+
+        Args:
+            grammarName: Name of the grammar (e.g., 'dbc', 'ldf', 'ncf')
+            startSymbol: Name of the start rule in the grammar
+            listenerClass: Listener class to use for parsing
+            debug: Enable debug output
+            logLevel: Logging level (INFO, WARN, ERROR, DEBUG)
+        """
         self.grammarName = grammarName
         self.startSymbol = startSymbol
         self.lexerModule, self.lexerClass = self._load('Lexer')
@@ -183,19 +220,41 @@ class ParserWrapper(object):
         self.listenerClass = listenerClass
         self.debug = debug
         self.logLevel = logLevel
+        self._syntaxErrors = 0
+        self.db = None
+        self.fnbase = None
 
     def __del__(self):
+        """Clean up resources when the object is garbage collected."""
+        # Nothing to clean up currently, but this is a placeholder for future cleanup
         pass
 
-    def _load(self, name):
-        className = '{0}{1}'.format(self.grammarName, name)
-        moduleName = 'pydbc.py{0}.{1}'.format(2 if sys.version_info.major == 2 else 3, className)
+    def _load(self, name: str) -> tuple:
+        """Load a module and class dynamically.
+
+        Args:
+            name: Name suffix for the module and class ('Lexer' or 'Parser')
+
+        Returns:
+            Tuple of (module, class)
+        """
+        className = f'{self.grammarName}{name}'
+        moduleName = f'pydbc.py3.{className}'  # Always use Python 3 modules
         module = importlib.import_module(moduleName)
         klass = getattr(module, className)
-        return (module, klass, )
+        return (module, klass)
 
-    def parse(self, input, trace = False):
-        self.db = VNDB(self.fnbase, debug = self.debug)
+    def parse(self, input: antlr4.InputStream, trace: bool = False) -> object:
+        """Parse input using the configured grammar and listener.
+
+        Args:
+            input: ANTLR4 input stream
+            trace: Enable trace output for debugging
+
+        Returns:
+            SQLAlchemy session object
+        """
+        self.db = VNDB(self.fnbase, debug=self.debug)
         lexer = self.lexerClass(input)
         tokenStream = antlr4.CommonTokenStream(lexer)
         parser = self.parserClass(tokenStream)
@@ -210,22 +269,58 @@ class ParserWrapper(object):
         self.db.session.commit()
         return self.db.session
 
-    def parseFromFile(self, filename, encoding = 'latin-1', trace = False):
+    def parseFromFile(self, filename: str, encoding: str = 'latin-1', trace: bool = False) -> object:
+        """Parse a file using the configured grammar and listener.
+
+        Args:
+            filename: Path to the file to parse
+            encoding: Character encoding of the file (auto-detected if possible)
+            trace: Enable trace output for debugging
+
+        Returns:
+            SQLAlchemy session object
+        """
         pth, fname = os.path.split(filename)
         self.fnbase = os.path.splitext(fname)[0]
         return self.parse(ParserWrapper.stringStream(filename, encoding), trace)
 
-    def parseFromString(self, buf, encoding = 'latin-1', trace = False, dbname = ":memory:"):
+    def parseFromString(self, buf: str, encoding: str = 'latin-1', trace: bool = False, 
+                        dbname: str = ":memory:") -> object:
+        """Parse a string using the configured grammar and listener.
+
+        Args:
+            buf: String to parse
+            encoding: Character encoding of the string
+            trace: Enable trace output for debugging
+            dbname: Name of the database to create
+
+        Returns:
+            SQLAlchemy session object
+        """
         self.fnbase = dbname
         return self.parse(antlr4.InputStream(buf), trace)
 
     @staticmethod
-    def stringStream(fname, encoding = 'latin-1'):
-        return antlr4.InputStream(codecs.open(fname, encoding = detect_encoding(fname)).read())
+    def stringStream(fname: str, encoding: str = 'latin-1') -> antlr4.InputStream:
+        """Create an ANTLR4 input stream from a file.
 
-    def _getNumberOfSyntaxErrors(self):
+        Args:
+            fname: Path to the file
+            encoding: Character encoding of the file (auto-detected if possible)
+
+        Returns:
+            ANTLR4 input stream
+        """
+        detected_encoding = detect_encoding(fname)
+        with codecs.open(fname, encoding=detected_encoding) as f:
+            return antlr4.InputStream(f.read())
+
+    def _getNumberOfSyntaxErrors(self) -> int:
+        """Get the number of syntax errors encountered during parsing.
+
+        Returns:
+            Number of syntax errors
+        """
         return self._syntaxErrors
 
     numberOfSyntaxErrors = property(_getNumberOfSyntaxErrors)
-
-

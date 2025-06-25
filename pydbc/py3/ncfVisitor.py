@@ -1,6 +1,6 @@
-# Generated from ncf.g4 by ANTLR 4.9.3
+# Generated from ncf.g4 by ANTLR 4.13.2
 from antlr4 import *
-if __name__ is not None and "." in __name__:
+if "." in __name__:
     from .ncfParser import ncfParser
 else:
     from ncfParser import ncfParser

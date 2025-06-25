@@ -24,34 +24,36 @@ __copyright__ = """
 
    s. FLOSS-EXCEPTION.txt
 """
-__author__  = 'Christoph Schueler'
+__author__ = 'Christoph Schueler'
 __version__ = '0.2.0'  # Updated to Python 3.10 and SQLAlchemy 2.0
 
 import datetime
-from functools import partial
-import mmap
 import re
-from typing import Optional, List, Dict, Any, Union
+from typing import Optional, List, Union
 
-from sqlalchemy import (MetaData, Column, ForeignKey, ForeignKeyConstraint, 
-    UniqueConstraint, CheckConstraint, select, func, event, create_engine
-)
-from sqlalchemy import String, Integer, Float, Boolean, Unicode
-from sqlalchemy.orm import (
-    DeclarativeBase, declared_attr, relationship, 
-    Mapped, mapped_column, validates, with_polymorphic
-)
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import BLOB, DateTime, String, Integer, Float, Boolean, Unicode
+from sqlalchemy import (Column, ForeignKey, ForeignKeyConstraint,
+                        UniqueConstraint, func
+                        )
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.orderinglist import ordering_list
+from sqlalchemy.orm import (
+    DeclarativeBase, declared_attr, relationship,
+    Mapped, mapped_column
+)
 
-from pydbc.types import (J1939Address, LinProductIdType, ByteOrderType, ValueType)
+from pydbc.types import (LinProductIdType, ByteOrderType, ValueType)
+
 
 class Base(DeclarativeBase):
     """Base class for all models"""
     pass
 
+
 # Regular expression to match initial values (either array of integers or a single integer)
 INIT_VALUE = re.compile(r"(?P<array>\d+(?:,\d+)+) | (?P<scalar>\d+)", re.VERBOSE)
+
 
 class MixInBase:
     """Base mixin for all models"""
@@ -70,28 +72,36 @@ class MixInBase:
                 result.append(f"{name} = {value}")
         return f"{self.__class__.__name__}({', '.join(result)})"
 
+
 class CommentableMixIn:
     """Mixin for models with comments"""
     comment: Mapped[Optional[str]] = mapped_column(Unicode(255), default=None)
+
 
 class MinMaxMixIn:
     """Mixin for models with min/max values"""
     minimum: Mapped[float] = mapped_column(Float, default=0.0)
     maximum: Mapped[float] = mapped_column(Float, default=0.0)
 
+
 class RidMixIn(MixInBase):
     """Mixin for models with a primary key 'rid'"""
     rid: Mapped[int] = mapped_column("rid", Integer, primary_key=True)
 
-def StdInteger(default: int = 0, primary_key: bool = False, unique: bool = False, nullable: bool = False) -> mapped_column:
+
+def StdInteger(default: int = 0, primary_key: bool = False, unique: bool = False,
+               nullable: bool = False) -> mapped_column:
     """Helper function to create a standard integer column using SQLAlchemy 2.0 style"""
     return mapped_column(Integer, default=default, nullable=nullable,
-        primary_key=primary_key, unique=unique)
+                         primary_key=primary_key, unique=unique)
 
-def StdFloat(default: float = 0.0, primary_key: bool = False, unique: bool = False, nullable: bool = False) -> mapped_column:
+
+def StdFloat(default: float = 0.0, primary_key: bool = False, unique: bool = False,
+             nullable: bool = False) -> mapped_column:
     """Helper function to create a standard float column using SQLAlchemy 2.0 style"""
     return mapped_column(Float, default=default, nullable=nullable,
-        primary_key=primary_key, unique=unique)
+                         primary_key=primary_key, unique=unique)
+
 
 """
     order_items = relationship(
@@ -112,6 +122,7 @@ class Node(Base, RidMixIn, CommentableMixIn):
         "polymorphic_on": type_,
     }
 
+
 class Message_Signal(Base, MixInBase):
     """Association model between Message and Signal"""
 
@@ -131,11 +142,11 @@ class Message_Signal(Base, MixInBase):
     multiplexor_value: Mapped[Optional[int]] = mapped_column(Integer)
 
     signal: Mapped["Signal"] = relationship("Signal", lazy="joined")
-    message: Mapped["Message"] = relationship("Message", back_populates="signals")
+    message: Mapped["Message"] = relationship("Message", back_populates="message_signals")
 
-    def __init__(self, signal: "Signal", message: "Message", offset: int, 
+    def __init__(self, signal: "Signal", message: "Message", offset: int,
                  multiplexor_signal: Optional[int] = None,
-                 multiplex_dependent: Optional[bool] = None, 
+                 multiplex_dependent: Optional[bool] = None,
                  multiplexor_value: Optional[int] = None):
         self.signal = signal
         self.message = message
@@ -153,7 +164,7 @@ class Message(Base, RidMixIn, CommentableMixIn):
     dlc: Mapped[int] = mapped_column(Integer, default=0)
     sender: Mapped[int] = mapped_column(Integer, default=0)
 
-    #transmitter_node_id
+    # transmitter_node_id
 
     type: Mapped[str] = mapped_column(String(256))
 
@@ -205,94 +216,92 @@ class Network(Base, RidMixIn, CommentableMixIn):
 
 
 class Node_RxSig(Base, MixInBase):
+    node = Column(Integer,
+                  ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                  nullable=False, default=0, primary_key=True
+                  )
+    signal = Column(Integer,
+                    ForeignKey("signal.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                    nullable=False, default=0, primary_key=True
+                    )
 
-    node = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    signal = Column(types.Integer,
-        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
 
 class Node_RxSignal(Base, MixInBase):
-
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    message_id = Column(types.Integer,
-        ForeignKey("message.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    signal_id = Column(types.Integer,
-        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
+    node_id = Column(Integer,
+                     ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
+    message_id = Column(Integer,
+                        ForeignKey("message.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                        nullable=False, default=0, primary_key=True
+                        )
+    signal_id = Column(Integer,
+                       ForeignKey("signal.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                       nullable=False, default=0, primary_key=True
+                       )
     __table_args__ = (
-        ForeignKeyConstraint(columns = ["message_id", "signal_id"],
-            refcolumns = ["message_signal.message_id", "message_signal.signal_id"]
-        ),
+        ForeignKeyConstraint(columns=["message_id", "signal_id"],
+                             refcolumns=["message_signal.message_id", "message_signal.signal_id"]
+                             ),
     )
 
-    #receiver_id = relationship(
+    # receiver_id = relationship(
     #    "Node_RxSignal", cascade="all, delete-orphan", backref="signal"
-    #)
-    #receiver = association_proxy("receiver_id", "signal")
+    # )
+    # receiver = association_proxy("receiver_id", "signal")
 
-    node = relationship("Node", uselist  = False, lazy = "joined")
-    message = relationship("Message", uselist  = False, lazy = "joined")
-    signal = relationship("Signal", uselist  = False, lazy = "joined")    # backref = "rx_signals", uselist  = False,
+    node = relationship("Node", uselist=False, lazy="joined")
+    message = relationship("Message", uselist=False, lazy="joined")
+    signal = relationship("Signal", uselist=False, lazy="joined")  # backref = "rx_signals", uselist  = False,
 
 
 class Node_TxMessage(Base, MixInBase):
+    node_id = Column(Integer,
+                     ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
+    message_id = Column(Integer,
+                        ForeignKey("message.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                        nullable=False, default=0, primary_key=True
+                        )
+    node = relationship("Node", backref="tx_messages", uselist=False)
+    message = relationship("Message", backref="tx_messages", uselist=False)
 
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    message_id = Column(types.Integer,
-        ForeignKey("message.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "tx_messages", uselist  = False)
-    message = relationship("Message", backref = "tx_messages", uselist  = False)
 
 class Node_TxSig(Base, MixInBase):
+    node_id = Column(Integer,
+                     ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
+    signal_id = Column(Integer,
+                       ForeignKey("signal.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                       nullable=False, default=0, primary_key=True
+                       )
+    node = relationship("Node", backref="tx_sigs", uselist=False)
+    signal = relationship("Signal", backref="tx_sigs", uselist=False)
 
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    signal_id = Column(types.Integer,
-        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "tx_sigs", uselist  = False)
-    signal = relationship("Signal", backref = "tx_sigs", uselist  = False)
 
 class Attribute_Definition(Base, RidMixIn, CommentableMixIn):
-
-    name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
+    name = Column(Unicode(255), nullable=False, unique=True, index=True)
     objecttype = StdInteger()
     valuetype = StdInteger()
-    array = Column(types.Boolean, default = False)
-    minimum = Column(types.Float, default = 0.0)
-    maximum = Column(types.Float, default = 0.0)
-    enumvalues = Column(types.TEXT)
-    default_number = Column(types.Float, default = 0.0)
-    default_string = Column(types.Unicode(255), default = None)
+    array = Column(Boolean, default=False)
+    minimum = Column(Float, default=0.0)
+    maximum = Column(Float, default=0.0)
+    enumvalues = Column(Unicode(255))
+    default_number = Column(Float, default=0.0)
+    default_string = Column(Unicode(255), default=None)
+
 
 class Attribute_Value(Base, MixInBase):
-
-    object_id = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    attribute_definition_id = Column(types.Integer,
-        ForeignKey("attribute_definition.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True,
-    )
-    num_value = Column(types.Float, default = 0.0)
-    string_value = Column(types.TEXT)
-    attribute_definition = relationship("Attribute_Definition", backref = "values")
+    object_id = Column(Integer, nullable=False, default=0, primary_key=True)
+    attribute_definition_id = Column(Integer,
+                                     ForeignKey("attribute_definition.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                                     nullable=False, default=0, primary_key=True,
+                                     )
+    num_value = Column(Float, default=0.0)
+    string_value = Column(Unicode(255))
+    attribute_definition = relationship("Attribute_Definition", backref="values")
 
     """
     @hybrid_property
@@ -310,270 +319,252 @@ class Attribute_Value(Base, MixInBase):
 
 
 class AttributeRel_Value(Base, MixInBase):
-
-    object_id = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    attribute_definition_id = Column(types.Integer,
-        ForeignKey("attribute_definition.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True,
-    )
-    num_value = Column(types.Float, default = 0.0)
-    string_value = Column(types.TEXT)
-    opt_object_id_1 = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    opt_object_id_2 = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    blob_value = Column(types.BLOB)
-    attribute_definition = relationship("Attribute_Definition", backref = "attribute_rel_values")
+    object_id = Column(Integer, nullable=False, default=0, primary_key=True)
+    attribute_definition_id = Column(Integer,
+                                     ForeignKey("attribute_definition.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                                     nullable=False, default=0, primary_key=True,
+                                     )
+    num_value = Column(Float, default=0.0)
+    string_value = Column(Unicode(255))
+    opt_object_id_1 = Column(Integer, nullable=False, default=0, primary_key=True)
+    opt_object_id_2 = Column(Integer, nullable=False, default=0, primary_key=True)
+    blob_value = Column(BLOB)
+    attribute_definition = relationship("Attribute_Definition", backref="attribute_rel_values")
 
 
 class Vndb_Meta(Base, RidMixIn):
-
     schema_version = StdInteger()
     vndb_type = StdInteger()
-    created = Column(types.DateTime, default = datetime.datetime.now)
+    created = Column(DateTime, default=datetime.datetime.now)
 
 
 class Vndb_Migrations(Base, RidMixIn):
-
-    app = Column(types.Unicode(255), nullable = False)
-    name = Column(types.Unicode(255), nullable = False)
-    applied = Column(types.DateTime,  func.now)
+    app = Column(Unicode(255), nullable=False)
+    name = Column(Unicode(255), nullable=False)
+    applied = Column(DateTime, func.now)
 
 
 class Vndb_Protocol(Base, MixInBase):
+    network_id = Column(Integer,
+                        ForeignKey("network.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                        nullable=False, default=0, primary_key=True,
+                        )
+    name = Column(Unicode(255), nullable=False)
+    specific = Column(Unicode(255), nullable=True)
+    network = relationship("Network", uselist=False)
 
-    network_id = Column(types.Integer,
-        ForeignKey("network.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True,
-    )
-    name = Column(types.Unicode(255), nullable = False)
-    specific = Column(types.Unicode(255), nullable = True)
-    network = relationship("Network", uselist = False)
 
 class ECU(Base, RidMixIn, CommentableMixIn):
-
-    name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
+    name = Column(Unicode(255), nullable=False, unique=True, index=True)
 
 
 class ECU_EnvVar(Base, MixInBase):
-
-    ecu = Column(types.Integer,
-        ForeignKey("ecu.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True,
-    )
-    env_var = Column(types.Integer,
-        ForeignKey("envvar.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True,
-    )
+    ecu = Column(Integer,
+                 ForeignKey("ecu.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                 nullable=False, default=0, primary_key=True,
+                 )
+    env_var = Column(Integer,
+                     ForeignKey("envvar.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True,
+                     )
 
 
 class ECU_Node(Base, MixInBase):
-    ecu = Column(types.Integer,
-        ForeignKey("ecu.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True,
-    )
-    node = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True,
-    )
+    ecu = Column(Integer,
+                 ForeignKey("ecu.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                 nullable=False, default=0, primary_key=True,
+                 )
+    node = Column(Integer,
+                  ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                  nullable=False, default=0, primary_key=True,
+                  )
 
 
 class Gateway_Signal(Base, RidMixIn, CommentableMixIn):
+    vehicle_id = Column(Integer, nullable=False, default=0)
+    dest_signal = Column(Integer, nullable=False, default=0)
+    dest_network = Column(Integer, nullable=False, default=0)
+    dest_message = Column(Integer, nullable=False, default=0)
+    dest_transmitter = Column(Integer, nullable=False, default=0)
+    gateway = Column(Integer, nullable=False, default=0)
+    source_signal = Column(Integer, nullable=False, default=0)
+    source_network = Column(Integer, nullable=False, default=0)
+    source_message = Column(Integer, nullable=False, default=0)
+    source_receiver = Column(Integer, nullable=False, default=0)
+    reserved_id1 = Column(Integer, nullable=False, default=0)
 
-    vehicle_id = Column(types.Integer, nullable = False, default = 0)
-    dest_signal = Column(types.Integer, nullable = False, default = 0)
-    dest_network = Column(types.Integer, nullable = False, default = 0)
-    dest_message = Column(types.Integer, nullable = False, default = 0)
-    dest_transmitter = Column(types.Integer, nullable = False, default = 0)
-    gateway = Column(types.Integer, nullable = False, default = 0)
-    source_signal = Column(types.Integer, nullable = False, default = 0)
-    source_network = Column(types.Integer, nullable = False, default = 0)
-    source_message = Column(types.Integer, nullable = False, default = 0)
-    source_receiver = Column(types.Integer, nullable = False, default = 0)
-    reserved_id1 = Column(types.Integer, nullable = False, default = 0)
 
 class Node_Group(Base, RidMixIn, CommentableMixIn):
-
-    name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
-    node_object_type = Column(types.Integer, nullable = False, default = 0)
-    node_group_type = Column(types.Integer, nullable = False, default = 0)
+    name = Column(Unicode(255), nullable=False, unique=True, index=True)
+    node_object_type = Column(Integer, nullable=False, default=0)
+    node_group_type = Column(Integer, nullable=False, default=0)
 
 
 class Node_Group_Object(Base, MixInBase):
-    parent_type = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    parent_rid = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    object_type = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    object_rid = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    object_rid2 = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    opt_object_ref_1 = Column(types.Integer, nullable = False, default = 0)
-    opt_object_ref_2 = Column(types.Integer, nullable = False, default = 0)
-    opt_object_value = Column(types.Integer, nullable = False, default = 0)
+    parent_type = Column(Integer, nullable=False, default=0, primary_key=True)
+    parent_rid = Column(Integer, nullable=False, default=0, primary_key=True)
+    object_type = Column(Integer, nullable=False, default=0, primary_key=True)
+    object_rid = Column(Integer, nullable=False, default=0, primary_key=True)
+    object_rid2 = Column(Integer, nullable=False, default=0, primary_key=True)
+    opt_object_ref_1 = Column(Integer, nullable=False, default=0)
+    opt_object_ref_2 = Column(Integer, nullable=False, default=0)
+    opt_object_value = Column(Integer, nullable=False, default=0)
 
 
 class Network_Node(Base, MixInBase):
-
-    network = Column(types.Integer,
-        ForeignKey("network.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
+    network = Column(Integer,
+                     ForeignKey("network.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
+    node = Column(Integer,
+                  ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                  nullable=False, default=0, primary_key=True
+                  )
 
 
 class Signal_Group(Base, RidMixIn):
-
-    name = Column(types.Unicode(255), nullable = False)
-    value = Column(types.Integer, nullable = False, default = 0)
-    message_id = Column(types.Integer,
-        ForeignKey("message.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0
-    )
-    message = relationship("Message", backref = "signal_groups")
+    name = Column(Unicode(255), nullable=False)
+    value = Column(Integer, nullable=False, default=0)
+    message_id = Column(Integer,
+                        ForeignKey("message.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                        nullable=False, default=0
+                        )
+    message = relationship("Message", backref="signal_groups")
     UniqueConstraint("Message", "Name")
 
 
 class Signal_Group_Signal(Base, MixInBase):
-
-    signal_group_id = Column(types.Integer,
-        ForeignKey("signal_group.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    message_id = Column(types.Integer,
-        ForeignKey("message.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    signal_id = Column(types.Integer,
-        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    signal_group = relationship("Signal_Group", backref = "signal_group_signal")
-    message = relationship("Message", backref = "signal_group_signal")
-    signal = relationship("Signal", backref = "signal_group_signal")
+    signal_group_id = Column(Integer,
+                             ForeignKey("signal_group.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                             nullable=False, default=0, primary_key=True
+                             )
+    message_id = Column(Integer,
+                        ForeignKey("message.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                        nullable=False, default=0, primary_key=True
+                        )
+    signal_id = Column(Integer,
+                       ForeignKey("signal.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                       nullable=False, default=0, primary_key=True
+                       )
+    signal_group = relationship("Signal_Group", backref="signal_group_signal")
+    message = relationship("Message", backref="signal_group_signal")
+    signal = relationship("Signal", backref="signal_group_signal")
 
 
 class Valuetable(Base, RidMixIn, CommentableMixIn):
     """
     """
-    name = Column(types.Unicode(255), nullable = False, index = True)
+    name = Column(Unicode(255), nullable=False, index=True)
 
 
 class Object_Valuetable(Base, MixInBase):
     """
 
     """
-    object_type = Column(types.Integer, nullable = False, default = 0)  # , primary_key = True
-    object_rid = Column(types.Integer, nullable = False, default = 0)   # , primary_key = True
-    valuetable_id = Column(types.Integer,
-        ForeignKey("valuetable.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    valuetable = relationship("Valuetable", backref = "object_valuetable", uselist = False)
+    object_type = Column(Integer, nullable=False, default=0)  # , primary_key = True
+    object_rid = Column(Integer, nullable=False, default=0)  # , primary_key = True
+    valuetable_id = Column(Integer,
+                           ForeignKey("valuetable.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                           nullable=False, default=0, primary_key=True
+                           )
+    valuetable = relationship("Valuetable", backref="object_valuetable", uselist=False)
 
 
 class Value_Description(Base, MixInBase):
-
-    valuetable_id = Column(types.Integer,
-        ForeignKey("valuetable.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    value = Column(types.Float, nullable = False, default = 0.0, primary_key = True)
-    value_description = Column(types.Unicode(255), nullable = False)
-    valuetable = relationship("Valuetable", backref = "values")
+    valuetable_id = Column(Integer,
+                           ForeignKey("valuetable.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                           nullable=False, default=0, primary_key=True
+                           )
+    value = Column(Float, nullable=False, default=0.0, primary_key=True)
+    value_description = Column(Unicode(255), nullable=False)
+    valuetable = relationship("Valuetable", backref="values")
 
 
 class Vehicle(Base, RidMixIn, CommentableMixIn):
-
-    name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
+    name = Column(Unicode(255), nullable=False, unique=True, index=True)
 
 
 class Vehicle_ECU(Base, MixInBase):
+    vehicle = Column(Integer,
+                     ForeignKey("vehicle.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
 
-    vehicle = Column(types.Integer,
-        ForeignKey("vehicle.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-
-    ecu = Column(types.Integer,
-        ForeignKey("ecu.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
+    ecu = Column(Integer,
+                 ForeignKey("ecu.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                 nullable=False, default=0, primary_key=True
+                 )
 
 
 class Vehicle_Network(Base, MixInBase):
+    vehicle = Column(Integer,
+                     ForeignKey("vehicle.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
 
-    vehicle = Column(types.Integer,
-        ForeignKey("vehicle.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-
-    network = Column(types.Integer,
-        ForeignKey("network.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
+    network = Column(Integer,
+                     ForeignKey("network.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
 
 
 class Versioninfo(Base, MixInBase):
-
-    object_type = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    object_rid = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    version_number = Column(types.Integer, nullable = False, default = 0)
-    is_modified = Column(types.Boolean, nullable = False, default = False)
+    object_type = Column(Integer, nullable=False, default=0, primary_key=True)
+    object_rid = Column(Integer, nullable=False, default=0, primary_key=True)
+    version_number = Column(Integer, nullable=False, default=0)
+    is_modified = Column(Boolean, nullable=False, default=False)
 
 
 class Category_Definition(Base, RidMixIn):
-
-    name = Column(types.Unicode(255), nullable = False)
-    key = Column(types.Integer, nullable = False, default = 0, unique = True)
-    level = Column(types.Integer, nullable = False, default = 0)
+    name = Column(Unicode(255), nullable=False)
+    key = Column(Integer, nullable=False, default=0, unique=True)
+    level = Column(Integer, nullable=False, default=0)
 
 
 class Category_Value(Base, MixInBase):
+    object_id = Column(Integer, nullable=False, default=0, primary_key=True)
+    category_definition_id = Column(Integer,
+                                    ForeignKey("category_definition.key", onupdate="CASCADE", ondelete="RESTRICT"),
+                                    nullable=False, default=0
+                                    )
+    objecttype = Column(Integer, nullable=False, default=0, primary_key=True)
+    category_definition = relationship("Category_Definition", backref="values")
 
-    object_id = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    category_definition_id = Column(types.Integer,
-        ForeignKey("category_definition.key", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0
-    )
-    objecttype = Column(types.Integer, nullable = False, default = 0, primary_key = True)
-    category_definition = relationship("Category_Definition", backref = "values")
 
 class Dbc_Version(Base, RidMixIn):
-
-    version_string = Column(types.Unicode(255), nullable = False, default = '')
-    network = Column(types.Integer, nullable = False, default = 0, unique = True)
+    version_string = Column(Unicode(255), nullable=False, default='')
+    network = Column(Integer, nullable=False, default=0, unique=True)
 
 
 class EnvVar(Base, RidMixIn, CommentableMixIn):
-
-    name = Column(types.Unicode(255), nullable = False, unique = True, index = True)
+    name = Column(Unicode(255), nullable=False, unique=True, index=True)
     type = StdInteger()
-    unit = Column(types.Unicode(255), default = None)
-    minimum = Column(types.Float, default = 0.0)
-    maximum = Column(types.Float, default = 0.0)
-    startup_value = Column(types.Float, default = 0.0)
+    unit = Column(Unicode(255), default=None)
+    minimum = Column(Float, default=0.0)
+    maximum = Column(Float, default=0.0)
+    startup_value = Column(Float, default=0.0)
     size = StdInteger()
     access = StdInteger()
-    accessingNodes = relationship("Node", secondary = "envvar_accessnode")
+    accessingNodes = relationship("Node", secondary="envvar_accessnode")
 
 
 class EnvVar_AccessNode(Base, MixInBase):
-
-    envvar_id = Column(types.Integer,
-        ForeignKey("envvar.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    #envvar = relationship("EnvVar", backref = "nodes")
-    #node = relationship("Node", backref = "envvars")
+    envvar_id = Column(Integer,
+                       ForeignKey("envvar.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                       nullable=False, default=0, primary_key=True
+                       )
+    node_id = Column(Integer,
+                     ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
+    # envvar = relationship("EnvVar", backref = "nodes")
+    # node = relationship("Node", backref = "envvars")
 
 
 class EnvironmentVariablesData(Base, MixInBase):
+    name = Column(Unicode(255), nullable=False, primary_key=True)
+    value = Column(Integer, nullable=False)
 
-    name = Column(types.Unicode(255), nullable = False, primary_key = True)
-    value = Column(types.Integer, nullable = False)
 
 ##
 ##  LIN specific classses.
@@ -596,7 +587,7 @@ class LinNetwork(Network):
     speed: Mapped[Optional[float]] = mapped_column(Float, nullable=True, default=None)
     channel_name: Mapped[Optional[str]] = mapped_column(Unicode(255), nullable=True, default=None)
 
-    def __init__(self, name: str, protocol_version: Optional[str] = None, 
+    def __init__(self, name: str, protocol_version: Optional[str] = None,
                  language_version: Optional[str] = None, speed: Optional[float] = None,
                  file_revision: Optional[str] = None, channel_name: Optional[str] = None):
         super().__init__()
@@ -608,8 +599,8 @@ class LinNetwork(Network):
         self.channel_name = channel_name
 
     def __str__(self) -> str:
-        return f'LinNetwork(name = "{self.name}", protocol_version = "{self.protocol_version}", language_version = "{self.language_version}",'\
-            f'file_revision = "{self.file_revision or ""}", speed = {self.speed}, channel_name = "{self.channel_name or ""}")'
+        return f'LinNetwork(name = "{self.name}", protocol_version = "{self.protocol_version}", language_version = "{self.language_version}",' \
+               f'file_revision = "{self.file_revision or ""}", speed = {self.speed}, channel_name = "{self.channel_name or ""}")'
 
     __repr__ = __str__
 
@@ -618,10 +609,12 @@ class LinNode(Node):
     """
     """
     lin_node_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("node.rid"),
-        primary_key = True
+        primary_key=True
     )
+
+    signals = relationship("LinSignal", back_populates="publisher")
 
     __mapper_args__ = {
         "polymorphic_identity": "LinNode"
@@ -632,23 +625,23 @@ class LinMasterNode(LinNode):
     """
     """
     lin_master_node_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linnode.lin_node_id"),
-        primary_key = True
+        primary_key=True
     )
 
-    timebase = StdFloat(default = 0.0)
-    jitter = StdFloat(default = 0.0)
+    timebase = StdFloat(default=0.0)
+    jitter = StdFloat(default=0.0)
 
     # Only J2602.
-    bit_length = StdInteger(nullable = True, default = None)
-    tolerant = StdFloat(nullable = True, default = None)
+    bit_length = StdInteger(nullable=True, default=None)
+    tolerant = StdFloat(nullable=True, default=None)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinMasterNode"
     }
 
-    def __init__(self, name, timebase, jitter, bit_length = None, tolerant = None):
+    def __init__(self, name, timebase, jitter, bit_length=None, tolerant=None):
         self.name = name
         self.timebase = timebase
         self.jitter = jitter
@@ -656,9 +649,10 @@ class LinMasterNode(LinNode):
         self.tolerant = tolerant
 
     def __repr__(self):
-        return 'LinMasterNode(name = "{}", timebase = {}, jitter = {}, bit_length = {}, tolerant = {})'.format(self.name,
+        return 'LinMasterNode(name = "{}", timebase = {}, jitter = {}, bit_length = {}, tolerant = {})'.format(
+            self.name,
             self.timebase, self.jitter, self.bit_length, self.tolerant
-        )
+            )
 
     __str__ = __repr__
 
@@ -667,24 +661,24 @@ class LinSlaveNode(LinNode):
     """
     """
     lin_slave_node_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linnode.lin_node_id"),
-        primary_key = True
+        primary_key=True
     )
 
-    protocol_version = Column(types.Unicode(255))
-    configured_NAD = StdInteger(nullable = True, default = None)
-    initial_NAD = StdInteger(nullable = True, default = None)
+    protocol_version = Column(Unicode(255))
+    configured_NAD = StdInteger(nullable=True, default=None)
+    initial_NAD = StdInteger(nullable=True, default=None)
 
-    supplier_id = StdInteger(default = 0)
-    function_id = StdInteger(default = 0)
-    variant = StdInteger(nullable = True, default = None)
+    supplier_id = StdInteger(default=0)
+    function_id = StdInteger(default=0)
+    variant = StdInteger(nullable=True, default=None)
 
-    p2_min = StdFloat(nullable = True, default = None)
-    st_min = StdFloat(nullable = True, default = None)
-    n_as_timeout = StdFloat(nullable = True, default = None)
-    n_cr_timeout = StdFloat(nullable = True, default = None)
-    response_tolerance = StdFloat(nullable = True, default = None)
+    p2_min = StdFloat(nullable=True, default=None)
+    st_min = StdFloat(nullable=True, default=None)
+    n_as_timeout = StdFloat(nullable=True, default=None)
+    n_cr_timeout = StdFloat(nullable=True, default=None)
+    response_tolerance = StdFloat(nullable=True, default=None)
 
     @hybrid_property
     def product_id(self):
@@ -718,8 +712,8 @@ class LinSlaveNode(LinNode):
         "polymorphic_identity": "LinSlaveNode"
     }
 
-    def __init__(self, name, protocol_version = None, configured_NAD = None, initial_NAD = None, product_id = (),
-                 p2_min = None, st_min = None, n_as_timeout = None, n_cr_timeout = None, response_tolerance = None):
+    def __init__(self, name, protocol_version=None, configured_NAD=None, initial_NAD=None, product_id=(),
+                 p2_min=None, st_min=None, n_as_timeout=None, n_cr_timeout=None, response_tolerance=None):
         self.name = name
         self.protocol_version = protocol_version
         self.configured_NAD = configured_NAD
@@ -738,8 +732,6 @@ class LinSlaveNode(LinNode):
         )
 
     __str__ = __repr__
-
-
 
 
 class LinSignal(Signal):
@@ -815,15 +807,16 @@ class LinSignalSubscriber(Base, MixInBase):
     """
 
     """
-    lin_node_id = Column(types.Integer,
-        ForeignKey("linnode.lin_node_id", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, primary_key = True
-    )
-    lin_signal_id = Column(types.Integer,
-        ForeignKey("linsignal.lin_signal_id", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, primary_key = True
-    )
-    subscriber = relationship(LinNode, lazy = "joined")
+    lin_node_id = Column(Integer,
+                         ForeignKey("linnode.lin_node_id", onupdate="CASCADE", ondelete="RESTRICT"),
+                         nullable=False, primary_key=True
+                         )
+    lin_signal_id = Column(Integer,
+                           ForeignKey("linsignal.lin_signal_id", onupdate="CASCADE", ondelete="RESTRICT"),
+                           nullable=False, primary_key=True
+                           )
+    subscriber = relationship(LinNode, lazy="joined")
+    signal = relationship("LinSignal", back_populates="signal_subscribers", lazy="joined")
 
     def __init__(self, subscriber):
         self.subscriber = subscriber
@@ -833,9 +826,9 @@ class LinUnconditionalFrame(Message):
     """
     """
     lin_unconditional_frame_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("message.rid"),
-        primary_key = True
+        primary_key=True
     )
 
     frame_signals = relationship(
@@ -843,11 +836,11 @@ class LinUnconditionalFrame(Message):
     )
     signals = association_proxy("frame_signals", "signal")
 
-    publisher_id =  Column(types.Integer,
-        ForeignKey("linnode.lin_node_id", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False
-    )
-    publisher = relationship("LinNode", backref = "unconditional_frames")
+    publisher_id = Column(Integer,
+                          ForeignKey("linnode.lin_node_id", onupdate="CASCADE", ondelete="RESTRICT"),
+                          nullable=False
+                          )
+    publisher = relationship("LinNode", backref="unconditional_frames")
 
     __mapper_args__ = {
         "polymorphic_identity": "LinUnconditionalFrame"
@@ -895,20 +888,20 @@ class LinUnconditionalFrameSignal(Base, MixInBase):
 
     """
     lin_unconditional_frame_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
-        primary_key = True
+        primary_key=True
     )
 
-    lin_signal_id = Column(types.Integer,
-        ForeignKey("linsignal.lin_signal_id", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, primary_key = True
-    )
-    signal_offset = StdInteger(default = 0)
-    unconditional_frame = relationship(LinUnconditionalFrame, lazy = "joined")
-    signal = relationship(LinSignal, lazy = "joined")
+    lin_signal_id = Column(Integer,
+                           ForeignKey("linsignal.lin_signal_id", onupdate="CASCADE", ondelete="RESTRICT"),
+                           nullable=False, primary_key=True
+                           )
+    signal_offset = StdInteger(default=0)
+    unconditional_frame = relationship(LinUnconditionalFrame, lazy="joined", overlaps="frame,frame_signals")
+    signal = relationship(LinSignal, lazy="joined")
 
-    def __init__(self, signal, signal_offset = 0):
+    def __init__(self, signal, signal_offset=0):
         self.signal = signal
         self.signal_offset = signal_offset
 
@@ -916,13 +909,14 @@ class LinUnconditionalFrameSignal(Base, MixInBase):
         return 'LinUnconditionalFrameSignal(unconditional_frame = {}, signal = {}, signal_offset = {})'.format(
             self.unconditional_frame, self.signal, self.signal_offset
         )
+
     __str__ = __repr__
 
 
 class LinSignalEncodingType(Base, RidMixIn):
     """
     """
-    name = Column(types.Unicode(255), nullable = False, unique = True)
+    name = Column(Unicode(255), nullable=False, unique=True)
 
     def __init__(self, name):
         self.name = name
@@ -936,37 +930,37 @@ class LinSignalEncodingType(Base, RidMixIn):
 class LinSignalRepresentation(Base, MixInBase):
     """
     """
-    lin_signal_encoding_type_id = Column(types.Integer,
-        ForeignKey("linsignalencodingtype.rid"),
-        nullable = False, primary_key = True
-    )
-    signal_id = Column(types.Integer,
-        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    signal_encoding_type = relationship("LinSignalEncodingType", backref = "representations", uselist = False)
-    signal = relationship("Signal",  uselist  = False)
+    lin_signal_encoding_type_id = Column(Integer,
+                                         ForeignKey("linsignalencodingtype.rid"),
+                                         nullable=False, primary_key=True
+                                         )
+    signal_id = Column(Integer,
+                       ForeignKey("signal.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                       nullable=False, default=0, primary_key=True
+                       )
+    signal_encoding_type = relationship("LinSignalEncodingType", backref="representations", uselist=False)
+    signal = relationship("Signal", uselist=False)
 
     def __init__(self, signal_encoding_type, signal):
         self.signal_encoding_type = signal_encoding_type
         self.signal = signal
 
     def __repr__(self):
-        return 'LinSignalRepresentation(signal_encoding_type = {}, signal = {})'.format(self.signal_encoding_type, self.signal)
+        return 'LinSignalRepresentation(signal_encoding_type = {}, signal = {})'.format(self.signal_encoding_type,
+                                                                                        self.signal)
 
     __str__ = __repr__
 
 
 class LinSignalEncodingEntry(Base, MixInBase):
+    entry_id = Column(Integer, primary_key=True)
 
-    entry_id = Column(types.Integer, primary_key = True)
-
-    lin_signal_encoding_type_id = Column(types.Integer,
-        ForeignKey("linsignalencodingtype.rid"),
-        nullable = False, # , primary_key = True
-    )
-    type = Column(types.String(75))
-    signal_encoding_type = relationship("LinSignalEncodingType", backref = "entries", uselist = False)
+    lin_signal_encoding_type_id = Column(Integer,
+                                         ForeignKey("linsignalencodingtype.rid"),
+                                         nullable=False,  # , primary_key = True
+                                         )
+    type = Column(String(75))
+    signal_encoding_type = relationship("LinSignalEncodingType", backref="entries", uselist=False)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinSignalEncodingEntry",
@@ -975,13 +969,12 @@ class LinSignalEncodingEntry(Base, MixInBase):
 
 
 class LinSignalEncodingEntry_Value(LinSignalEncodingEntry):
-
     entry_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linsignalencodingentry.entry_id"),
-        primary_key = True
+        primary_key=True
     )
-    entry_type = Column(types.Integer)
+    entry_type = Column(Integer)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinSignalEncodingEntry_Value"
@@ -997,14 +990,13 @@ class LinSignalEncodingEntry_Value(LinSignalEncodingEntry):
 
 
 class LinSignalEncodingEntry_Logical(LinSignalEncodingEntry):
-
     entry_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linsignalencodingentry.entry_id"),
-        primary_key = True
+        primary_key=True
     )
-    signal_value = Column(types.Float, nullable = False)
-    text_info = Column(types.Unicode(1024), nullable = True)
+    signal_value = Column(Float, nullable=False)
+    text_info = Column(Unicode(1024), nullable=True)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinSignalEncodingEntry_Logical"
@@ -1015,23 +1007,23 @@ class LinSignalEncodingEntry_Logical(LinSignalEncodingEntry):
         self.text_info = text_info
 
     def __repr__(self):
-        return 'LinSignalEncodingEntry_Logical(signal_value = {}, text_info = "{}")'.format(self.signal_value, self.text_info)
+        return 'LinSignalEncodingEntry_Logical(signal_value = {}, text_info = "{}")'.format(self.signal_value,
+                                                                                            self.text_info)
 
     __str__ = __repr__
 
 
 class LinSignalEncodingEntry_Physical(LinSignalEncodingEntry):
-
     entry_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linsignalencodingentry.entry_id"),
-        primary_key = True
+        primary_key=True
     )
-    min_value = Column(types.Float, nullable = False)
-    max_value = Column(types.Float, nullable = False)
-    scale = Column(types.Float, nullable = False)
-    offset = Column(types.Float, nullable = False)
-    text_info = Column(types.Unicode(1024), nullable = True)
+    min_value = Column(Float, nullable=False)
+    max_value = Column(Float, nullable=False)
+    scale = Column(Float, nullable=False)
+    offset = Column(Float, nullable=False)
+    text_info = Column(Unicode(1024), nullable=True)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinSignalEncodingEntry_Physical"
@@ -1052,23 +1044,23 @@ class LinScheduleTable(Base, RidMixIn):
     """
     """
 
-    name = Column(types.Unicode(255), nullable = False, unique = True)
+    name = Column(Unicode(255), nullable=False, unique=True)
     entries = relationship("LinScheduleTable_Command", order_by="LinScheduleTable_Command.position",
-                           collection_class = ordering_list('position')
-    )
+                           collection_class=ordering_list('position')
+                           )
 
 
 class LinScheduleTable_Command(Base, MixInBase):
     """
     """
-    command_id = Column(types.Integer, primary_key = True)
+    command_id = Column(Integer, primary_key=True)
 
-    lin_schedule_table_id = Column(types.Integer,
-        ForeignKey("linscheduletable.rid"),
-        nullable = False, # , primary_key = True
-    )
-    frame_time = Column(types.Float, nullable = False)
-    type = Column(types.String(75))
+    lin_schedule_table_id = Column(Integer,
+                                   ForeignKey("linscheduletable.rid"),
+                                   nullable=False,  # , primary_key = True
+                                   )
+    frame_time = Column(Float, nullable=False)
+    type = Column(String(75))
     position = StdInteger()
 
     __mapper_args__ = {
@@ -1089,15 +1081,15 @@ class LinScheduleTable_Command_Frame(LinScheduleTable_Command):
     """
     """
     command_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable_command.command_id"),
-        primary_key = True
+        primary_key=True
     )
-    frame_id = Column(types.Integer,
-        ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
-        nullable = False, default = 0, primary_key = True
-    )
-    frame = relationship("LinUnconditionalFrame", backref = "entries", uselist = False)
+    frame_id = Column(Integer,
+                      ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
+                      nullable=False, default=0, primary_key=True
+                      )
+    frame = relationship("LinUnconditionalFrame", backref="entries", uselist=False)
 
     __mapper_args__ = {"polymorphic_identity": "LinScheduleTable_Command_Frame"}
 
@@ -1115,15 +1107,14 @@ class LinScheduleTable_Command_MasterReq(LinScheduleTable_Command):
     """
     """
     command_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable_command.command_id"),
-        primary_key = True
+        primary_key=True
     )
 
     __mapper_args__ = {
         "polymorphic_identity": "LinScheduleTable_Command_MasterReq"
     }
-
 
     def __init__(self, frame_time):
         self.frame_time = frame_time
@@ -1138,9 +1129,9 @@ class LinScheduleTable_Command_SlaveResp(LinScheduleTable_Command):
     """
     """
     command_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable_command.command_id"),
-        primary_key = True
+        primary_key=True
     )
 
     __mapper_args__ = {
@@ -1160,15 +1151,15 @@ class LinScheduleTable_Command_AssignNad(LinScheduleTable_Command):
     """
     """
     command_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable_command.command_id"),
-        primary_key = True
+        primary_key=True
     )
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "assign_nads", uselist  = False)
+    node_id = Column(Integer,
+                     ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
+    node = relationship("Node", backref="assign_nads", uselist=False)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinScheduleTable_Command_AssignNad"
@@ -1188,22 +1179,22 @@ class LinScheduleTable_Command_ConditionalChangeNad(LinScheduleTable_Command):
     """
     """
     command_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable_command.command_id"),
-        primary_key = True
+        primary_key=True
     )
-    nad = Column(types.Integer)
-    id = Column(types.Integer)
-    byte = Column(types.Integer)
-    mask = Column(types.Integer)
-    inv = Column(types.Integer)
-    new_nad = Column(types.Integer)
+    nad = Column(Integer)
+    id = Column(Integer)
+    byte = Column(Integer)
+    mask = Column(Integer)
+    inv = Column(Integer)
+    new_nad = Column(Integer)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinScheduleTable_Command_ConditionalChangeNad"
     }
 
-    def __init__(self, frame_time, nad, id, byte, mask , inv, new_nad):
+    def __init__(self, frame_time, nad, id, byte, mask, inv, new_nad):
         self.frame_time = frame_time
         self.nad = nad
         self.id = id
@@ -1215,7 +1206,7 @@ class LinScheduleTable_Command_ConditionalChangeNad(LinScheduleTable_Command):
     def __repr__(self):
         return 'LinScheduleTable_Command_ConditionalChangeNad(frame_time = {}, nad = {}, id = {}, byte = {}, mask = {}, inv = {}, new_nad = {})'.format(
             self.frame_time, self.nad, self.id, self.byte, self.mask, self.inv, self.new_nad
-    )
+        )
 
     __str__ = __repr__
 
@@ -1224,20 +1215,20 @@ class LinScheduleTable_Command_DataDump(LinScheduleTable_Command):
     """
     """
     command_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable_command.command_id"),
-        primary_key = True
+        primary_key=True
     )
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "data_dumps", uselist  = False)
-    d1 = Column(types.Integer)
-    d2 = Column(types.Integer)
-    d3 = Column(types.Integer)
-    d4 = Column(types.Integer)
-    d5 = Column(types.Integer)
+    node_id = Column(Integer,
+                     ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
+    node = relationship("Node", backref="data_dumps", uselist=False)
+    d1 = Column(Integer)
+    d2 = Column(Integer)
+    d3 = Column(Integer)
+    d4 = Column(Integer)
+    d5 = Column(Integer)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinScheduleTable_Command_DataDump"
@@ -1264,15 +1255,15 @@ class LinScheduleTable_Command_SaveConfiguration(LinScheduleTable_Command):
     """
     """
     command_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable_command.command_id"),
-        primary_key = True
+        primary_key=True
     )
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "save_configurations", uselist  = False)
+    node_id = Column(Integer,
+                     ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
+    node = relationship("Node", backref="save_configurations", uselist=False)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinScheduleTable_Command_SaveConfiguration"
@@ -1283,7 +1274,8 @@ class LinScheduleTable_Command_SaveConfiguration(LinScheduleTable_Command):
         self.node = node
 
     def __repr__(self):
-        return 'LinScheduleTable_Command_SaveConfiguration(frame_time = {}, node = {})'.format(self.frame_time, self.node)
+        return 'LinScheduleTable_Command_SaveConfiguration(frame_time = {}, node = {})'.format(self.frame_time,
+                                                                                               self.node)
 
     __str__ = __repr__
 
@@ -1292,26 +1284,27 @@ class LinScheduleTable_Command_AssignFrameIdRange(LinScheduleTable_Command):
     """
     """
     command_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable_command.command_id"),
-        primary_key = True
+        primary_key=True
     )
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "assign_frame_id_ranges", uselist  = False)
-    frame_index = Column(types.Integer)
-    frame_pid1 = Column(types.Integer)
-    frame_pid2 = Column(types.Integer)
-    frame_pid3 = Column(types.Integer)
-    frame_pid4 = Column(types.Integer)
+    node_id = Column(Integer,
+                     ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
+    node = relationship("Node", backref="assign_frame_id_ranges", uselist=False)
+    frame_index = Column(Integer)
+    frame_pid1 = Column(Integer)
+    frame_pid2 = Column(Integer)
+    frame_pid3 = Column(Integer)
+    frame_pid4 = Column(Integer)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinScheduleTable_Command_AssignFrameIdRange"
     }
 
-    def __init__(self, frame_time, node, frame_index, frame_pid1 = None, frame_pid2 = None, frame_pid3 = None, frame_pid4 = None):
+    def __init__(self, frame_time, node, frame_index, frame_pid1=None, frame_pid2=None, frame_pid3=None,
+                 frame_pid4=None):
         self.frame_time = frame_time
         self.node = node
         self.frame_index = frame_index
@@ -1322,7 +1315,8 @@ class LinScheduleTable_Command_AssignFrameIdRange(LinScheduleTable_Command):
 
     def __repr__(self):
         return 'LinScheduleTable_Command_AssignFrameIdRange(frame_time = {}, node = {}, frame_index = {}, frame_pid1 = {}, frame_pid2 = {}, frame_pid3 = {}, frame_pid4 = {})'.format(
-            self.frame_time, self.node, self.frame_index, self.frame_pid1, self.frame_pid2, self.frame_pid3, self.frame_pid4
+            self.frame_time, self.node, self.frame_index, self.frame_pid1, self.frame_pid2, self.frame_pid3,
+            self.frame_pid4
         )
 
     __str__ = __repr__
@@ -1332,23 +1326,22 @@ class LinScheduleTable_Command_FreeFormat(LinScheduleTable_Command):
     """
     """
     command_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable_command.command_id"),
-        primary_key = True
+        primary_key=True
     )
-    d1 = Column(types.Integer)
-    d2 = Column(types.Integer)
-    d3 = Column(types.Integer)
-    d4 = Column(types.Integer)
-    d5 = Column(types.Integer)
-    d6 = Column(types.Integer)
-    d7 = Column(types.Integer)
-    d8 = Column(types.Integer)
+    d1 = Column(Integer)
+    d2 = Column(Integer)
+    d3 = Column(Integer)
+    d4 = Column(Integer)
+    d5 = Column(Integer)
+    d6 = Column(Integer)
+    d7 = Column(Integer)
+    d8 = Column(Integer)
 
     __mapper_args__ = {
         "polymorphic_identity": "LinScheduleTable_Command_FreeFormat"
     }
-
 
     def __init__(self, frame_time, d1, d2, d3, d4, d5, d6, d7, d8):
         self.frame_time = frame_time
@@ -1373,20 +1366,20 @@ class LinScheduleTable_Command_AssignFrameId(LinScheduleTable_Command):
     """
     """
     command_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable_command.command_id"),
-        primary_key = True
+        primary_key=True
     )
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "assign_frame_ids", uselist  = False)
-    frame_id = Column(types.Integer,
-        ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
-        nullable = False, default = 0, primary_key = True
-    )
-    frame = relationship("LinUnconditionalFrame", backref = "assign_frame_ids", uselist = False)
+    node_id = Column(Integer,
+                     ForeignKey("node.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                     nullable=False, default=0, primary_key=True
+                     )
+    node = relationship("Node", backref="assign_frame_ids", uselist=False)
+    frame_id = Column(Integer,
+                      ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
+                      nullable=False, default=0, primary_key=True
+                      )
+    frame = relationship("LinUnconditionalFrame", backref="assign_frame_ids", uselist=False)
 
     __mapper_args__ = {"polymorphic_identity": "LinScheduleTable_Command_AssignFrameId"}
 
@@ -1402,19 +1395,18 @@ class LinScheduleTable_Command_AssignFrameId(LinScheduleTable_Command):
     __str__ = __repr__
 
 
-
 class LinSporadicFrame_Association(Base, MixInBase):
     """
     """
     sporadic_frame_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linsporadicframe.frame_id"),
-        primary_key = True
+        primary_key=True
     )
     frame_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
-        primary_key = True
+        primary_key=True
     )
     unconditional_frame = relationship("LinUnconditionalFrame")
     position = StdInteger()
@@ -1427,11 +1419,11 @@ class LinSporadicFrame(LinUnconditionalFrame):
     """
     """
     frame_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
-        primary_key = True
+        primary_key=True
     )
-    associated_frames = relationship("LinUnconditionalFrame", secondary = "linsporadicframe_association", uselist = True)
+    associated_frames = relationship("LinUnconditionalFrame", secondary="linsporadicframe_association", uselist=True, overlaps="unconditional_frame")
 
     """
     message_signals = relationship(
@@ -1452,18 +1444,19 @@ class LinEventTriggeredFrame_Association(Base, MixInBase):
     """
     """
     event_triggered_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("lineventtriggeredframe.frame_id"),
-        primary_key = True
+        primary_key=True
     )
     frame_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
-        primary_key = True
+        primary_key=True
     )
-    event_triggered_frame = relationship("LinEventTriggeredFrame", foreign_keys = [event_triggered_id])
+    event_triggered_frame = relationship("LinEventTriggeredFrame", foreign_keys=[event_triggered_id])
     unconditional_frame = relationship("LinUnconditionalFrame")
-    #position = StdInteger()
+
+    # position = StdInteger()
 
     def __init__(self, unconditional_frame):
         self.unconditional_frame = unconditional_frame
@@ -1473,36 +1466,38 @@ class LinEventTriggeredFrame(LinUnconditionalFrame):
     """
     """
     frame_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
-        primary_key = True
+        primary_key=True
     )
     collision_resolving_schedule_table_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linscheduletable.rid"),
-        nullable = True,
+        nullable=True,
     )
 
-    collision_resolving_schedule_table = relationship("LinScheduleTable", backref = "event_triggered_frames",
-        uselist = False
-    )
+    collision_resolving_schedule_table = relationship("LinScheduleTable", backref="event_triggered_frames",
+                                                      uselist=False
+                                                      )
 
-    associated_frames = relationship("LinUnconditionalFrame", secondary = "lineventtriggeredframe_association",
-        order_by = "LinEventTriggeredFrame_Association.frame_id", #collection_class = ordering_list('position'),
-        uselist = True
-    )
+    associated_frames = relationship("LinUnconditionalFrame", secondary="lineventtriggeredframe_association",
+                                     order_by="LinEventTriggeredFrame_Association.frame_id",
+                                     # collection_class = ordering_list('position'),
+                                     uselist=True,
+                                     overlaps="unconditional_frame,event_triggered_frame"
+                                     )
 
-    #associated_frames_assoc = relationship("LinEventTriggeredFrame_Association",
+    # associated_frames_assoc = relationship("LinEventTriggeredFrame_Association",
     #    order_by = "LinEventTriggeredFrame_Association.position", collection_class = ordering_list('position'),
     #    #backref = "event_triggered_frame"
-    #)
-    #associated_frames = association_proxy("associated_frames_assoc", "event_triggered_frame")
+    # )
+    # associated_frames = association_proxy("associated_frames_assoc", "event_triggered_frame")
 
     __mapper_args__ = {
         "polymorphic_identity": "LinEventTriggeredFrame"
     }
 
-    def __init__(self, name, frame_id, master_node, collision_resolving_schedule_table = None):
+    def __init__(self, name, frame_id, master_node, collision_resolving_schedule_table=None):
         self.name = name
         self.frame_id = frame_id
         self.publisher = master_node
@@ -1512,36 +1507,36 @@ class LinEventTriggeredFrame(LinUnconditionalFrame):
 class LinConfigurableFrame(Base, MixInBase):
     """
     """
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid"),
-        nullable = False,
-        primary_key = True
-    )
+    node_id = Column(Integer,
+                     ForeignKey("node.rid"),
+                     nullable=False,
+                     primary_key=True
+                     )
     frame_id = Column(
-        types.Integer,
+        Integer,
         ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
-        primary_key = True
+        primary_key=True
     )
-    identifier = StdInteger(nullable = True)
+    identifier = StdInteger(nullable=True)
 
-    node = relationship("Node", backref = "configurable_frames", uselist  = False)
-    frame = relationship("LinUnconditionalFrame", backref = "configurable_frames", uselist = False)
+    node = relationship("Node", backref="configurable_frames", uselist=False)
+    frame = relationship("LinUnconditionalFrame", backref="configurable_frames", uselist=False)
 
 
 class LinFaultStateSignal(Base, MixInBase):
     """
     """
-    node_id = Column(types.Integer,
-        ForeignKey("node.rid"),
-        nullable = False,
-        primary_key = True
-    )
-    signal_id = Column(types.Integer,
-        ForeignKey("signal.rid", onupdate = "CASCADE", ondelete = "RESTRICT"),
-        nullable = False, default = 0, primary_key = True
-    )
-    node = relationship("Node", backref = "fault_state_signals", uselist  = False)
-    signal = relationship("Signal",  uselist  = False)
+    node_id = Column(Integer,
+                     ForeignKey("node.rid"),
+                     nullable=False,
+                     primary_key=True
+                     )
+    signal_id = Column(Integer,
+                       ForeignKey("signal.rid", onupdate="CASCADE", ondelete="RESTRICT"),
+                       nullable=False, default=0, primary_key=True
+                       )
+    node = relationship("Node", backref="fault_state_signals", uselist=False)
+    signal = relationship("Signal", uselist=False)
 
     def __init__(self, node, signal):
         self.node = node
@@ -1557,19 +1552,19 @@ class LinResponseErrorSignal(Base, MixInBase):
     """
     """
 
-    node_id = Column(types.Integer,
-        ForeignKey("linnode.lin_node_id"),
-        nullable = False,
-        primary_key = True
-    )
+    node_id = Column(Integer,
+                     ForeignKey("linnode.lin_node_id"),
+                     nullable=False,
+                     primary_key=True
+                     )
 
-    signal_id = Column(types.Integer,
-        ForeignKey("linsignal.lin_signal_id"),
-        nullable = True, primary_key = True
-    )
+    signal_id = Column(Integer,
+                       ForeignKey("linsignal.lin_signal_id"),
+                       nullable=True, primary_key=True
+                       )
 
-    node = relationship("LinNode", backref = "response_error", uselist  = False)
-    signal = relationship("LinSignal", uselist = False)
+    node = relationship("LinNode", backref="response_error", uselist=False)
+    signal = relationship("LinSignal", uselist=False)
 
     def __init__(self, node, signal):
         self.node = node
