@@ -107,11 +107,11 @@ class DBCCreator:
             The created Message object
         """
         if isinstance(sender, str):
-            sender = self._nodes[sender].rid
+            sender_rid = self._nodes[sender].rid
         elif isinstance(sender, Node):
-            sender = sender.rid
+            sender_rid = sender.rid
             
-        message = Message(name=name, message_id=message_id, dlc=dlc, sender=sender, **kwargs)
+        message = Message(name=name, message_id=message_id, dlc=dlc, sender=sender_rid, **kwargs)
         self.session.add(message)
         self._messages[name] = message
         return message

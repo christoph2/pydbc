@@ -48,11 +48,13 @@ def dbc_example():
     engine = dbc.create_node("Engine")
     gateway = dbc.create_node("Gateway")
     dashboard = dbc.create_node("Dashboard")
-    
+    dbc.session.commit()
     # Create messages
     engine_data = dbc.create_message("EngineData", 100, 8, engine)
     vehicle_status = dbc.create_message("VehicleStatus", 200, 8, gateway)
-    
+
+    dbc.session.commit()
+
     # Create signals
     petrol_level = dbc.create_signal(
         "PetrolLevel", 8, byteorder=1, sign=1,
@@ -77,17 +79,21 @@ def dbc_example():
         formula_factor=0.1, formula_offset=0.0,
         minimum=0, maximum=300, unit="km/h"
     )
-    
+    dbc.session.commit()
     # Add signals to messages
     dbc.add_signal_to_message(engine_data, petrol_level, 24)
     dbc.add_signal_to_message(engine_data, engine_power, 48)
     dbc.add_signal_to_message(engine_data, engine_force, 32)
     dbc.add_signal_to_message(vehicle_status, vehicle_speed, 0)
-    
+
+    dbc.session.commit()
+
     # Add signal receivers
-    dbc.add_node_as_receiver(petrol_level, dashboard)
-    dbc.add_node_as_receiver(vehicle_speed, dashboard)
-    
+    # dbc.add_node_as_receiver(petrol_level, dashboard)
+    # dbc.add_node_as_receiver(vehicle_speed, dashboard)
+
+    dbc.session.commit()
+
     # Create a value table
     dbc.create_valuetable("EngineStatus", {
         0: "Running",
@@ -345,7 +351,7 @@ if __name__ == "__main__":
     
     # Run the examples
     dbc_example()
-    ldf_example()
-    ncf_example()
+    # ldf_example()
+    # ncf_example()
     
     print("All examples completed successfully.")
