@@ -103,13 +103,6 @@ def StdFloat(default: float = 0.0, primary_key: bool = False, unique: bool = Fal
                          primary_key=primary_key, unique=unique)
 
 
-"""
-    order_items = relationship(
-        "OrderItem", cascade="all, delete-orphan", backref="order"
-    )
-"""
-
-
 class Node(Base, RidMixIn, CommentableMixIn):
     """Node model representing a network node"""
 
@@ -652,7 +645,7 @@ class LinMasterNode(LinNode):
         return 'LinMasterNode(name = "{}", timebase = {}, jitter = {}, bit_length = {}, tolerant = {})'.format(
             self.name,
             self.timebase, self.jitter, self.bit_length, self.tolerant
-            )
+        )
 
     __str__ = __repr__
 
@@ -1423,7 +1416,8 @@ class LinSporadicFrame(LinUnconditionalFrame):
         ForeignKey("linunconditionalframe.lin_unconditional_frame_id"),
         primary_key=True
     )
-    associated_frames = relationship("LinUnconditionalFrame", secondary="linsporadicframe_association", uselist=True, overlaps="unconditional_frame")
+    associated_frames = relationship("LinUnconditionalFrame", secondary="linsporadicframe_association", uselist=True,
+                                     overlaps="unconditional_frame")
 
     """
     message_signals = relationship(
