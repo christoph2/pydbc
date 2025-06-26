@@ -24,40 +24,38 @@ __copyright__ = """
 
    s. FLOSS-EXCEPTION.txt
 """
-__author__  = 'Christoph Schueler'
-__version__ = '0.1.0'
+__author__ = "Christoph Schueler"
+__version__ = "0.1.0"
 
-from datetime import datetime
-import enum
-from functools import partial
 import mmap
-import os
 import re
 import sqlite3
-import sys
+from functools import partial
 
-from sqlalchemy import (MetaData, schema, types, orm, event,
-    create_engine, Column, ForeignKey, ForeignKeyConstraint, func,
-    UniqueConstraint, inspect, text
+from sqlalchemy import (
+    types,
+    orm,
+    event,
+    create_engine,
+    text,
 )
-
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.engine import Engine
-from sqlalchemy.sql import exists
 
-from pydbc.logger import Logger
 from pydbc.db import model
+from pydbc.logger import Logger
 
+DB_EXTENSION = "vndb"
 
-DB_EXTENSION    = "vndb"
+CACHE_SIZE = 4  # MB
+PAGE_SIZE = mmap.PAGESIZE
 
-CACHE_SIZE      = 4 # MB
-PAGE_SIZE       = mmap.PAGESIZE
 
 def calculateCacheSize(value):
     return -(value // PAGE_SIZE)
 
+
 REGEXER_CACHE = {}
+
 
 def regexer(value, expr):
     if not REGEXER_CACHE.get(expr):
@@ -65,9 +63,16 @@ def regexer(value, expr):
     re_expr = REGEXER_CACHE[expr]
     return re_expr.match(value) is not None
 
+
 INITIAL_DATA = {
-    'node': (
-        {"rid": 0, "node_id": 0, "name": 'Vector__XXX', "comment": 'Dummy node for non-existent senders/receivers.', "type_": 'Node'},
+    "node": (
+        {
+            "rid": 0,
+            "node_id": 0,
+            "name": "Vector__XXX",
+            "comment": "Dummy node for non-existent senders/receivers.",
+            "type_": "Node",
+        },
     ),
 }
 """
@@ -81,21 +86,24 @@ INITIAL_DATA = {
         'Message');
 """
 
+
 def _inserter(data, target, conn, **kws):
     for row in data:
         k, v = row.keys(), row.values()
-        keys = ', '.join([x for x in k])
-        values = ', '.join([repr(x) for x in v])
+        keys = ", ".join([x for x in k])
+        values = ", ".join([repr(x) for x in v])
         stmt = text("INSERT INTO {}({}) VALUES ({})".format(target.name, keys, values))
         conn.execute(stmt)
 
+
 def loadInitialData(target):
     data = INITIAL_DATA[target.__table__.fullname]
-    event.listen(target.__table__, 'after_create', partial(_inserter, data))
+    event.listen(target.__table__, "after_create", partial(_inserter, data))
+
 
 class MyCustomEnum(types.TypeDecorator):
 
-    impl=types.Integer
+    impl = types.Integer
 
     def __init__(self, enum_values, *l, **kw):
         types.TypeDecorator.__init__(self, *l, **kw)
@@ -108,71 +116,73 @@ class MyCustomEnum(types.TypeDecorator):
         return result
 
     def convert_result_value(self, value, engine):
-        'Do nothing here'
+        "Do nothing here"
         return self.impl.convert_result_value(value, engine)
+
 
 @event.listens_for(Engine, "connect")
 def set_sqlite3_pragmas(dbapi_connection, connection_record):
     dbapi_connection.create_function("REGEXP", 2, regexer)
     cursor = dbapi_connection.cursor()
-    #cursor.execute("PRAGMA jornal_mode=WAL")
+    # cursor.execute("PRAGMA jornal_mode=WAL")
     cursor.execute("PRAGMA FOREIGN_KEYS=ON")
     cursor.execute("PRAGMA PAGE_SIZE={}".format(PAGE_SIZE))
-    cursor.execute("PRAGMA CACHE_SIZE={}".format(calculateCacheSize(CACHE_SIZE * 1024 * 1024)))
-    cursor.execute("PRAGMA SYNCHRONOUS=OFF") # FULL
-    cursor.execute("PRAGMA LOCKING_MODE=EXCLUSIVE") # NORMAL
+    cursor.execute(
+        "PRAGMA CACHE_SIZE={}".format(calculateCacheSize(CACHE_SIZE * 1024 * 1024))
+    )
+    cursor.execute("PRAGMA SYNCHRONOUS=OFF")  # FULL
+    cursor.execute("PRAGMA LOCKING_MODE=EXCLUSIVE")  # NORMAL
     cursor.execute("PRAGMA TEMP_STORE=MEMORY")  # FILE
     cursor.close()
 
 
 class VNDB(object):
-    """
+    """ """
 
-    """
-    def __init__(self, filename = ":memory:", debug = False, logLevel = 'INFO', create = True):
-        if filename == ':memory:':
+    def __init__(self, filename=":memory:", debug=False, logLevel="INFO", create=True):
+        if filename == ":memory:":
             self.dbname = ""
         else:
             if not filename.lower().endswith(DB_EXTENSION):
-               self.dbname = "{}.{}".format(filename, DB_EXTENSION)
+                self.dbname = "{}.{}".format(filename, DB_EXTENSION)
             else:
-               self.dbname = filename
-        self._engine = create_engine("sqlite:///{}".format(self.dbname), echo = debug,
-            connect_args={'detect_types': sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES}, native_datetime = True)
-        self._session = orm.Session(self._engine, autoflush = False, autocommit = False)
+                self.dbname = filename
+        self._engine = create_engine(
+            "sqlite:///{}".format(self.dbname),
+            echo=debug,
+            connect_args={
+                "detect_types": sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES
+            },
+            native_datetime=True,
+        )
+        self._session = orm.Session(self._engine, autoflush=False, autocommit=False)
         self._metadata = model.Base.metadata
         if create == True:
             model.Base.metadata.create_all(self.engine)
             self.session.flush()
             self.session.commit()
-        self.logger = Logger(__name__, level = logLevel)
+        self.logger = Logger(__name__, level=logLevel)
 
     @classmethod
-    def _open_or_create(cls, filename = ":memory:", debug = False, logLevel = 'INFO', create = True):
-        """
-
-        """
+    def _open_or_create(
+        cls, filename=":memory:", debug=False, logLevel="INFO", create=True
+    ):
+        """ """
         inst = cls(filename, debug, logLevel, create)
         return inst
 
     @classmethod
-    def create(cls, filename = ":memory:", debug = False, logLevel = 'INFO'):
-        """
-
-        """
+    def create(cls, filename=":memory:", debug=False, logLevel="INFO"):
+        """ """
         return cls._open_or_create(filename, debug, logLevel, True)
 
     @classmethod
-    def open(cls, filename = ":memory:", debug = False, logLevel = 'INFO'):
-        """
-
-        """
+    def open(cls, filename=":memory:", debug=False, logLevel="INFO"):
+        """ """
         return cls._open_or_create(filename, debug, logLevel, False)
 
     def close(self):
-        """
-
-        """
+        """ """
         self.session.close()
         self.engine.dispose()
 
@@ -189,15 +199,13 @@ class VNDB(object):
         return self._session
 
     def begin_transaction(self):
-        """
-        """
+        """ """
 
     def commit_transaction(self):
-        """
-        """
+        """ """
 
     def rollback_transaction(self):
-        """
-        """
+        """ """
+
 
 loadInitialData(model.Node)

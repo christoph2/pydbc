@@ -19,7 +19,8 @@ jobs:
 
       - name: Build sdist
         run: |
-          pip install -U build
+          pip install -U build poetry
+          poetry install
           python -m build --sdist
 
       - uses: actions/upload-artifact@v4
@@ -29,7 +30,8 @@ jobs:
           retention-days: 1
       - name: Test with pytest
         run: |
-          pip install pytest
+          pip install pytest poetry
+          poetry install
           pytest
 
   upload_pypi:

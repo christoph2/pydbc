@@ -31,21 +31,29 @@ __copyright__ = """
 
    s. FLOSS-EXCEPTION.txt
 """
-__author__ = 'Christoph Schueler'
-__version__ = '0.1.0'
+__author__ = "Christoph Schueler"
+__version__ = "0.1.0"
 
-from typing import Optional, List, Union, Dict, Any, Tuple
+from typing import Optional, List, Union, Tuple
 
 from pydbc.db import VNDB
 from pydbc.db.model import (
-    LinMasterNode, LinNetwork, LinNode, LinUnconditionalFrame,
-    LinSignal, LinSlaveNode, LinEventTriggeredFrame,
-    LinScheduleTable, LinScheduleTable_Command_Frame, LinScheduleTable_Command_MasterReq, LinScheduleTable_Command_SlaveResp,
-    LinScheduleTable_Command_AssignNad, LinScheduleTable_Command_ConditionalChangeNad, LinScheduleTable_Command_DataDump,
-    LinScheduleTable_Command_SaveConfiguration, LinScheduleTable_Command_AssignFrameIdRange, LinScheduleTable_Command_FreeFormat,
-    LinScheduleTable_Command_AssignFrameId, LinSporadicFrame, LinConfigurableFrame, LinFaultStateSignal, LinResponseErrorSignal,
-    LinSignalEncodingType, LinSignalEncodingEntry_Logical, LinSignalEncodingEntry_Physical,
-    LinSignalEncodingEntry_Value, LinSignalRepresentation, LinUnconditionalFrameSignal, LinSignalSubscriber
+    LinMasterNode,
+    LinNetwork,
+    LinNode,
+    LinUnconditionalFrame,
+    LinSignal,
+    LinSlaveNode,
+    LinEventTriggeredFrame,
+    LinScheduleTable,
+    LinScheduleTable_Command_Frame,
+    LinSporadicFrame,
+    LinSignalEncodingType,
+    LinSignalEncodingEntry_Logical,
+    LinSignalEncodingEntry_Physical,
+    LinSignalRepresentation,
+    LinUnconditionalFrameSignal,
+    LinSignalSubscriber,
 )
 
 
@@ -70,10 +78,16 @@ class LDFCreator:
         self._schedule_tables = {}
         self._signal_encodings = {}
 
-    def create_network(self, name: str, protocol_version: Optional[str] = None,
-                      language_version: Optional[str] = None, speed: Optional[float] = None,
-                      file_revision: Optional[str] = None, channel_name: Optional[str] = None,
-                      **kwargs) -> LinNetwork:
+    def create_network(
+        self,
+        name: str,
+        protocol_version: Optional[str] = None,
+        language_version: Optional[str] = None,
+        speed: Optional[float] = None,
+        file_revision: Optional[str] = None,
+        channel_name: Optional[str] = None,
+        **kwargs
+    ) -> LinNetwork:
         """Create a new LIN network.
 
         Args:
@@ -101,9 +115,15 @@ class LDFCreator:
         self._networks[name] = network
         return network
 
-    def create_master_node(self, name: str, timebase: float, jitter: float,
-                         bit_length: Optional[int] = None, tolerant: Optional[bool] = None,
-                         **kwargs) -> LinMasterNode:
+    def create_master_node(
+        self,
+        name: str,
+        timebase: float,
+        jitter: float,
+        bit_length: Optional[int] = None,
+        tolerant: Optional[bool] = None,
+        **kwargs
+    ) -> LinMasterNode:
         """Create a new LIN master node.
 
         Args:
@@ -130,12 +150,20 @@ class LDFCreator:
         self._master_nodes[name] = master_node
         return master_node
 
-    def create_slave_node(self, name: str, protocol_version: Optional[str] = None,
-                        configured_NAD: Optional[int] = None, initial_NAD: Optional[int] = None,
-                        product_id: Tuple[int, int, int] = (), p2_min: Optional[float] = None,
-                        st_min: Optional[float] = None, n_as_timeout: Optional[float] = None,
-                        n_cr_timeout: Optional[float] = None, response_tolerance: Optional[float] = None,
-                        **kwargs) -> LinSlaveNode:
+    def create_slave_node(
+        self,
+        name: str,
+        protocol_version: Optional[str] = None,
+        configured_NAD: Optional[int] = None,
+        initial_NAD: Optional[int] = None,
+        product_id: Tuple[int, int, int] = (),
+        p2_min: Optional[float] = None,
+        st_min: Optional[float] = None,
+        n_as_timeout: Optional[float] = None,
+        n_cr_timeout: Optional[float] = None,
+        response_tolerance: Optional[float] = None,
+        **kwargs
+    ) -> LinSlaveNode:
         """Create a new LIN slave node.
 
         Args:
@@ -172,8 +200,14 @@ class LDFCreator:
         self._slave_nodes[name] = slave_node
         return slave_node
 
-    def create_signal(self, name: str, signal_size: int, init_value: Union[int, List[int]],
-                    publisher: Union[str, LinNode], **kwargs) -> LinSignal:
+    def create_signal(
+        self,
+        name: str,
+        signal_size: int,
+        init_value: Union[int, List[int]],
+        publisher: Union[str, LinNode],
+        **kwargs
+    ) -> LinSignal:
         """Create a new LIN signal.
 
         Args:
@@ -200,8 +234,9 @@ class LDFCreator:
         self._signals[name] = signal
         return signal
 
-    def add_signal_subscriber(self, signal: Union[str, LinSignal],
-                            subscriber: Union[str, LinNode]) -> LinSignalSubscriber:
+    def add_signal_subscriber(
+        self, signal: Union[str, LinSignal], subscriber: Union[str, LinNode]
+    ) -> LinSignalSubscriber:
         """Add a subscriber to a signal.
 
         Args:
@@ -221,8 +256,14 @@ class LDFCreator:
         self.session.add(subscriber_obj)
         return subscriber_obj
 
-    def create_unconditional_frame(self, name: str, frame_id: int, size: int,
-                                 publisher: Union[str, LinNode], **kwargs) -> LinUnconditionalFrame:
+    def create_unconditional_frame(
+        self,
+        name: str,
+        frame_id: int,
+        size: int,
+        publisher: Union[str, LinNode],
+        **kwargs
+    ) -> LinUnconditionalFrame:
         """Create a new LIN unconditional frame.
 
         Args:
@@ -239,19 +280,18 @@ class LDFCreator:
             publisher = self._nodes[publisher]
 
         frame = LinUnconditionalFrame(
-            name=name,
-            frame_id=frame_id,
-            size=size,
-            publisher=publisher,
-            **kwargs
+            name=name, frame_id=frame_id, size=size, publisher=publisher, **kwargs
         )
         self.session.add(frame)
         self._frames[name] = frame
         return frame
 
-    def add_signal_to_frame(self, frame: Union[str, LinUnconditionalFrame],
-                          signal: Union[str, LinSignal],
-                          signal_offset: int = 0) -> LinUnconditionalFrameSignal:
+    def add_signal_to_frame(
+        self,
+        frame: Union[str, LinUnconditionalFrame],
+        signal: Union[str, LinSignal],
+        signal_offset: int = 0,
+    ) -> LinUnconditionalFrameSignal:
         """Add a signal to a frame.
 
         Args:
@@ -268,17 +308,20 @@ class LDFCreator:
             signal = self._signals[signal]
 
         frame_signal = LinUnconditionalFrameSignal(
-            signal=signal,
-            signal_offset=signal_offset
+            signal=signal, signal_offset=signal_offset
         )
         frame.frame_signals.append(frame_signal)
         self.session.add(frame_signal)
         return frame_signal
 
-    def create_event_triggered_frame(self, name: str, frame_id: int,
-                                   master_node: Union[str, LinMasterNode],
-                                   collision_resolving_schedule_table: Optional[str] = None,
-                                   **kwargs) -> LinEventTriggeredFrame:
+    def create_event_triggered_frame(
+        self,
+        name: str,
+        frame_id: int,
+        master_node: Union[str, LinMasterNode],
+        collision_resolving_schedule_table: Optional[str] = None,
+        **kwargs
+    ) -> LinEventTriggeredFrame:
         """Create a new LIN event-triggered frame.
 
         Args:
@@ -335,9 +378,12 @@ class LDFCreator:
         self._schedule_tables[name] = schedule_table
         return schedule_table
 
-    def add_frame_to_schedule_table(self, schedule_table: Union[str, LinScheduleTable],
-                                  frame: Union[str, LinUnconditionalFrame],
-                                  frame_time: float) -> LinScheduleTable_Command_Frame:
+    def add_frame_to_schedule_table(
+        self,
+        schedule_table: Union[str, LinScheduleTable],
+        frame: Union[str, LinUnconditionalFrame],
+        frame_time: float,
+    ) -> LinScheduleTable_Command_Frame:
         """Add a frame to a schedule table.
 
         Args:
@@ -353,10 +399,7 @@ class LDFCreator:
         if isinstance(frame, str):
             frame = self._frames[frame]
 
-        command = LinScheduleTable_Command_Frame(
-            frame_time=frame_time,
-            frame=frame
-        )
+        command = LinScheduleTable_Command_Frame(frame_time=frame_time, frame=frame)
         schedule_table.commands.append(command)
         self.session.add(command)
         return command
@@ -376,8 +419,12 @@ class LDFCreator:
         self._signal_encodings[name] = encoding_type
         return encoding_type
 
-    def add_logical_value_to_encoding(self, encoding_type: Union[str, LinSignalEncodingType],
-                                    signal_value: int, text_info: str) -> LinSignalEncodingEntry_Logical:
+    def add_logical_value_to_encoding(
+        self,
+        encoding_type: Union[str, LinSignalEncodingType],
+        signal_value: int,
+        text_info: str,
+    ) -> LinSignalEncodingEntry_Logical:
         """Add a logical value to a signal encoding type.
 
         Args:
@@ -392,16 +439,21 @@ class LDFCreator:
             encoding_type = self._signal_encodings[encoding_type]
 
         entry = LinSignalEncodingEntry_Logical(
-            signal_value=signal_value,
-            text_info=text_info
+            signal_value=signal_value, text_info=text_info
         )
         encoding_type.entries.append(entry)
         self.session.add(entry)
         return entry
 
-    def add_physical_range_to_encoding(self, encoding_type: Union[str, LinSignalEncodingType],
-                                     min_value: float, max_value: float, scale: float,
-                                     offset: float, text_info: str) -> LinSignalEncodingEntry_Physical:
+    def add_physical_range_to_encoding(
+        self,
+        encoding_type: Union[str, LinSignalEncodingType],
+        min_value: float,
+        max_value: float,
+        scale: float,
+        offset: float,
+        text_info: str,
+    ) -> LinSignalEncodingEntry_Physical:
         """Add a physical range to a signal encoding type.
 
         Args:
@@ -423,14 +475,17 @@ class LDFCreator:
             max_value=max_value,
             scale=scale,
             offset=offset,
-            text_info=text_info
+            text_info=text_info,
         )
         encoding_type.entries.append(entry)
         self.session.add(entry)
         return entry
 
-    def add_signal_representation(self, signal: Union[str, LinSignal],
-                                encoding_type: Union[str, LinSignalEncodingType]) -> LinSignalRepresentation:
+    def add_signal_representation(
+        self,
+        signal: Union[str, LinSignal],
+        encoding_type: Union[str, LinSignalEncodingType],
+    ) -> LinSignalRepresentation:
         """Associate a signal with a signal encoding type.
 
         Args:
@@ -446,8 +501,7 @@ class LDFCreator:
             encoding_type = self._signal_encodings[encoding_type]
 
         representation = LinSignalRepresentation(
-            signal_encoding_type=encoding_type,
-            signal=signal
+            signal_encoding_type=encoding_type, signal=signal
         )
         self.session.add(representation)
         return representation
