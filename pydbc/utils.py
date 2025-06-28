@@ -150,8 +150,8 @@ def detect_encoding(file_name: str) -> str:
         file_name = str(file_name)
     for line in open(file_name, "rb"):
         detector.feed(line)
-        if detector.done:
-            break
+        #if detector.done:
+        #    break
     result = detector.result['encoding'] if detector.done else "ascii"
     detector.close()
     return result

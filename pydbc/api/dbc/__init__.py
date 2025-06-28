@@ -61,7 +61,7 @@ class DBCCreator:
             db_path: Path to the database file or ":memory:" for in-memory database
             debug: Enable debug mode
         """
-        self.db = VNDB.create(db_path, debug=debug)
+        self.db = VNDB.create(db_path, debug=debug, autocommit=True)
         self.session = self.db.session
         self._networks = {}
         self._nodes = {}

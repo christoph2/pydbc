@@ -249,9 +249,10 @@ class LDFCreator:
         if isinstance(signal, str):
             signal = self._signals[signal]
         if isinstance(subscriber, str):
-            subscriber = self._nodes[subscriber]
-
-        subscriber_obj = LinSignalSubscriber(subscriber=subscriber)
+            subscriber_obj = self._nodes[subscriber]
+        else:
+            subscriber_obj = subscriber
+        # subscriber_obj = LinSignalSubscriber(subscriber=subscriber)
         signal.subscribers.append(subscriber_obj)
         self.session.add(subscriber_obj)
         return subscriber_obj

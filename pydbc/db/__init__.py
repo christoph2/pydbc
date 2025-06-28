@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2021 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2025 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -40,6 +40,7 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.engine import Engine
+from sqlalchemy.orm import sessionmaker
 
 from pydbc.db import model
 from pydbc.logger import Logger
@@ -102,7 +103,6 @@ def loadInitialData(target):
 
 
 class MyCustomEnum(types.TypeDecorator):
-
     impl = types.Integer
 
     def __init__(self, enum_values, *l, **kw):
@@ -139,7 +139,8 @@ def set_sqlite3_pragmas(dbapi_connection, connection_record):
 class VNDB(object):
     """ """
 
-    def __init__(self, filename=":memory:", debug=False, logLevel="INFO", create=True):
+    def __init__(self, filename: str = ":memory:", debug: bool = False, logLevel: str = "INFO", create: bool = True,
+                 autocommit: bool = False):
         if filename == ":memory:":
             self.dbname = ""
         else:
@@ -151,11 +152,14 @@ class VNDB(object):
             "sqlite:///{}".format(self.dbname),
             echo=debug,
             connect_args={
-                "detect_types": sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES
+                "detect_types": sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES,
+                "isolation_level": "IMMEDIATE",
             },
             native_datetime=True,
+            # autocommit=autocommit
         )
-        self._session = orm.Session(self._engine, autoflush=False, autocommit=False)
+        SessionFactory = sessionmaker(self._engine, autoflush=False)    # autocommit=autocommit
+        self._session = SessionFactory()
         self._metadata = model.Base.metadata
         if create == True:
             model.Base.metadata.create_all(self.engine)
@@ -165,21 +169,21 @@ class VNDB(object):
 
     @classmethod
     def _open_or_create(
-        cls, filename=":memory:", debug=False, logLevel="INFO", create=True
+            cls, filename=":memory:", debug=False, logLevel="INFO", create=True, autocommit=False,
     ):
         """ """
-        inst = cls(filename, debug, logLevel, create)
+        inst = cls(filename, debug, logLevel, create, autocommit)
         return inst
 
     @classmethod
-    def create(cls, filename=":memory:", debug=False, logLevel="INFO"):
+    def create(cls, filename=":memory:", debug=False, logLevel="INFO", autocommit: bool=False):
         """ """
-        return cls._open_or_create(filename, debug, logLevel, True)
+        return cls._open_or_create(filename, debug, logLevel, True, autocommit)
 
     @classmethod
-    def open(cls, filename=":memory:", debug=False, logLevel="INFO"):
+    def open(cls, filename=":memory:", debug=False, logLevel="INFO", autocommit: bool=False):
         """ """
-        return cls._open_or_create(filename, debug, logLevel, False)
+        return cls._open_or_create(filename, debug, logLevel, False, autocommit)
 
     def close(self):
         """ """
