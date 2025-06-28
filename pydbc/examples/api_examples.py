@@ -31,8 +31,8 @@ __copyright__ = """
 
    s. FLOSS-EXCEPTION.txt
 """
-__author__ = 'Christoph Schueler'
-__version__ = '0.1.0'
+__author__ = "Christoph Schueler"
+__version__ = "0.1.0"
 
 
 def dbc_example():
@@ -54,27 +54,51 @@ def dbc_example():
 
     # Create signals
     petrol_level = dbc.create_signal(
-        "PetrolLevel", 8, byteorder=1, sign=1,
-        formula_factor=1.0, formula_offset=0.0,
-        minimum=0, maximum=255, unit="l"
+        "PetrolLevel",
+        8,
+        byteorder=1,
+        sign=1,
+        formula_factor=1.0,
+        formula_offset=0.0,
+        minimum=0,
+        maximum=255,
+        unit="l",
     )
 
     engine_power = dbc.create_signal(
-        "EnginePower", 16, byteorder=1, sign=1,
-        formula_factor=0.01, formula_offset=0.0,
-        minimum=0, maximum=150, unit="kw"
+        "EnginePower",
+        16,
+        byteorder=1,
+        sign=1,
+        formula_factor=0.01,
+        formula_offset=0.0,
+        minimum=0,
+        maximum=150,
+        unit="kw",
     )
 
     engine_force = dbc.create_signal(
-        "EngineForce", 16, byteorder=1, sign=1,
-        formula_factor=1.0, formula_offset=0.0,
-        minimum=0, maximum=0, unit="N"
+        "EngineForce",
+        16,
+        byteorder=1,
+        sign=1,
+        formula_factor=1.0,
+        formula_offset=0.0,
+        minimum=0,
+        maximum=0,
+        unit="N",
     )
 
     vehicle_speed = dbc.create_signal(
-        "VehicleSpeed", 16, byteorder=1, sign=1,
-        formula_factor=0.1, formula_offset=0.0,
-        minimum=0, maximum=300, unit="km/h"
+        "VehicleSpeed",
+        16,
+        byteorder=1,
+        sign=1,
+        formula_factor=0.1,
+        formula_offset=0.0,
+        minimum=0,
+        maximum=300,
+        unit="km/h",
     )
     # Add signals to messages
     dbc.add_signal_to_message(engine_data, petrol_level, 24)
@@ -121,7 +145,7 @@ def ldf_example():
         protocol_version="2.1",
         language_version="2.1",
         speed=19.2,
-        channel_name="LIN1"
+        channel_name="LIN1",
     )
 
     # Create master node
@@ -137,7 +161,7 @@ def ldf_example():
         protocol_version="2.1",
         configured_NAD=1,
         initial_NAD=1,
-        product_id=(0x1234, 0x5678, 0x01)
+        product_id=(0x1234, 0x5678, 0x01),
     )
 
     slave2 = ldf.create_slave_node(
@@ -145,29 +169,20 @@ def ldf_example():
         protocol_version="2.1",
         configured_NAD=2,
         initial_NAD=2,
-        product_id=(0x1234, 0x5679, 0x01)
+        product_id=(0x1234, 0x5679, 0x01),
     )
 
     # Create signals
     motor_speed = ldf.create_signal(
-        "MotorSpeed",
-        signal_size=16,
-        init_value=0,
-        publisher=master
+        "MotorSpeed", signal_size=16, init_value=0, publisher=master
     )
 
     motor_position = ldf.create_signal(
-        "MotorPosition",
-        signal_size=8,
-        init_value=0,
-        publisher=slave1
+        "MotorPosition", signal_size=8, init_value=0, publisher=slave1
     )
 
     temperature = ldf.create_signal(
-        "Temperature",
-        signal_size=8,
-        init_value=20,
-        publisher=slave2
+        "Temperature", signal_size=8, init_value=20, publisher=slave2
     )
 
     # Add signal subscribers
@@ -177,24 +192,15 @@ def ldf_example():
 
     # Create frames
     master_frame = ldf.create_unconditional_frame(
-        "MasterFrame",
-        frame_id=0x10,
-        size=2,
-        publisher=master
+        "MasterFrame", frame_id=0x10, size=2, publisher=master
     )
 
     slave1_frame = ldf.create_unconditional_frame(
-        "Slave1Frame",
-        frame_id=0x20,
-        size=1,
-        publisher=slave1
+        "Slave1Frame", frame_id=0x20, size=1, publisher=slave1
     )
 
     slave2_frame = ldf.create_unconditional_frame(
-        "Slave2Frame",
-        frame_id=0x30,
-        size=1,
-        publisher=slave2
+        "Slave2Frame", frame_id=0x30, size=1, publisher=slave2
     )
 
     # Add signals to frames
@@ -224,7 +230,7 @@ def ldf_example():
         max_value=254,
         scale=0.5,
         offset=-40,
-        text_info="Temperature in Celsius"
+        text_info="Temperature in Celsius",
     )
 
     # Associate signal with encoding
@@ -298,7 +304,7 @@ def ncf_example():
         unit="°C",
         minimum=0,
         maximum=150,
-        initial_value="90"
+        initial_value="90",
     )
 
     vehicle_speed = ncf.create_env_var(
@@ -307,7 +313,7 @@ def ncf_example():
         unit="km/h",
         minimum=0,
         maximum=250,
-        initial_value="0"
+        initial_value="0",
     )
 
     # Add environment variables to ECUs
