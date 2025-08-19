@@ -31,8 +31,8 @@ __copyright__ = """
 
    s. FLOSS-EXCEPTION.txt
 """
-__author__ = 'Christoph Schueler'
-__version__ = '0.1.0'
+__author__ = "Christoph Schueler"
+__version__ = "0.1.0"
 
 import argparse
 import logging
@@ -42,13 +42,19 @@ from typing import Optional, Union
 
 from pydbc.parser import ParserWrapper
 from pydbc.dbcListener import DbcListener
-from pydbc.ldfListener import LdfListener
-from pydbc.ncfListener import NcfListener
+
+# from pydbc.ldfListener import LdfListener
+# from pydbc.ncfListener import NcfListener
 from pydbc.types import FileType
 
 
-def parseFile(pth: pathlib.Path, filetype: FileType, debug: bool = False, 
-           remove_file: bool = False, logLevel: str = "WARN") -> Optional[object]:
+def parseFile(
+    pth: pathlib.Path,
+    filetype: FileType,
+    debug: bool = False,
+    remove_file: bool = False,
+    logLevel: str = "WARN",
+) -> Optional[object]:
     """Parse a vehicle network description file and create a database.
 
     Args:
@@ -62,21 +68,23 @@ def parseFile(pth: pathlib.Path, filetype: FileType, debug: bool = False,
         SQLAlchemy session object or None if parsing failed
     """
     if filetype == FileType.DBC:
-        grammar = 'dbc'
-        start_symbol = 'dbcfile'
+        grammar = "dbc"
+        start_symbol = "dbcfile"
         listenerClass = DbcListener
     elif filetype == FileType.LDF:
-        grammar = 'ldf'
-        start_symbol = 'lin_description_file'
+        grammar = "ldf"
+        start_symbol = "lin_description_file"
         listenerClass = LdfListener
     elif filetype == FileType.NCF:
-        grammar = 'ncf'
-        start_symbol = 'toplevel'
+        grammar = "ncf"
+        start_symbol = "toplevel"
         listenerClass = NcfListener
     else:
         raise ValueError(f"Invalid filetype '{filetype}'")
 
-    parser = ParserWrapper(grammar, start_symbol, listenerClass, debug=debug, logLevel=logLevel)
+    parser = ParserWrapper(
+        grammar, start_symbol, listenerClass, debug=debug, logLevel=logLevel
+    )
     logging.info(f"Processing '{pth}'")
 
     dbfn = f"{pth.stem}.vndb"
@@ -101,6 +109,7 @@ def parseFile(pth: pathlib.Path, filetype: FileType, debug: bool = False,
         logging.error(f"Error parsing {pth}: {e}")
         return None
 
+
 def get_file_type(pth: pathlib.Path) -> Optional[FileType]:
     """Determine the file type based on the file extension.
 
@@ -111,15 +120,16 @@ def get_file_type(pth: pathlib.Path) -> Optional[FileType]:
         FileType enum value or None if the file type is not supported
     """
     suffix = pth.suffix.lower()
-    if suffix == '.dbc':
+    if suffix == ".dbc":
         result = FileType.DBC
-    elif suffix == '.ldf':
+    elif suffix == ".ldf":
         result = FileType.LDF
-    elif suffix == '.ncf':
+    elif suffix == ".ncf":
         result = FileType.NCF
     else:
         result = None
     return result
+
 
 def importFile(pth: pathlib.Path, logLevel: str) -> Optional[object]:
     """Import a vehicle network description file into a database.
@@ -141,22 +151,24 @@ def importFile(pth: pathlib.Path, logLevel: str) -> Optional[object]:
 
 def main() -> None:
     """Main entry point for the vndb_importer script."""
-    footer = "CAVEAT: In this version vndb_importer is DESTRUCTIVE, i.e. no merging happens!"
+    footer = (
+        "CAVEAT: In this version vndb_importer is DESTRUCTIVE, i.e. no merging happens!"
+    )
     parser = argparse.ArgumentParser(
-        description='Import vehicle network description files into a database.',
-        epilog=footer
+        description="Import vehicle network description files into a database.",
+        epilog=footer,
     )
     parser.add_argument(
         "vehicle_file",
         help=".dbc, .ldf, or .ncf file(s) to import (glob patterns supported)",
-        nargs="+"
+        nargs="+",
     )
     parser.add_argument(
         "-k",
-        dest='keepDirectory',
+        dest="keepDirectory",
         action="store_true",
         default=False,
-        help="keep directory; otherwise create db in current directory"
+        help="keep directory; otherwise create db in current directory",
     )
     parser.add_argument(
         "-l",
@@ -164,29 +176,26 @@ def main() -> None:
         type=str,
         choices=["debug", "info", "warn", "error"],
         default="warn",
-        help="logging level [debug | info | warn | error]"
+        help="logging level [debug | info | warn | error]",
     )
     parser.add_argument(
         "-w",
         dest="winout",
         action="store_true",
-        help="Format output for Windows console."
+        help="Format output for Windows console.",
     )
     parser.add_argument(
         "-u",
         dest="ucout",
         action="store_true",
-        help="Generate UTF-8 encoded output (otherwise Latin-1)."
+        help="Generate UTF-8 encoded output (otherwise Latin-1).",
     )
 
     args = parser.parse_args()
 
     # Configure logging
     log_level = getattr(logging, args.loglevel.upper())
-    logging.basicConfig(
-        level=log_level,
-        format='%(levelname)s: %(message)s'
-    )
+    logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
 
     # Process each input file
     for arg in args.vehicle_file:
@@ -206,5 +215,6 @@ def main() -> None:
             else:
                 logging.error(f"Failed to import {pth}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

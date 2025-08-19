@@ -24,19 +24,25 @@ __copyright__ = """
 
    s. FLOSS-EXCEPTION.txt
 """
-__author__  = 'Christoph Schueler'
-__version__ = '0.1.0'
+__author__ = "Christoph Schueler"
+__version__ = "0.1.0"
 
 import itertools
 import os
 import pathlib
-from chardet.universaldetector import UniversalDetector
 
-def slicer(iterable, sliceLength, converter = None):
+import chardet
+
+
+def slicer(iterable, sliceLength, converter=None):
     if converter is None:
         converter = type(iterable)
     length = len(iterable)
-    return [converter(*(iterable[item : item + sliceLength])) for item in range(0, length, sliceLength)]
+    return [
+        converter(*(iterable[item : item + sliceLength]))
+        for item in range(0, length, sliceLength)
+    ]
+
 
 import sys
 
@@ -54,31 +60,32 @@ def runningOnTravis():
 
 
 def createStringBuffer(*args):
-    """Create a string with file-like behaviour (StringIO on Python 2.x).
-    """
+    """Create a string with file-like behaviour (StringIO on Python 2.x)."""
     return StringIO(*args)
 
 
 CYG_PREFIX = "/cygdrive/"
 
+
 def cygpathToWin(path):
     if path.startswith(CYG_PREFIX):
-        path = path[len(CYG_PREFIX) : ]
+        path = path[len(CYG_PREFIX) :]
         driveLetter = "{0}:\\".format(path[0])
-        path = path[2 : ].replace("/", "\\")
+        path = path[2:].replace("/", "\\")
         path = "{0}{1}".format(driveLetter, path)
     return path
 
 
 import ctypes
 
+
 class StructureWithEnums(ctypes.Structure):
-    """Add missing enum feature to ctypes Structures.
-    """
+    """Add missing enum feature to ctypes Structures."""
+
     _map = {}
 
     def __getattribute__(self, name):
-        _map = ctypes.Structure.__getattribute__(self, '_map')
+        _map = ctypes.Structure.__getattribute__(self, "_map")
         value = ctypes.Structure.__getattribute__(self, name)
         if name in _map:
             EnumClass = _map[name]
@@ -97,9 +104,11 @@ class StructureWithEnums(ctypes.Structure):
             if attr in self._map:
                 attrType = self._map[attr]
             value = getattr(self, attr)
-            result.append("    {0} [{1}] = {2!r};".format(attr, attrType.__name__, value))
+            result.append(
+                "    {0} [{1}] = {2!r};".format(attr, attrType.__name__, value)
+            )
         result.append("};")
-        return '\n'.join(result)
+        return "\n".join(result)
 
     __repr__ = __str__
 
@@ -113,26 +122,35 @@ def flatten(*args):
             result.append(arg)
     return result
 
+
 import subprocess
+
 
 class CommandError(Exception):
     pass
 
+
 def runCommand(cmd):
-    proc = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    proc = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     result = proc.communicate()
     proc.wait()
     if proc.returncode:
         raise CommandError("{0}".format(result[1]))
     return result[0]
 
+
 from unicodedata import normalize
 
+
 def nfc_equal(str1, str2):
-    return normalize('NFC', str1) == normalize('NFC', str2)
+    return normalize("NFC", str1) == normalize("NFC", str2)
+
 
 def fold_equal(str1, str2):
-    return (normalize('NFC', str1).casefold() == normalize('NFC', str2).casefold())
+    return normalize("NFC", str1).casefold() == normalize("NFC", str2).casefold()
+
 
 def detect_encoding(file_name: str) -> str:
     """Detect encoding of a text file.
@@ -145,15 +163,9 @@ def detect_encoding(file_name: str) -> str:
     -------
     str: Useable as `encoding` paramter to `open`.
     """
-    detector = UniversalDetector()
     if isinstance(file_name, pathlib.WindowsPath):
         file_name = str(file_name)
-    for line in open(file_name, "rb"):
-        detector.feed(line)
-        #if detector.done:
-        #    break
-    result = detector.result['encoding'] if detector.done else "ascii"
-    detector.close()
-    return result
-
-
+    with open(file_name, "rb") as inf:
+        data = inf.read()
+    encoding = chardet.detect(data).get("encoding")
+    return encoding

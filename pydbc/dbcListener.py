@@ -563,7 +563,6 @@ class DbcListener(parser.BaseListener):
     def exitSignalTypes(self, ctx):
         self.log_insertion("SignalTypes")
         ctx.value =[x.value for x in ctx.sigTypes]
-        print("SIGNAL-TYPES", ctx.value)
 
     def exitSignalType(self, ctx):
         ctx.value = dict(name = self.getValue(ctx.signalTypeName), size = self.getValue(ctx.signalSize),

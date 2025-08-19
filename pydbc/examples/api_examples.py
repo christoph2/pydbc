@@ -111,11 +111,7 @@ def dbc_example():
     # dbc.add_node_as_receiver(vehicle_speed, dashboard)
 
     # Create a value table
-    dbc.create_valuetable("EngineStatus", {
-        0: "Running",
-        1: "Idle",
-        2: "Stopped"
-    })
+    dbc.create_valuetable("EngineStatus", {0: "Running", 1: "Idle", 2: "Stopped"})
 
     # Commit changes to the database
     dbc.commit()
@@ -128,6 +124,11 @@ def dbc_example():
     # Close the database
     dbc.close()
     print("DBC example completed.\n")
+
+    from pydbc.db.imex import DbcExporter
+
+    dbx = DbcExporter(":memory:")
+    dbx.run()
 
 
 def ldf_example():
@@ -149,11 +150,7 @@ def ldf_example():
     )
 
     # Create master node
-    master = ldf.create_master_node(
-        "MasterECU",
-        timebase=0.005,
-        jitter=0.0001
-    )
+    master = ldf.create_master_node("MasterECU", timebase=0.005, jitter=0.0001)
 
     # Create slave nodes
     slave1 = ldf.create_slave_node(
@@ -212,7 +209,7 @@ def ldf_example():
     schedule_table = ldf.create_schedule_table("NormalTable")
 
     # Add frames to the schedule table
-    # ldf.add_frame_to_schedule_table(schedule_table, master_frame, 0.01)
+    ldf.add_frame_to_schedule_table(schedule_table, master_frame, 0.01)
     # ldf.add_frame_to_schedule_table(schedule_table, slave1_frame, 0.02)
     # ldf.add_frame_to_schedule_table(schedule_table, slave2_frame, 0.03)
 
@@ -349,7 +346,7 @@ if __name__ == "__main__":
 
     # Run the examples
     dbc_example()
-    ldf_example()
+    # ldf_example()
     # ncf_example()
 
     print("All examples completed successfully.")

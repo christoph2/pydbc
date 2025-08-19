@@ -24,8 +24,8 @@ __copyright__ = """
 
    s. FLOSS-EXCEPTION.txt
 """
-__author__  = 'Christoph Schueler'
-__version__ = '0.1.0'
+__author__ = "Christoph Schueler"
+__version__ = "0.1.0"
 
 import codecs
 import importlib
@@ -42,17 +42,38 @@ from sqlalchemy.ext import baked
 from pydbc.logger import Logger
 from pydbc.db import VNDB
 from pydbc.db.model import (
-    Dbc_Version, Message, Message_Signal, Network, Node, Signal, Value_Description,
-    Valuetable, EnvironmentVariablesData, EnvVar, Attribute_Definition, Attribute_Value,
-    Node_TxMessage, Node_RxSignal, Category_Definition, Category_Value, AttributeRel_Value,
-    Signal_Group_Signal, Signal_Group, Vndb_Protocol, Object_Valuetable
+    Dbc_Version,
+    Message,
+    Message_Signal,
+    Network,
+    Node,
+    Signal,
+    Value_Description,
+    Valuetable,
+    EnvironmentVariablesData,
+    EnvVar,
+    Attribute_Definition,
+    Attribute_Value,
+    Node_TxMessage,
+    Node_RxSignal,
+    Category_Definition,
+    Category_Value,
+    AttributeRel_Value,
+    Signal_Group_Signal,
+    Signal_Group,
+    Vndb_Protocol,
+    Object_Valuetable,
 )
 from pydbc.utils import detect_encoding
 
-def indent(level):
-    print(" " * level,)
 
-def dump(tree, level = 0):
+def indent(level):
+    print(
+        " " * level,
+    )
+
+
+def dump(tree, level=0):
     indent(level)
     if isinstance(tree, antlr4.TerminalNode):
         print(tree.symbol.text)
@@ -66,48 +87,62 @@ def dump(tree, level = 0):
     print(")")
 
 
-def toInt(number, base = 10):
-    """
-
-    """
+def toInt(number, base=10):
+    """ """
     try:
         res = int(number, base)
     except ValueError as e:
         res = None
     return res
 
-def toFloat(number):
-    """
 
-    """
+def toFloat(number):
+    """ """
     try:
         res = float(number)
     except ValueError as e:
         res = None
     return res
 
+
 class BaseListener(antlr4.ParseTreeListener):
-    """
-    """
+    """ """
 
     value = []
 
-    def __init__(self, database, logLevel = 'INFO'):
+    def __init__(self, database, logLevel="INFO"):
         self.db = database
-        self.logger = Logger(__name__, level = logLevel)
+        self.logger = Logger(__name__, level=logLevel)
         super(BaseListener, self).__init__()
         self.session = database.session
         self.bakery = baked.bakery()
         self.bake_common_queries()
 
     def bake_common_queries(self):
-        self.ATTRIBUTE_DEFINITION_BY_NAME = self.bakery(lambda session: self.session.query(Attribute_Definition).\
-            filter(Attribute_Definition.name == bindparam('name')))
-        self.MESSAGE_BY_NAME = self.bakery(lambda session: session.query(Message).filter(Message.name == bindparam('name')))
-        self.NODE_BY_NAME = self.bakery(lambda session: session.query(Node).filter(Node.name == bindparam('name')))
-        self.NODE_BY_RID = self.bakery(lambda session: session.query(Node).filter(Node.rid == bindparam('rid')))
-        self.SIGNAL_BY_NAME = self.bakery(lambda session: session.query(Signal).filter(Signal.name == bindparam('name')))
-        self.SIGNAL_BY_RID = self.bakery(lambda session: session.query(Signal).filter(Signal.rid == bindparam('rid')))
+        self.ATTRIBUTE_DEFINITION_BY_NAME = self.bakery(
+            lambda session: self.session.query(Attribute_Definition).filter(
+                Attribute_Definition.name == bindparam("name")
+            )
+        )
+        self.MESSAGE_BY_NAME = self.bakery(
+            lambda session: session.query(Message).filter(
+                Message.name == bindparam("name")
+            )
+        )
+        self.NODE_BY_NAME = self.bakery(
+            lambda session: session.query(Node).filter(Node.name == bindparam("name"))
+        )
+        self.NODE_BY_RID = self.bakery(
+            lambda session: session.query(Node).filter(Node.rid == bindparam("rid"))
+        )
+        self.SIGNAL_BY_NAME = self.bakery(
+            lambda session: session.query(Signal).filter(
+                Signal.name == bindparam("name")
+            )
+        )
+        self.SIGNAL_BY_RID = self.bakery(
+            lambda session: session.query(Signal).filter(Signal.rid == bindparam("rid"))
+        )
 
     def log_insertion(self, table_name):
         self.logger.debug("Inserting values for '{}'.".format(table_name))
@@ -115,10 +150,10 @@ class BaseListener(antlr4.ParseTreeListener):
     def getList(self, attr):
         return [x for x in attr] if attr else []
 
-    def getTerminal(self, attr, default = None):
+    def getTerminal(self, attr, default=None):
         return attr.text if attr else default
 
-    def getValue(self, attr, default = None):
+    def getValue(self, attr, default=None):
         return attr.value if attr else default
 
     def exitIntValue(self, ctx):
@@ -151,15 +186,17 @@ class BaseListener(antlr4.ParseTreeListener):
         ctx.value = value
 
     def _formatMessage(self, msg, location):
-        return "[{0}:{1}] {2}".format(location.start.line, location.start.column + 1, msg)
+        return "[{0}:{1}] {2}".format(
+            location.start.line, location.start.column + 1, msg
+        )
 
-    def _log(self, method, msg, location = None):
+    def _log(self, method, msg, location=None):
         if location:
             method(self._formatMessage(msg, location))
         else:
             method(msg)
 
-    def info(self, msg, location = None):
+    def info(self, msg, location=None):
         """Log an info message.
 
         Args:
@@ -168,7 +205,7 @@ class BaseListener(antlr4.ParseTreeListener):
         """
         self._log(self.logger.info, msg, location)
 
-    def warn(self, msg, location = None):
+    def warn(self, msg, location=None):
         """Log a warning message.
 
         Args:
@@ -177,7 +214,7 @@ class BaseListener(antlr4.ParseTreeListener):
         """
         self._log(self.logger.warning, msg, location)
 
-    def error(self, msg, location = None):
+    def error(self, msg, location=None):
         """Log an error message.
 
         Args:
@@ -186,7 +223,7 @@ class BaseListener(antlr4.ParseTreeListener):
         """
         self._log(self.logger.error, msg, location)
 
-    def debug(self, msg, location = None):
+    def debug(self, msg, location=None):
         """Log a debug message.
 
         Args:
@@ -202,8 +239,15 @@ class ParserWrapper(object):
     This class provides a convenient interface for parsing files using ANTLR4 grammars.
     It dynamically loads the appropriate lexer and parser classes based on the grammar name.
     """
-    def __init__(self, grammarName: str, startSymbol: str, listenerClass: type, 
-                 debug: bool = False, logLevel: str = 'INFO'):
+
+    def __init__(
+        self,
+        grammarName: str,
+        startSymbol: str,
+        listenerClass: type,
+        debug: bool = False,
+        logLevel: str = "INFO",
+    ):
         """Initialize the parser wrapper.
 
         Args:
@@ -215,8 +259,8 @@ class ParserWrapper(object):
         """
         self.grammarName = grammarName
         self.startSymbol = startSymbol
-        self.lexerModule, self.lexerClass = self._load('Lexer')
-        self.parserModule, self.parserClass = self._load('Parser')
+        self.lexerModule, self.lexerClass = self._load("Lexer")
+        self.parserModule, self.parserClass = self._load("Parser")
         self.listenerClass = listenerClass
         self.debug = debug
         self.logLevel = logLevel
@@ -238,8 +282,8 @@ class ParserWrapper(object):
         Returns:
             Tuple of (module, class)
         """
-        className = f'{self.grammarName}{name}'
-        moduleName = f'pydbc.py3.{className}'  # Always use Python 3 modules
+        className = f"{self.grammarName}{name}"
+        moduleName = f"pydbc.py3.{className}"  # Always use Python 3 modules
         module = importlib.import_module(moduleName)
         klass = getattr(module, className)
         return (module, klass)
@@ -269,7 +313,9 @@ class ParserWrapper(object):
         self.db.session.commit()
         return self.db.session
 
-    def parseFromFile(self, filename: str, encoding: str = 'ISO-8859-1', trace: bool = False) -> object:   # str = 'latin-1'
+    def parseFromFile(
+        self, filename: str, encoding: str = "ISO-8859-1", trace: bool = False
+    ) -> object:  # str = 'latin-1'
         """Parse a file using the configured grammar and listener.
 
         Args:
@@ -284,8 +330,13 @@ class ParserWrapper(object):
         self.fnbase = os.path.splitext(fname)[0]
         return self.parse(ParserWrapper.stringStream(filename, encoding), trace)
 
-    def parseFromString(self, buf: str, encoding: str = 'ISO-8859-1', trace: bool = False, # str = 'latin-1'
-                        dbname: str = ":memory:") -> object:
+    def parseFromString(
+        self,
+        buf: str,
+        encoding: str = "ISO-8859-1",
+        trace: bool = False,  # str = 'latin-1'
+        dbname: str = ":memory:",
+    ) -> object:
         """Parse a string using the configured grammar and listener.
 
         Args:
@@ -301,7 +352,7 @@ class ParserWrapper(object):
         return self.parse(antlr4.InputStream(buf), trace)
 
     @staticmethod
-    def stringStream(fname: str, encoding: str = 'ISO-8859-1') -> antlr4.InputStream:
+    def stringStream(fname: str, encoding: str = "ISO-8859-1") -> antlr4.InputStream:
         """Create an ANTLR4 input stream from a file.
 
         Args:
@@ -311,8 +362,9 @@ class ParserWrapper(object):
         Returns:
             ANTLR4 input stream
         """
-        # detected_encoding = detect_encoding(fname)
-        detected_encoding = encoding
+        detected_encoding = detect_encoding(fname)
+        print(f"Detected encoding: {detected_encoding}")
+        # detected_encoding = encoding
         with codecs.open(fname, encoding=detected_encoding) as f:
             return antlr4.InputStream(f.read())
 
