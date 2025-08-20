@@ -39,7 +39,8 @@ pytest-runner = ">=6.0.0"
 black = "^25.1.0"
 
 [tool.poetry.group.docs.dependencies]
-sphinxcontrib-napoleon = "*"
+sphinx = "*"
+myst-parser = "*"
 numpydoc = "*"
 bumpversion = "*"
 
