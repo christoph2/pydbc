@@ -118,3 +118,39 @@ LdfExporter(":memory:").run()
 ```
 
 The exporters use templates in pydbc/cgen/templates and render a text file named testfile.txt.render.
+
+
+## Import a .dbc and query messages
+
+```python
+from pydbc.api.imports import import_dbc
+from pydbc.db.model import Message
+
+# Parse the DBC file and get a SQLAlchemy session
+session = import_dbc("C:\\path\\to\\file.dbc")
+
+# Count all messages
+print("Messages:", session.query(Message).count())
+
+# List message names and IDs
+for m in session.query(Message).order_by(Message.message_id).all():
+    print(f"0x{m.message_id:X} {m.name}")
+```
+
+## Open an existing .vndb and query messages/signals
+
+```python
+from pydbc.api.imports import open_vndb
+from pydbc.db.model import Message
+
+vndb = open_vndb("C:\\path\\to\\database.vndb")
+session = vndb.session
+
+# Find one message and print its signals
+msg = session.query(Message).filter_by(name="EngineData").first()
+if msg:
+    print("Message:", msg.name, hex(msg.message_id), "dlc=", msg.dlc)
+    for ms in msg.signals:  # Message_Signal association
+        s = ms.signal
+        print(f"  {s.name}: start={ms.offset} size={s.bitsize} unit={s.unit}")
+```

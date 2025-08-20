@@ -141,33 +141,30 @@ ldfx.run()  # writes testfile.txt.render
 
 Note: The exporters render using packaged templates under pydbc/cgen/templates. They are intended for demonstration/round‑trip tests.
 
-## 5. Parse an existing DBC file
+## 5. Import an existing DBC/LDF/NCF or open a VNDB file
 
-pyDBC also contains a grammar‑based parser using ANTLR4 and a dedicated DBC listener that populates the SQLAlchemy model.
+To simplify parsing files with the ANTLR4 grammars, use the small helper functions under pydbc.api.imports.
 
 ```python
-from pydbc.parser import ParserWrapper
-from pydbc.dbcListener import DbcListener
+from pydbc.api.imports import import_dbc, import_ldf, import_ncf, open_vndb
 
-# grammar name must match available generated classes (installed with the project)
-# startSymbol is the entry rule of the grammar (e.g., "dbcfile")
-wrapper = ParserWrapper(
-    grammarName="dbc",          # loads pydbc.py3.dbcLexer / dbcParser
-    startSymbol="dbcfile",      # entry rule
-    listenerClass=DbcListener,   # populates VNDB
-    debug=False,
-)
+# DBC: parse a .dbc and get a SQLAlchemy session (DB is written next to the input as .vndb)
+session = import_dbc("path\\to\\your\\file.dbc")
 
-# Parse a file (encoding auto‑detected) and get a SQLAlchemy session
-session = wrapper.parseFromFile("path\\to\\your\\file.dbc")
+# LDF / NCF work the same (requires the respective listeners to be available)
+# ldf_session = import_ldf("path\\to\\your\\file.ldf")
+# ncf_session = import_ncf("path\\to\\your\\file.ncf")
 
-# Or parse from a string
-session = wrapper.parseFromString("VERSION \"1.0\"; ...", dbname="demo")
+# If you already have a .vndb file, open it
+vndb = open_vndb("path\\to\\your\\file.vndb")
+session = vndb.session
 
-print("syntax errors:", wrapper.numberOfSyntaxErrors)
+# Advanced: provide a custom listener (must match the grammar)
+# from pydbc.dbcListener import DbcListener
+# session = import_dbc("file.dbc", listenerClass=DbcListener, debug=False, logLevel="INFO")
 ```
 
-The parser wrapper uses pydbc.utils.detect_encoding to open files with the best matching character set.
+Under the hood these functions use ParserWrapper and auto-detect file encodings using pydbc.utils.detect_encoding.
 
 ## 6. Querying your data (SQLAlchemy session)
 
@@ -188,6 +185,27 @@ print("Messages:", n)
 msg = session.query(Message).filter_by(name="EngineData").first()
 for ms in msg.signals:  # Message_Signal association
     print(ms.signal.name, ms.offset)
+```
+
+If you opened an existing .vndb file with open_vndb, use vndb.session in the same way:
+
+```python
+from pydbc.api.imports import open_vndb
+from pydbc.db.model import Message, Signal
+
+vndb = open_vndb("C:\\path\\to\\database.vndb")
+session = vndb.session
+
+# list all messages and their IDs
+for m in session.query(Message).order_by(Message.message_id).all():
+    print(f"0x{m.message_id:X} {m.name} (dlc={m.dlc})")
+
+# fetch a specific message and show its signals with bit offsets
+msg = session.query(Message).filter_by(name="EngineData").first()
+if msg:
+    for ms in msg.signals:  # ms is a Message_Signal association row
+        s = ms.signal
+        print(f"{s.name}: start={ms.offset} size={s.bitsize} unit={s.unit}")
 ```
 
 ## 7. Next steps
