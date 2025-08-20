@@ -52,22 +52,92 @@ from pydbc.db.model import (
 
 
 class DBCCreator:
-    """High-level API for creating DBC components."""
+    """High-level API for creating DBC components.
 
-    def __init__(self, db_path: str = ":memory:", debug: bool = False):
+    This creator can either create a new database (default) or attach to an existing
+    SQLAlchemy session returned by the parser. Use DBCCreator.from_session(session)
+    or pass session=... to the constructor to extend an existing database.
+    """
+
+    def __init__(self, db_path: str = ":memory:", debug: bool = False, session=None):
         """Initialize a new DBC creator.
 
         Args:
             db_path: Path to the database file or ":memory:" for in-memory database
             debug: Enable debug mode
+            session: Optional existing SQLAlchemy session to attach to (e.g., from ParserWrapper)
         """
-        self.db = VNDB.create(db_path, debug=debug, autocommit=True)
-        self.session = self.db.session
+        if session is not None:
+            # Attach to an existing session (parsed DB, etc.)
+            self.db = None  # no VNDB instance managed here
+            self.session = session
+        else:
+            self.db = VNDB.create(db_path, debug=debug, autocommit=True)
+            self.session = self.db.session
         self._networks = {}
         self._nodes = {}
         self._messages = {}
         self._signals = {}
         self._valuetables = {}
+
+    @classmethod
+    def from_session(cls, session):
+        """Create a DBCCreator attached to an existing SQLAlchemy session.
+
+        Example:
+            from pydbc.parser import ParserWrapper
+            from pydbc.dbcListener import DbcListener
+            wrapper = ParserWrapper(grammarName="dbc", startSymbol="dbcfile", listenerClass=DbcListener)
+            session = wrapper.parseFromFile("C:\\path\\to\\file.dbc")
+            dbc = DBCCreator.from_session(session)
+        """
+        return cls(session=session)
+
+    # internal helpers for lazy name -> object resolution
+    def _get_node(self, node):
+        if isinstance(node, str):
+            if node in self._nodes:
+                return self._nodes[node]
+            obj = self.session.query(Node).filter_by(name=node).first()
+            if obj is None:
+                raise KeyError(f"Node '{node}' not found")
+            self._nodes[node] = obj
+            return obj
+        return node
+
+    def _get_message(self, message):
+        if isinstance(message, str):
+            if message in self._messages:
+                return self._messages[message]
+            obj = self.session.query(Message).filter_by(name=message).first()
+            if obj is None:
+                raise KeyError(f"Message '{message}' not found")
+            self._messages[message] = obj
+            return obj
+        return message
+
+    def _get_signal(self, signal):
+        if isinstance(signal, str):
+            if signal in self._signals:
+                return self._signals[signal]
+            obj = self.session.query(Signal).filter_by(name=signal).first()
+            if obj is None:
+                raise KeyError(f"Signal '{signal}' not found")
+            self._signals[signal] = obj
+            return obj
+        return signal
+
+    def index_existing(self):
+        """Optionally preload existing objects from the current session into caches."""
+        for n in self.session.query(Network).all():
+            self._networks[n.name] = n
+        for n in self.session.query(Node).all():
+            self._nodes[n.name] = n
+        for m in self.session.query(Message).all():
+            if m.name:
+                self._messages[m.name] = m
+        for s in self.session.query(Signal).all():
+            self._signals[s.name] = s
 
     def create_network(self, name: str, **kwargs) -> Network:
         """Create a new network.
@@ -120,13 +190,19 @@ class DBCCreator:
             The created Message object
         """
         if isinstance(sender, str):
-            sender_rid = self._nodes[sender].rid
+            sender_obj = self._get_node(sender)
+            sender_rid = sender_obj.rid
         elif isinstance(sender, Node):
             sender_rid = sender.rid
-            
+        elif isinstance(sender, int):
+            sender_rid = sender
+        else:
+            raise TypeError("sender must be a node name, Node, or integer rid")
+
         message = Message(name=name, message_id=message_id, dlc=dlc, sender=sender_rid, **kwargs)
         self.session.add(message)
-        self._messages[name] = message
+        if name:
+            self._messages[name] = message
         return message
 
     def create_signal(
@@ -198,9 +274,9 @@ class DBCCreator:
             The created Message_Signal object
         """
         if isinstance(message, str):
-            message = self._messages[message]
+            message = self._get_message(message)
         if isinstance(signal, str):
-            signal = self._signals[signal]
+            signal = self._get_signal(signal)
 
         msg_sig = Message_Signal(
             message=message,
@@ -247,9 +323,9 @@ class DBCCreator:
             The created Node_RxSignal object
         """
         if isinstance(signal, str):
-            signal = self._signals[signal]
+            signal = self._get_signal(signal)
         if isinstance(node, str):
-            node = self._nodes[node]
+            node = self._get_node(node)
 
         node_rx_signal = Node_RxSignal(signal=signal, node=node)
         self.session.add(node_rx_signal)

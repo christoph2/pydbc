@@ -136,6 +136,17 @@ For more detailed examples, see the `pydbc/examples/api_examples.py` file.
 - Support for all major components of automotive network description files
 - Comprehensive examples demonstrating API usage
 
+## Documentation
+
+The full documentation in GitHub‑Flavored Markdown is available in the docs/ folder:
+- docs/INDEX.md — Documentation home
+- docs/getting-started.md — Installation and quickstarts
+- docs/tutorial.md — Step‑by‑step walkthrough
+- docs/how-to.md — Task‑oriented guides
+- docs/examples.md — Ready‑to‑run examples
+- docs/api-reference.md — API reference
+- docs/python-can.md — Using pyDBC with python-can (send/receive CAN frames)
+
 ## License
 
 GNU General Public License v2.0
