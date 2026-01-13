@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pydbc"
-version = "0.5.1"
+version = "0.5.2"
 description = "Vehicle description file handling for Python"
 authors = ["Christoph Schueler <cpu12.gems@googlemail.com>"]
 readme = "README.md"
