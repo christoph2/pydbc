@@ -403,7 +403,7 @@ class AttributeRel_Value(Base, MixInBase):
     )
 
 
-class Vndb_Meta(Base, RidMixIn):
+class VndbMeta(Base, RidMixIn):
     schema_version = StdInteger()
     vndb_type = StdInteger()
     created = Column(DateTime, default=datetime.datetime.now)

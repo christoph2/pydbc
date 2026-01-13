@@ -4,7 +4,7 @@
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2021 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2025 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 
@@ -241,12 +241,12 @@ class ParserWrapper(object):
     """
 
     def __init__(
-        self,
-        grammarName: str,
-        startSymbol: str,
-        listenerClass: type,
-        debug: bool = False,
-        logLevel: str = "INFO",
+            self,
+            grammarName: str,
+            startSymbol: str,
+            listenerClass: type,
+            debug: bool = False,
+            logLevel: str = "INFO",
     ):
         """Initialize the parser wrapper.
 
@@ -314,7 +314,7 @@ class ParserWrapper(object):
         return self.db.session
 
     def parseFromFile(
-        self, filename: str, encoding: str = "ISO-8859-1", trace: bool = False
+            self, filename: str, encoding: str = "ISO-8859-1", trace: bool = False
     ) -> object:  # str = 'latin-1'
         """Parse a file using the configured grammar and listener.
 
@@ -331,11 +331,11 @@ class ParserWrapper(object):
         return self.parse(ParserWrapper.stringStream(filename, encoding), trace)
 
     def parseFromString(
-        self,
-        buf: str,
-        encoding: str = "ISO-8859-1",
-        trace: bool = False,  # str = 'latin-1'
-        dbname: str = ":memory:",
+            self,
+            buf: str,
+            encoding: str = "ISO-8859-1",
+            trace: bool = False,  # str = 'latin-1'
+            dbname: str = ":memory:",
     ) -> object:
         """Parse a string using the configured grammar and listener.
 

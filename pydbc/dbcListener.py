@@ -40,7 +40,7 @@ from pydbc.db.model import (
     Dbc_Version, Message, Message_Signal, Network, Node, Signal, Value_Description,
     Valuetable, EnvironmentVariablesData, EnvVar, Attribute_Definition, Attribute_Value,
     Node_TxMessage, Node_RxSignal, Category_Definition, Category_Value, AttributeRel_Value,
-    Signal_Group_Signal, Signal_Group, Vndb_Protocol, Object_Valuetable
+    Signal_Group_Signal, Signal_Group, Vndb_Protocol, Object_Valuetable, VndbMeta
 )
 
 
@@ -239,30 +239,37 @@ class DbcListener(parser.BaseListener):
     def exitDbcfile(self, ctx):
         self.session.commit()
         self.value = dict(
-            version = ctx.version().value,
-            newSymbols = ctx.newSymbols().value,
-            bitTiming = ctx.bitTiming().value,
-            nodes = ctx.nodes().value,
-            valueTables = ctx.valueTables().value,
-            messages = ctx.messages().value,
-            messageTransmitters = ctx.messageTransmitters().value,
-            environmentVariables = ctx.environmentVariables().value,
-            environmentVariablesData = ctx.environmentVariablesData().value,
-            signalTypes = ctx.signalTypes().value,
-            comments = ctx.comments().value,
-            attributeDefinitions = ctx.attributeDefinitions().value,
-            relativeAttributeDefinitions = ctx.relativeAttributeDefinitions().value,
-            attributeDefaults = ctx.attributeDefaults().value,
-            relativeAttributeDefaults = ctx.relativeAttributeDefaults().value,
-            attributeValues = ctx.attributeValues().value,
-            relativeAttributeValues = ctx.relativeAttributeValues().value,
-            objectValueTables = ctx.objectValueTables().value,
-            categoryDefinitions = ctx.categoryDefinitions().value,
-            categories = ctx.categories().value,
-            signalGroups = ctx.signalGroups().value,
-            signalExtendedValueTypeList = ctx.signalExtendedValueTypeList().value
+            version=ctx.version().value,
+            newSymbols=ctx.newSymbols().value,
+            bitTiming=ctx.bitTiming().value,
+            nodes=ctx.nodes().value,
+            valueTables=ctx.valueTables().value,
+            messages=ctx.messages().value,
+            messageTransmitters=ctx.messageTransmitters().value,
+            environmentVariables=ctx.environmentVariables().value,
+            environmentVariablesData=ctx.environmentVariablesData().value,
+            signalTypes=ctx.signalTypes().value,
+            comments=ctx.comments().value,
+            attributeDefinitions=ctx.attributeDefinitions().value,
+            relativeAttributeDefinitions=ctx.relativeAttributeDefinitions().value,
+            attributeDefaults=ctx.attributeDefaults().value,
+            relativeAttributeDefaults=ctx.relativeAttributeDefaults().value,
+            attributeValues=ctx.attributeValues().value,
+            relativeAttributeValues=ctx.relativeAttributeValues().value,
+            objectValueTables=ctx.objectValueTables().value,
+            categoryDefinitions=ctx.categoryDefinitions().value,
+            categories=ctx.categories().value,
+            signalGroups=ctx.signalGroups().value,
+            signalExtendedValueTypeList=ctx.signalExtendedValueTypeList().value
 
         )
+        meta_entry = VndbMeta(schema_version=1, vndb_type=1)
+        self.session.add(meta_entry)
+        self.session.commit()
+        self.logger.info("Finished processing.")
+        #self.logger.info(
+        #    f"Finished parsing. Network '{self.network.name}' with {len(self.network.messages)} messages."
+        #)
 
     def exitMessageTransmitters(self, ctx):
         self.log_insertion("NodeTxMessages")

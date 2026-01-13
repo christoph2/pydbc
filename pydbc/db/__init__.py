@@ -28,6 +28,7 @@ __author__ = "Christoph Schueler"
 __version__ = "0.1.0"
 
 import mmap
+import os
 import re
 import sqlite3
 from functools import partial
@@ -165,6 +166,10 @@ class VNDB(object):
             model.Base.metadata.create_all(self.engine)
             self.session.flush()
             self.session.commit()
+            # Mark database as consistent after successful import
+            from pydbc.db.model import VndbMeta
+            self.session.add(VndbMeta(schema_version=1, vndb_type=1))
+            self.session.commit()
         self.logger = Logger(__name__, level=logLevel)
 
     @classmethod
@@ -184,6 +189,57 @@ class VNDB(object):
     def open(cls, filename=":memory:", debug=False, logLevel="INFO", autocommit: bool=False):
         """ """
         return cls._open_or_create(filename, debug, logLevel, False, autocommit)
+
+    @classmethod
+    def open_or_create(cls, db_path: str, import_func, debug=False, logLevel="INFO"):
+        """
+        Opens a VNDB database if it exists and is consistent.
+        If not, it deletes the existing file (if any) and recreates it by calling import_func.
+
+        :param db_path: Path to the .vndb database file.
+        :param import_func: A callable (e.g., a lambda) that performs the import and returns a SQLAlchemy session.
+        :param debug: Enable SQLAlchemy debug logging.
+        :param logLevel: Logging level.
+        :return: An instance of VNDB.
+        """
+        if os.path.exists(db_path):
+            try:
+                db = cls(db_path, debug=debug, logLevel=logLevel, create=False)
+                # Check for consistency
+                from pydbc.db.model import VndbMeta
+                result = db.session.query(VndbMeta).first() # filter_by(key='db_status', value='consistent')
+                if result:
+                    db.logger.info(f"Opened existing database: {db_path}")
+                    return db
+                else:
+                    db.logger.warning(f"Database '{db_path}' is not consistent. Re-importing.")
+                    db.session.close()  # Close connection before deleting
+            except Exception as e:
+                # This can happen if the file is not a valid SQLite DB
+                Logger(__name__).warning(f"Failed to open '{db_path}' as a database ({e}). Re-importing.")
+
+            # If we are here, the DB is inconsistent or corrupt, so we remove it
+            try:
+                os.remove(db_path)
+            except OSError as e:
+                Logger(__name__).error(f"Error removing inconsistent database '{db_path}': {e}")
+                raise
+
+        # If the file doesn't exist or was removed, import it
+        Logger(__name__).info(f"Creating new database by importing source for '{db_path}'...")
+        session = import_func()
+        return cls.from_session(session)
+
+    @classmethod
+    def from_session(cls, session):
+        """Creates a VNDB instance from an existing session."""
+        instance = cls.__new__(cls)
+        instance._session = session
+        instance._engine = session.get_bind()
+        instance.dbname = str(instance._engine.url).replace("sqlite:///", "")
+        instance._metadata = model.Base.metadata
+        instance.logger = Logger(__name__)
+        return instance
 
     def close(self):
         """ """

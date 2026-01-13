@@ -128,3 +128,27 @@ class SocketCanCGenerator:
         }
         text = self.TEMPLATE.decode("utf-8") if isinstance(self.TEMPLATE, (bytes, bytearray)) else str(self.TEMPLATE)
         return renderTemplateFromText(text, ns, encoding="utf-8")
+
+
+class PythonCanAppGenerator:
+    """Generates eine standalone Python-Anwendung (.py) auf Basis von python-can.
+
+    Nutzung:
+        gen = PythonCanAppGenerator(session)
+        code = gen.render(only=["EngineData"], app_name="pydbc_python_can_app")
+        Path("python_can_app.py").write_text(code, encoding="utf-8")
+    """
+
+    TEMPLATE = pkgutil.get_data("pydbc", "cgen/templates/python_can.py.tmpl")
+
+    def __init__(self, session: Session):
+        self._session = session
+
+    def render(self, only: Optional[Iterable[str]] = None, app_name: str = "pydbc_python_can_app") -> str:
+        msgs = _collect_messages(self._session, only)
+        ns: Dict[str, Any] = {
+            "app_name": app_name,
+            "messages": msgs,
+        }
+        text = self.TEMPLATE.decode("utf-8") if isinstance(self.TEMPLATE, (bytes, bytearray)) else str(self.TEMPLATE)
+        return renderTemplateFromText(text, ns, encoding="utf-8")

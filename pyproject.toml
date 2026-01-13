@@ -47,6 +47,8 @@ bumpversion = "*"
 [tool.poetry.scripts]
 vndb_importer = "pydbc.scripts.vndb_importer:main"
 vndb_exporter = "pydbc.scripts.vndb_exporter:main"
+pydbc-codegen = "pydbc.scripts.codegen:main"
+pydbc_codegen = "pydbc.scripts.codegen:main"
 
 [tool.poetry.extras]
 python-can = ["python-can"]
