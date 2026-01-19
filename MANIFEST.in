@@ -1,7 +1,6 @@
 include *.md
 include *.txt
 include *.yml
-include .bumpversion.cfg
 include LICENSE
 recursive-include docs *.py
 recursive-include docs *.rst
