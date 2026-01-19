@@ -31,8 +31,8 @@ jobs:
       - name: Test with pytest
         run: poetry run pytest
 
-  build_sdist:
-    name: Build source distribution
+  build:
+    name: Build distributions
     needs: [ test ]
     runs-on: ubuntu-latest
     steps:
@@ -48,8 +48,8 @@ jobs:
           pip install -U build poetry
           poetry install
 
-      - name: Build sdist
-        run: python -m build --sdist
+      - name: Build distributions
+        run: python -m build
 
       - uses: actions/upload-artifact@v4
         with:
