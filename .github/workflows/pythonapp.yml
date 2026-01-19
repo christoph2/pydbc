@@ -58,7 +58,7 @@ jobs:
           retention-days: 1
 
   upload_pypi:
-    needs: [ build_sdist ]
+    needs: [ build ]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
