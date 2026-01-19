@@ -3,7 +3,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "pydbc"
+name = "PyDBC"
 version = "1.0.114"
 description = "Vehicle description file handling for Python"
 authors = ["Christoph Schueler <cpu12.gems@googlemail.com>"]
