@@ -13,26 +13,29 @@ jobs:
 
   build_sdist:
     name: Build source distribution
+    needs: [ test ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build sdist
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
         run: |
           pip install -U build poetry
           poetry install
-          python -m build --sdist
+
+      - name: Build sdist
+        run: python -m build --sdist
 
       - uses: actions/upload-artifact@v4
         with:
           path: dist/*.tar.gz
           include-hidden-files: true
           retention-days: 1
-      - name: Test with pytest
-        run: |
-          pip install pytest poetry
-          poetry install
-          pytest
 
   upload_pypi:
     needs: [ build_sdist ]
