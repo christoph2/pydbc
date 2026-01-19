@@ -53,7 +53,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          path: dist/*.tar.gz
+          path: dist/*
           include-hidden-files: true
           retention-days: 1
 
