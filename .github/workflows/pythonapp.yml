@@ -73,3 +73,5 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.13.0
         with:
           attestations: true
+          print-hash: true
+          verbose: true
