@@ -11,6 +11,26 @@ on:
 
 jobs:
 
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Test with pytest
+        run: poetry run pytest
+
   build_sdist:
     name: Build source distribution
     needs: [ test ]
