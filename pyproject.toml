@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyvndb"
-version = "1.0.114"
+version = "1.0.115"
 description = "Vehicle description file handling for Python"
 authors = ["Christoph Schueler <cpu12.gems@googlemail.com>"]
 readme = "README.md"
@@ -45,7 +45,7 @@ myst-parser = "*"
 numpydoc = "*"
 
 [tool.bumpver]
-current_version = "1.0.114"
+current_version = "1.0.115"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true
