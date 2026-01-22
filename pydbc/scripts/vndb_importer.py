@@ -199,21 +199,22 @@ def main() -> None:
 
     # Process each input file
     for arg in args.vehicle_file:
-        for pth in pathlib.Path().glob(arg):
-            if not pth.exists():
-                logging.error(f"File not found: {pth}")
-                continue
+        # print(arg)
+        pth=pathlib.Path(arg)
+        if not pth.exists():
+            logging.error(f"File not found: {pth}")
+            continue
 
-            if not pth.is_file():
-                logging.error(f"Not a file: {pth}")
-                continue
+        if not pth.is_file():
+            logging.error(f"Not a file: {pth}")
+            continue
 
-            # Import the file
-            session = importFile(pth, args.loglevel)
-            if session:
-                logging.info(f"Successfully imported {pth}")
-            else:
-                logging.error(f"Failed to import {pth}")
+        # Import the file
+        session = importFile(pth, args.loglevel)
+        if session:
+            logging.info(f"Successfully imported {pth}")
+        else:
+            logging.error(f"Failed to import {pth}")
 
 
 if __name__ == "__main__":
