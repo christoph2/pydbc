@@ -95,10 +95,10 @@ class RidMixIn(MixInBase):
 
 
 def StdInteger(
-        default: int = 0,
-        primary_key: bool = False,
-        unique: bool = False,
-        nullable: bool = False,
+    default: int = 0,
+    primary_key: bool = False,
+    unique: bool = False,
+    nullable: bool = False,
 ) -> mapped_column:
     """Helper function to create a standard integer column using SQLAlchemy 2.0 style"""
     return mapped_column(
@@ -111,10 +111,10 @@ def StdInteger(
 
 
 def StdFloat(
-        default: float = 0.0,
-        primary_key: bool = False,
-        unique: bool = False,
-        nullable: bool = False,
+    default: float = 0.0,
+    primary_key: bool = False,
+    unique: bool = False,
+    nullable: bool = False,
 ) -> mapped_column:
     """Helper function to create a standard float column using SQLAlchemy 2.0 style"""
     return mapped_column(
@@ -169,13 +169,13 @@ class Message_Signal(Base, MixInBase):
     )
 
     def __init__(
-            self,
-            signal: "Signal",
-            message: "Message",
-            offset: int,
-            multiplexor_signal: Optional[int] = None,
-            multiplex_dependent: Optional[bool] = None,
-            multiplexor_value: Optional[int] = None,
+        self,
+        signal: "Signal",
+        message: "Message",
+        offset: int,
+        multiplexor_signal: Optional[int] = None,
+        multiplex_dependent: Optional[bool] = None,
+        multiplexor_value: Optional[int] = None,
     ):
         self.signal = signal
         self.message = message
@@ -720,13 +720,13 @@ class LinNetwork(Network):
     )
 
     def __init__(
-            self,
-            name: str,
-            protocol_version: Optional[str] = None,
-            language_version: Optional[str] = None,
-            speed: Optional[float] = None,
-            file_revision: Optional[str] = None,
-            channel_name: Optional[str] = None,
+        self,
+        name: str,
+        protocol_version: Optional[str] = None,
+        language_version: Optional[str] = None,
+        speed: Optional[float] = None,
+        file_revision: Optional[str] = None,
+        channel_name: Optional[str] = None,
     ):
         super().__init__()
         self.name = name
@@ -839,17 +839,17 @@ class LinSlaveNode(LinNode):
     __mapper_args__ = {"polymorphic_identity": "LinSlaveNode"}
 
     def __init__(
-            self,
-            name,
-            protocol_version=None,
-            configured_NAD=None,
-            initial_NAD=None,
-            product_id=(),
-            p2_min=None,
-            st_min=None,
-            n_as_timeout=None,
-            n_cr_timeout=None,
-            response_tolerance=None,
+        self,
+        name,
+        protocol_version=None,
+        configured_NAD=None,
+        initial_NAD=None,
+        product_id=(),
+        p2_min=None,
+        st_min=None,
+        n_as_timeout=None,
+        n_cr_timeout=None,
+        response_tolerance=None,
     ):
         self.name = name
         self.protocol_version = protocol_version
@@ -902,11 +902,11 @@ class LinSignal(Signal):
     __mapper_args__ = {"polymorphic_identity": "LinSignal"}
 
     def __init__(
-            self,
-            name: str,
-            signal_size: int,
-            init_value: Union[int, List[int]],
-            publisher: "LinNode",
+        self,
+        name: str,
+        signal_size: int,
+        init_value: Union[int, List[int]],
+        publisher: "LinNode",
     ):
         super().__init__()
         self.name = name
@@ -1210,12 +1210,10 @@ class LinScheduleTable(Base, RidMixIn):
 class LinScheduleTable_Command(Base, MixInBase):
     """ """
 
-    rid = Column(Integer, primary_key=True)
+    rid = Column(Integer, primary_key=True, autoincrement=True)
 
     lin_schedule_table_id = Column(
-        Integer,
-        ForeignKey("linscheduletable.rid"),
-        nullable=False, primary_key=True
+        Integer, ForeignKey("linscheduletable.rid"), nullable=False
     )
     frame_time = Column(Float, nullable=False)
     type = Column(String(255))
@@ -1468,14 +1466,14 @@ class LinScheduleTable_Command_AssignFrameIdRange(LinScheduleTable_Command):
     }
 
     def __init__(
-            self,
-            frame_time,
-            node,
-            frame_index,
-            frame_pid1=None,
-            frame_pid2=None,
-            frame_pid3=None,
-            frame_pid4=None,
+        self,
+        frame_time,
+        node,
+        frame_index,
+        frame_pid1=None,
+        frame_pid2=None,
+        frame_pid3=None,
+        frame_pid4=None,
     ):
         self.frame_time = frame_time
         self.node = node
@@ -1549,7 +1547,6 @@ class LinScheduleTable_Command_AssignFrameId(LinScheduleTable_Command):
     command_id = Column(
         Integer, ForeignKey("linscheduletable_command.rid"), primary_key=True
     )
-
 
     node_id = Column(
         Integer,
@@ -1689,7 +1686,7 @@ class LinEventTriggeredFrame(LinUnconditionalFrame):
     __mapper_args__ = {"polymorphic_identity": "LinEventTriggeredFrame"}
 
     def __init__(
-            self, name, frame_id, master_node, collision_resolving_schedule_table=None
+        self, name, frame_id, master_node, collision_resolving_schedule_table=None
     ):
         self.name = name
         self.frame_id = frame_id

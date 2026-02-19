@@ -1,0 +1,248 @@
+# -*- coding: utf-8 -*-
+"""
+Generierter LIN-Code (pydbc LinGenericGenerator).
+Netzwerk: ${network_name or "<unbekannt>"}
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Dict, Any, List, Optional, Tuple
+
+DIAG_MASTER_REQ_ID = 0x3C
+DIAG_SLAVE_RESP_ID = 0x3D
+
+
+@dataclass(frozen=True)
+class LinSignalMeta:
+    name: str
+    start_bit: int
+    size: int
+    signed: bool
+    factor: float
+    offset: float
+    minimum: Optional[float]
+    maximum: Optional[float]
+    init_value: int
+    logical: Dict[int, Optional[str]]
+
+
+@dataclass(frozen=True)
+class LinFrameMeta:
+    name: str
+    frame_id: int
+    pid: int
+    dlc: int
+    publisher: Optional[str]
+    signals: List[LinSignalMeta]
+
+
+@dataclass(frozen=True)
+class LinScheduleCommand:
+    command_type: str
+    frame_time: float
+    frame_name: Optional[str]
+    node_name: Optional[str]
+    params: Dict[str, Any]
+
+
+@dataclass(frozen=True)
+class LinScheduleTable:
+    name: str
+    commands: List[LinScheduleCommand]
+
+
+def compute_pid(frame_id: int) -> int:
+    fid = frame_id & 0x3F
+    p0 = ((fid >> 0) ^ (fid >> 1) ^ (fid >> 2) ^ (fid >> 4)) & 0x1
+    p1 = (~((fid >> 1) ^ (fid >> 3) ^ (fid >> 4) ^ (fid >> 5))) & 0x1
+    return fid | (p0 << 6) | (p1 << 7)
+
+
+def _insert_bits_le(buf: bytearray, start_bit: int, size: int, value: int) -> None:
+    if size <= 0:
+        return
+    mask = (1 << size) - 1
+    value &= mask
+    bit_pos = start_bit
+    remaining = size
+    while remaining > 0:
+        byte_index = bit_pos // 8
+        bit_index = bit_pos % 8
+        bits_in_this_byte = min(remaining, 8 - bit_index)
+        chunk_mask = (1 << bits_in_this_byte) - 1
+        chunk = value & chunk_mask
+        buf[byte_index] &= ~(chunk_mask << bit_index)
+        buf[byte_index] |= (chunk << bit_index)
+        value >>= bits_in_this_byte
+        remaining -= bits_in_this_byte
+        bit_pos += bits_in_this_byte
+
+
+def _extract_bits_le(buf: bytes, start_bit: int, size: int, signed: bool) -> int:
+    if size <= 0:
+        return 0
+    bit_pos = start_bit
+    remaining = size
+    out = 0
+    shift = 0
+    while remaining > 0:
+        byte_index = bit_pos // 8
+        bit_index = bit_pos % 8
+        bits_in_this_byte = min(remaining, 8 - bit_index)
+        chunk_mask = (1 << bits_in_this_byte) - 1
+        byte_val = buf[byte_index]
+        chunk = (byte_val >> bit_index) & chunk_mask
+        out |= (chunk << shift)
+        remaining -= bits_in_this_byte
+        bit_pos += bits_in_this_byte
+        shift += bits_in_this_byte
+    if signed:
+        sign_bit = 1 << (size - 1)
+        if out & sign_bit:
+            out = out - (1 << size)
+    return out
+
+
+def _phys_to_raw(value: float, factor: float, offset: float, size: int, signed: bool) -> int:
+    if factor == 0:
+        raw = int(round(value - offset))
+    else:
+        raw = int(round((value - offset) / factor))
+    if signed:
+        min_raw = -(1 << (size - 1))
+        max_raw = (1 << (size - 1)) - 1
+    else:
+        min_raw = 0
+        max_raw = (1 << size) - 1
+    return max(min(raw, max_raw), min_raw)
+
+
+def _raw_to_phys(raw: int, factor: float, offset: float) -> float:
+    return raw * factor + offset
+
+
+FRAMES: List[LinFrameMeta] = [
+% for frame in unconditional_frames:
+    LinFrameMeta(
+        name="${frame.name}",
+        frame_id=${frame.frame_id},
+        pid=${frame.pid},
+        dlc=${frame.dlc},
+        publisher=${repr(frame.publisher) if frame.publisher else "None"},
+        signals=[
+% for sig in frame.signals:
+            LinSignalMeta(
+                name="${sig.name}",
+                start_bit=${sig.start_bit},
+                size=${sig.size},
+                signed=${str(sig.signed)},
+                factor=${sig.factor},
+                offset=${sig.offset},
+                minimum=${sig.minimum if sig.minimum is not None else "None"},
+                maximum=${sig.maximum if sig.maximum is not None else "None"},
+                init_value=${sig.init_value},
+                logical={
+% for entry in sig.logical_entries:
+                    ${int(entry.signal_value)}: ${repr(entry.text_info) if entry.text_info is not None else "None"},
+% endfor
+                },
+            ),
+% endfor
+        ],
+    ),
+% endfor
+]
+
+FRAMES_BY_ID = {f.frame_id: f for f in FRAMES}
+FRAMES_BY_NAME = {f.name: f for f in FRAMES}
+
+NODES = [
+% for node in nodes:
+    {"name": "${node.name}", "role": "${node.role}", "configured_nad": ${node.configured_nad if node.configured_nad is not None else "None"}, "initial_nad": ${node.initial_nad if node.initial_nad is not None else "None"}},
+% endfor
+]
+
+SPORADIC_FRAMES = [
+% for frame in sporadic_frames:
+    {"name": "${frame.name}", "frame_id": ${frame.frame_id}, "pid": ${frame.pid}, "associated_frames": ${frame.associated_frames}},
+% endfor
+]
+
+EVENT_TRIGGERED_FRAMES = [
+% for frame in event_triggered_frames:
+    {"name": "${frame.name}", "frame_id": ${frame.frame_id}, "pid": ${frame.pid}, "associated_frames": ${frame.associated_frames}, "collision_resolving_schedule": ${repr(frame.collision_resolving_schedule) if frame.collision_resolving_schedule else "None"}},
+% endfor
+]
+
+CONFIGURABLE_FRAMES = [
+% for cfg in configurable_frames:
+    {"node": "${cfg.node_name}", "frame": "${cfg.frame_name}", "identifier": ${cfg.identifier if cfg.identifier is not None else "None"}},
+% endfor
+]
+
+SCHEDULE_TABLES: List[LinScheduleTable] = [
+% for table in schedule_tables:
+    LinScheduleTable(
+        name="${table.name}",
+        commands=[
+% for cmd in table.commands:
+            LinScheduleCommand(
+                command_type="${cmd.command_type}",
+                frame_time=${cmd.frame_time},
+                frame_name=${repr(cmd.frame_name) if cmd.frame_name else "None"},
+                node_name=${repr(cmd.node_name) if cmd.node_name else "None"},
+                params=${cmd.params},
+            ),
+% endfor
+        ],
+    ),
+% endfor
+]
+
+
+def get_frame_by_name(name: str) -> LinFrameMeta:
+    return FRAMES_BY_NAME[name]
+
+
+def get_frame_by_id(frame_id: int) -> LinFrameMeta:
+    return FRAMES_BY_ID[frame_id]
+
+
+def encode_frame_by_name(frame_name: str, signal_values: Dict[str, float]) -> Tuple[int, int, bytes, int]:
+    frame = get_frame_by_name(frame_name)
+    data = bytearray([0] * frame.dlc)
+    for sig in frame.signals:
+        phys = float(signal_values.get(sig.name, sig.init_value))
+        raw = _phys_to_raw(phys, sig.factor, sig.offset, sig.size, sig.signed)
+        _insert_bits_le(data, sig.start_bit, sig.size, raw)
+    return frame.frame_id, frame.pid, bytes(data), frame.dlc
+
+
+def decode_frame_by_id(frame_id: int, data: bytes) -> Dict[str, Any]:
+    frame = get_frame_by_id(frame_id)
+    result: Dict[str, Any] = {}
+    for sig in frame.signals:
+        raw = _extract_bits_le(data, sig.start_bit, sig.size, sig.signed)
+        phys = _raw_to_phys(raw, sig.factor, sig.offset)
+        logical = sig.logical.get(raw) if sig.logical else None
+        result[sig.name] = {
+            "raw": raw,
+            "physical": phys,
+            "logical": logical,
+        }
+    return {"frame": frame.name, "signals": result}
+
+
+def encode_diagnostic_request(data: bytes) -> Tuple[int, int, bytes, int]:
+    return DIAG_MASTER_REQ_ID, compute_pid(DIAG_MASTER_REQ_ID), data, len(data)
+
+
+def encode_diagnostic_response(data: bytes) -> Tuple[int, int, bytes, int]:
+    return DIAG_SLAVE_RESP_ID, compute_pid(DIAG_SLAVE_RESP_ID), data, len(data)
+
+
+def get_schedule_table(name: str) -> LinScheduleTable:
+    for table in SCHEDULE_TABLES:
+        if table.name == name:
+            return table
+    raise KeyError(f"Schedule table '{name}' not found")

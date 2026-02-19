@@ -6,6 +6,7 @@ The generated code embeds your CAN database (messages and signals); no runtime d
 Currently supported generators:
 - MicroPython CAN application (Python script)
 - Linux SocketCAN C program
+- LIN generic generator (Python + C++)
 
 ## Prerequisites
 - A pyDBC SQLAlchemy session containing your messages/signals (via DBCCreator or ParserWrapper).
@@ -15,7 +16,7 @@ Currently supported generators:
 ```python
 from pathlib import Path
 from pydbc.api.dbc import DBCCreator
-from pydbc.cgen.generators import MicroPythonCanAppGenerator, SocketCanCGenerator
+from pydbc.cgen.generators import MicroPythonCanAppGenerator, SocketCanCGenerator, LinGenericGenerator
 
 # Build a tiny in-memory session (or parse an existing DBC to get a session)
 dbc = DBCCreator(":memory:")
@@ -31,6 +32,13 @@ Path("micropython_app.py").write_text(py_code, encoding="utf-8")
 sc = SocketCanCGenerator(session)
 c_code = sc.render(program_name="socketcan_app", only=["EngineData"])  # optional filter
 Path("socketcan_app.c").write_text(c_code, encoding="utf-8")
+
+# LIN generic generator (Python + C++)
+lin_gen = LinGenericGenerator(session)
+lin_py = lin_gen.render_python(module_name="lin_generated")
+lin_hpp = lin_gen.render_cpp(header_name="lin_generated.hpp")
+Path("lin_generated.py").write_text(lin_py, encoding="utf-8")
+Path("lin_generated.hpp").write_text(lin_hpp, encoding="utf-8")
 ```
 
 See a ready-to-run example at:
@@ -70,6 +78,16 @@ sudo ip link set up vcan0
 - Signals assumed little-endian (Intel). Big-endian (Motorola) signals are not yet generated.
 - Multiplexed signals are not yet handled specially.
 - DLC up to 8 supported in the simple templates (CAN FD can be added later).
+
+## LIN generic generator (Python + C++)
+The generated LIN code includes:
+- Metadata for unconditional frames, sporadic/event-triggered frames, configurable frames, nodes, and schedule tables
+- encode/decode helpers (raw + physical values), PID calculation, diagnostic frame helpers
+- No I/O layer; the caller plugs in a LIN transport/bus implementation
+
+Notes:
+- Signal scaling uses the first available physical encoding entry (scale/offset) if provided, otherwise identity.
+- Logical values are returned as optional text per signal when present.
 
 ## Extending
 The templates live under pydbc/cgen/templates. You can copy and customize them or contribute improvements:

@@ -1,0 +1,333 @@
+#pragma once
+
+#include <cstdint>
+#include <cstring>
+#include <limits>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+// Generierter LIN-Code (pydbc LinGenericGenerator).
+// Netzwerk: ${network_name or "<unbekannt>"}
+
+namespace lin_generated {
+
+constexpr uint8_t DIAG_MASTER_REQ_ID = 0x3C;
+constexpr uint8_t DIAG_SLAVE_RESP_ID = 0x3D;
+
+inline uint8_t compute_pid(uint8_t frame_id) {
+    uint8_t fid = frame_id & 0x3F;
+    uint8_t p0 = ((fid >> 0) ^ (fid >> 1) ^ (fid >> 2) ^ (fid >> 4)) & 0x1;
+    uint8_t p1 = (~((fid >> 1) ^ (fid >> 3) ^ (fid >> 4) ^ (fid >> 5))) & 0x1;
+    return static_cast<uint8_t>(fid | (p0 << 6) | (p1 << 7));
+}
+
+struct LinSignalMeta {
+    const char* name;
+    uint8_t start_bit;
+    uint8_t size;
+    bool signed_signal;
+    double factor;
+    double offset;
+    double minimum;
+    double maximum;
+    int init_value;
+    const std::pair<int, const char*>* logical;
+    size_t logical_count;
+};
+
+struct LinFrameMeta {
+    const char* name;
+    uint8_t frame_id;
+    uint8_t pid;
+    uint8_t dlc;
+    const char* publisher;
+    const LinSignalMeta* signals;
+    size_t signal_count;
+};
+
+struct LinScheduleCommand {
+    const char* type;
+    double frame_time;
+    const char* frame_name;
+    const char* node_name;
+    int nad;
+    int id;
+    int byte;
+    int mask;
+    int inv;
+    int new_nad;
+    int frame_index;
+    int frame_pid1;
+    int frame_pid2;
+    int frame_pid3;
+    int frame_pid4;
+    int d1;
+    int d2;
+    int d3;
+    int d4;
+    int d5;
+    int d6;
+    int d7;
+    int d8;
+};
+
+struct LinScheduleTable {
+    const char* name;
+    const LinScheduleCommand* commands;
+    size_t command_count;
+};
+
+inline void insert_bits_le(std::vector<uint8_t>& buf, int start_bit, int size, int value) {
+    if (size <= 0) {
+        return;
+    }
+    int mask = (1 << size) - 1;
+    value &= mask;
+    int bit_pos = start_bit;
+    int remaining = size;
+    while (remaining > 0) {
+        int byte_index = bit_pos / 8;
+        int bit_index = bit_pos % 8;
+        int bits_in_this_byte = std::min(remaining, 8 - bit_index);
+        int chunk_mask = (1 << bits_in_this_byte) - 1;
+        int chunk = value & chunk_mask;
+        buf[byte_index] &= static_cast<uint8_t>(~(chunk_mask << bit_index));
+        buf[byte_index] |= static_cast<uint8_t>(chunk << bit_index);
+        value >>= bits_in_this_byte;
+        remaining -= bits_in_this_byte;
+        bit_pos += bits_in_this_byte;
+    }
+}
+
+inline int extract_bits_le(const std::vector<uint8_t>& buf, int start_bit, int size, bool signed_signal) {
+    if (size <= 0) {
+        return 0;
+    }
+    int bit_pos = start_bit;
+    int remaining = size;
+    int out = 0;
+    int shift = 0;
+    while (remaining > 0) {
+        int byte_index = bit_pos / 8;
+        int bit_index = bit_pos % 8;
+        int bits_in_this_byte = std::min(remaining, 8 - bit_index);
+        int chunk_mask = (1 << bits_in_this_byte) - 1;
+        int byte_val = buf[byte_index];
+        int chunk = (byte_val >> bit_index) & chunk_mask;
+        out |= (chunk << shift);
+        remaining -= bits_in_this_byte;
+        bit_pos += bits_in_this_byte;
+        shift += bits_in_this_byte;
+    }
+    if (signed_signal) {
+        int sign_bit = 1 << (size - 1);
+        if (out & sign_bit) {
+            out = out - (1 << size);
+        }
+    }
+    return out;
+}
+
+inline int phys_to_raw(double value, const LinSignalMeta& sig) {
+    double raw = (sig.factor == 0.0) ? (value - sig.offset) : ((value - sig.offset) / sig.factor);
+    int rounded = static_cast<int>(std::llround(raw));
+    int min_raw = sig.signed_signal ? -(1 << (sig.size - 1)) : 0;
+    int max_raw = sig.signed_signal ? ((1 << (sig.size - 1)) - 1) : ((1 << sig.size) - 1);
+    if (rounded < min_raw) {
+        return min_raw;
+    }
+    if (rounded > max_raw) {
+        return max_raw;
+    }
+    return rounded;
+}
+
+inline double raw_to_phys(int raw, const LinSignalMeta& sig) {
+    return static_cast<double>(raw) * sig.factor + sig.offset;
+}
+
+struct DecodedSignal {
+    int raw;
+    double physical;
+    const char* logical;
+};
+
+struct DecodedFrame {
+    const char* name;
+    std::unordered_map<std::string, DecodedSignal> signals;
+};
+
+% for f_index, frame in enumerate(unconditional_frames):
+% for s_index, sig in enumerate(frame.signals):
+% if sig.logical_entries:
+static const std::pair<int, const char*> frame_${f_index}_signal_${s_index}_logical[] = {
+% for entry in sig.logical_entries:
+    {${int(entry.signal_value)}, ${repr(entry.text_info) if entry.text_info is not None else "nullptr"}},
+% endfor
+};
+% endif
+% endfor
+% endfor
+
+% for f_index, frame in enumerate(unconditional_frames):
+static const LinSignalMeta frame_${f_index}_signals[] = {
+% for s_index, sig in enumerate(frame.signals):
+    {
+        "${sig.name}",
+        ${sig.start_bit},
+        ${sig.size},
+        ${str(sig.signed).lower()},
+        ${sig.factor},
+        ${sig.offset},
+        ${sig.minimum if sig.minimum is not None else "std::numeric_limits<double>::quiet_NaN()"},
+        ${sig.maximum if sig.maximum is not None else "std::numeric_limits<double>::quiet_NaN()"},
+        ${sig.init_value},
+% if sig.logical_entries:
+        frame_${f_index}_signal_${s_index}_logical,
+        ${len(sig.logical_entries)},
+% else:
+        nullptr,
+        0,
+% endif
+    },
+% endfor
+};
+% endfor
+
+static const LinFrameMeta FRAMES[] = {
+% for f_index, frame in enumerate(unconditional_frames):
+    {
+        "${frame.name}",
+        ${frame.frame_id},
+        ${frame.pid},
+        ${frame.dlc},
+        ${repr(frame.publisher) if frame.publisher else "nullptr"},
+        frame_${f_index}_signals,
+        ${len(frame.signals)},
+    },
+% endfor
+};
+
+% for t_index, table in enumerate(schedule_tables):
+static const LinScheduleCommand schedule_${t_index}_commands[] = {
+% for cmd in table.commands:
+    {
+        "${cmd.command_type}",
+        ${cmd.frame_time},
+        ${repr(cmd.frame_name) if cmd.frame_name else "nullptr"},
+        ${repr(cmd.node_name) if cmd.node_name else "nullptr"},
+        ${cmd.params.get("nad", -1)},
+        ${cmd.params.get("id", -1)},
+        ${cmd.params.get("byte", -1)},
+        ${cmd.params.get("mask", -1)},
+        ${cmd.params.get("inv", -1)},
+        ${cmd.params.get("new_nad", -1)},
+        ${cmd.params.get("frame_index", -1)},
+        ${cmd.params.get("frame_pid1", -1)},
+        ${cmd.params.get("frame_pid2", -1)},
+        ${cmd.params.get("frame_pid3", -1)},
+        ${cmd.params.get("frame_pid4", -1)},
+        ${cmd.params.get("d1", -1)},
+        ${cmd.params.get("d2", -1)},
+        ${cmd.params.get("d3", -1)},
+        ${cmd.params.get("d4", -1)},
+        ${cmd.params.get("d5", -1)},
+        ${cmd.params.get("d6", -1)},
+        ${cmd.params.get("d7", -1)},
+        ${cmd.params.get("d8", -1)},
+    },
+% endfor
+};
+% endfor
+
+static const LinScheduleTable SCHEDULE_TABLES[] = {
+% for t_index, table in enumerate(schedule_tables):
+    {"${table.name}", schedule_${t_index}_commands, ${len(table.commands)}},
+% endfor
+};
+
+inline const LinFrameMeta* find_frame_by_name(const std::string& name) {
+    for (const auto& frame : FRAMES) {
+        if (name == frame.name) {
+            return &frame;
+        }
+    }
+    return nullptr;
+}
+
+inline const LinFrameMeta* find_frame_by_id(uint8_t frame_id) {
+    for (const auto& frame : FRAMES) {
+        if (frame_id == frame.frame_id) {
+            return &frame;
+        }
+    }
+    return nullptr;
+}
+
+inline bool encode_frame_by_name(
+    const std::string& frame_name,
+    const std::unordered_map<std::string, double>& values,
+    uint8_t& out_frame_id,
+    uint8_t& out_pid,
+    std::vector<uint8_t>& out_data
+) {
+    const LinFrameMeta* frame = find_frame_by_name(frame_name);
+    if (!frame) {
+        return false;
+    }
+    out_frame_id = frame->frame_id;
+    out_pid = frame->pid;
+    out_data.assign(frame->dlc, 0);
+    for (size_t i = 0; i < frame->signal_count; ++i) {
+        const auto& sig = frame->signals[i];
+        auto it = values.find(sig.name);
+        double phys = (it == values.end()) ? static_cast<double>(sig.init_value) : it->second;
+        int raw = phys_to_raw(phys, sig);
+        insert_bits_le(out_data, sig.start_bit, sig.size, raw);
+    }
+    return true;
+}
+
+inline bool decode_frame_by_id(uint8_t frame_id, const std::vector<uint8_t>& data, DecodedFrame& out_frame) {
+    const LinFrameMeta* frame = find_frame_by_id(frame_id);
+    if (!frame) {
+        return false;
+    }
+    out_frame.name = frame->name;
+    out_frame.signals.clear();
+    for (size_t i = 0; i < frame->signal_count; ++i) {
+        const auto& sig = frame->signals[i];
+        int raw = extract_bits_le(data, sig.start_bit, sig.size, sig.signed_signal);
+        double phys = raw_to_phys(raw, sig);
+        const char* logical = nullptr;
+        for (size_t j = 0; j < sig.logical_count; ++j) {
+            if (sig.logical[j].first == raw) {
+                logical = sig.logical[j].second;
+                break;
+            }
+        }
+        out_frame.signals.emplace(sig.name, DecodedSignal{raw, phys, logical});
+    }
+    return true;
+}
+
+inline std::pair<uint8_t, std::vector<uint8_t>> make_diagnostic_request(const std::vector<uint8_t>& data) {
+    return {compute_pid(DIAG_MASTER_REQ_ID), data};
+}
+
+inline std::pair<uint8_t, std::vector<uint8_t>> make_diagnostic_response(const std::vector<uint8_t>& data) {
+    return {compute_pid(DIAG_SLAVE_RESP_ID), data};
+}
+
+inline const LinScheduleTable* find_schedule_table(const std::string& name) {
+    for (const auto& table : SCHEDULE_TABLES) {
+        if (name == table.name) {
+            return &table;
+        }
+    }
+    return nullptr;
+}
+
+}  // namespace lin_generated
