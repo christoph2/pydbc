@@ -139,13 +139,13 @@ For more detailed examples, see the `pydbc/examples/api_examples.py` file.
 ## Documentation
 
 The full documentation in GitHub‑Flavored Markdown is available in the docs/ folder:
-- docs/INDEX.md — Documentation home
-- docs/getting-started.md — Installation and quickstarts
-- docs/tutorial.md — Step‑by‑step walkthrough
-- docs/how-to.md — Task‑oriented guides
-- docs/examples.md — Ready‑to‑run examples
-- docs/api-reference.md — API reference
-- docs/python-can.md — Using pyDBC with python-can (send/receive CAN frames)
+- [Documentation home](docs/INDEX.md)
+- [Installation and quickstarts](docs/getting-started.md)
+- [Step‑by‑step walkthrough](docs/tutorial.md)
+- [Task‑oriented guides](docs/how-to.md)
+- [Ready‑to‑run examples](docs/examples.md)
+- [API reference](docs/api-reference.md)
+- [Using pyDBC with python-can](docs/python-can.md) (send/receive CAN frames)
 
 ## License
 
