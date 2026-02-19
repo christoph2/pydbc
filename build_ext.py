@@ -56,7 +56,15 @@ def get_py_config() -> dict:
             libdir = alternate_libdir(include)
     else:
         library = VARS["LIBRARY"]
-        DIR_VARS = ("LIBDIR", "BINLIBDEST", "DESTLIB", "LIBDEST", "MACHDESTLIB", "DESTSHARED", "LIBPL")
+        DIR_VARS = (
+            "LIBDIR",
+            "BINLIBDEST",
+            "DESTLIB",
+            "LIBDEST",
+            "MACHDESTLIB",
+            "DESTSHARED",
+            "LIBPL",
+        )
         arch = None
         if uname.system == "Linux":
             arch = VARS.get("MULTIARCH", "")
@@ -82,7 +90,7 @@ def get_py_config() -> dict:
                     break
         if not found:
             print("Could NOT locate Python library.")
-            return dict(exe=sys.executable, include=include, libdir="", library=library)
+            return None
     return dict(exe=sys.executable, include=include, libdir=libdir, library=library)
 
 
@@ -101,19 +109,30 @@ def get_env_bool(name: str, default: int = 0) -> bool:
 
 
 def build_extension(debug: bool = False, use_temp_dir: bool = False) -> None:
-    # use_temp_dir = use_temp_dir or get_env_bool("BUILD_TEMP")
+    print("build_ext::build_extension()")
+
+    use_temp_dir = use_temp_dir or get_env_bool("BUILD_TEMP")
     debug = debug or get_env_bool("BUILD_DEBUG")
 
     cfg = "Debug" if debug else "Release"
-    py_cfg = get_py_config()
+    bits, linkage = platform.architecture()
+    print(f"Bits: {bits!r} Linkage: {linkage!r} Build-Type: {cfg!r}")
 
-    cmake_args = [
-        f"-DPython3_EXECUTABLE={py_cfg['exe']}",
-        f"-DPython3_INCLUDE_DIR={py_cfg['include']}",
-        f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
-    ]
-    if py_cfg["libdir"]:
-        cmake_args.append(f"-DPython3_LIBRARY={str(Path(py_cfg['libdir']) / Path(py_cfg['library']))}")
+    cmake_args = []
+    py_cfg = get_py_config()
+    if py_cfg is not None:
+        cmake_args = [
+            f"-DPython3_EXECUTABLE={py_cfg['exe']}",
+            f"-DPython3_INCLUDE_DIR={py_cfg['include']}",
+            f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
+        ]
+        # Only add library path if we found one
+        if py_cfg["libdir"]:
+            cmake_args.append(
+                f"-DPython3_LIBRARY={str(Path(py_cfg['libdir']) / Path(py_cfg['library']))}"
+            )
+        else:
+            print("INFO: No explicit Python library path - CMake will auto-detect")
 
     build_args = ["--config Release", "--verbose"]
 
@@ -124,23 +143,36 @@ def build_extension(debug: bool = False, use_temp_dir: bool = False) -> None:
             cmake_args += ["-DCMAKE_OSX_ARCHITECTURES={}".format(";".join(archs))]
 
     if use_temp_dir:
-        build_temp = Path(TemporaryDirectory(suffix=".build-temp").name) / "extension_it_in"
+        build_temp = (
+            Path(TemporaryDirectory(suffix=".build-temp").name) / "extension_it_in"
+        )
     else:
-        build_temp = TOP_DIR / "build_cmake"
-    
+        build_temp = Path(".")
     if not build_temp.exists():
         build_temp.mkdir(parents=True)
 
+    # Clean CMake cache to avoid conflicts when building multiple Python versions in sequence
+    cmake_cache = build_temp / "CMakeCache.txt"
+    if cmake_cache.exists():
+        cmake_cache.unlink()
+
     banner("Step #1: Configure")
     # cmake_args += ["--debug-output"]
-    subprocess.run(["cmake", "-S", str(TOP_DIR), "-B", str(build_temp), *cmake_args], check=True)  # nosec
+    subprocess.run(
+        ["cmake", "-S", str(TOP_DIR), *cmake_args], cwd=build_temp, check=True
+    )  # nosec
+
+    cmake_args += [f"--parallel {mp.cpu_count()}"]
 
     banner("Step #2: Build")
     # build_args += ["-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"]
-    subprocess.run(["cmake", "--build", str(build_temp), "--parallel", str(mp.cpu_count()), *build_args], check=True)  # nosec
+    subprocess.run(
+        ["cmake", "--build", str(build_temp), *build_args], cwd=TOP_DIR, check=True
+    )  # nosec
 
     banner("Step #3: Install")
-    subprocess.run(["cmake", "--install", str(build_temp), "--prefix", str(TOP_DIR)], check=True)  # nosec
+    # subprocess.run(["cmake", "--install", "."], cwd=build_temp, check=True)  # nosec
+    subprocess.run(["cmake", "--install", build_temp], cwd=TOP_DIR, check=True)  # nosec
 
 
 if __name__ == "__main__":
