@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.0", "cmake>=3.12", "pybind11[global]>=2.12.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
@@ -19,9 +19,21 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13"
 ]
+build = "build_ext.py"
+include = [
+    { path = "pydbc/cpp_ext/*.so", format = "wheel" },
+    { path = "pydbc/cpp_ext/*.pyd", format = "wheel" },
+	{ path = "pydbc/cgen/templates/*.tmpl", format = "wheel" },
+
+    { path = "CMakeLists.txt", format = "sdist" },
+
+	{ path = "pydbc/cpp_ext/*h", format = "sdist" },
+	{ path = "pydbc/cpp_ext/*cpp", format = "sdist" },
+]
+
 packages = [{include = "pydbc"}]
-include = ["pydbc/cgen/templates/*.tmpl"]
 
 [tool.poetry.dependencies]
 python = ">=3.10"
@@ -70,9 +82,18 @@ vndb_exporter = "pydbc.scripts.vndb_exporter:main"
 pydbc-codegen = "pydbc.scripts.codegen:main"
 pydbc_codegen = "pydbc.scripts.codegen:main"
 
-[tool.poetry.extras]
-python-can = ["python-can"]
+[tool.cibuildwheel]
+build-verbosity = 3
+build = "cp3{10,11,12,13,14}-*"
+skip = ["*_i686", "*-musllinux*"]
+build-frontend = "build"
 
-[tool.pytest.ini_options]
-addopts = "--verbose --tb=short -o junit_family=xunit2"
+[tool.pytest]
+addopts = [
+  "--verbose",
+  "--tb=short",
+  "--junitxml=result.xml",
+  "-o",
+  "junit_family=xunit2",
+]
 testpaths = ["pydbc/tests"]
