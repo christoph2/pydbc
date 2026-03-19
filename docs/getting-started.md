@@ -85,6 +85,25 @@ ncf.add_ecu_to_vehicle(vehicle, engine_ecu)
 ncf.commit()
 ```
 
+## Quickstart: Open and query an existing VNDB
+
+```python
+from pydbc.api.query import VNDBQuery
+
+# open an existing database created via importer or creator APIs
+query = VNDBQuery("R1556_Veh_02.vndb")
+
+networks = query.list_networks()
+nodes = query.list_nodes()
+messages = query.list_messages()
+signals = query.list_signals()
+
+engine = query.get_node("Engine")
+engine_data = query.get_message(100)  # by message_id
+
+print(query.summary())
+```
+
 ## Where to go next
 
 - Tutorial: docs/tutorial.md — Build a small but complete model step‑by‑step.

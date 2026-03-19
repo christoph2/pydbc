@@ -42,9 +42,10 @@ from typing import Optional, Union
 
 from pydbc.parser import ParserWrapper
 from pydbc.dbcListener import DbcListener
+from pydbc.db.model import Message, Network, Node, Signal
 
-# from pydbc.ldfListener import LdfListener
-# from pydbc.ncfListener import NcfListener
+from pydbc.ldfListener import LdfListener
+from pydbc.ncfListener import NcfListener
 from pydbc.types import FileType
 
 
@@ -149,6 +150,16 @@ def importFile(pth: pathlib.Path, logLevel: str) -> Optional[object]:
     return parseFile(pth, file_type, remove_file=True, logLevel=logLevel)
 
 
+def get_import_summary(session: object) -> dict[str, int]:
+    """Collect summary counters of imported key entities."""
+    return {
+        "networks": session.query(Network).count(),
+        "nodes": session.query(Node).count(),
+        "messages": session.query(Message).count(),
+        "signals": session.query(Signal).count(),
+    }
+
+
 def main() -> None:
     """Main entry point for the vndb_importer script."""
     footer = (
@@ -198,23 +209,75 @@ def main() -> None:
     logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
 
     # Process each input file
+    stats = {
+        "total": len(args.vehicle_file),
+        "success": 0,
+        "failed": 0,
+        "missing": 0,
+        "not_files": 0,
+        "unsupported": 0,
+        "networks": 0,
+        "nodes": 0,
+        "messages": 0,
+        "signals": 0,
+    }
+
     for arg in args.vehicle_file:
         # print(arg)
         pth=pathlib.Path(arg)
         if not pth.exists():
             logging.error(f"File not found: {pth}")
+            stats["failed"] += 1
+            stats["missing"] += 1
             continue
 
         if not pth.is_file():
             logging.error(f"Not a file: {pth}")
+            stats["failed"] += 1
+            stats["not_files"] += 1
+            continue
+
+        if get_file_type(pth) is None:
+            logging.error(f"Unsupported file type: {pth.suffix} ({pth})")
+            stats["failed"] += 1
+            stats["unsupported"] += 1
             continue
 
         # Import the file
         session = importFile(pth, args.loglevel)
         if session:
+            stats["success"] += 1
+            summary = get_import_summary(session)
+            stats["networks"] += summary["networks"]
+            stats["nodes"] += summary["nodes"]
+            stats["messages"] += summary["messages"]
+            stats["signals"] += summary["signals"]
             logging.info(f"Successfully imported {pth}")
+            logging.info(
+                "Import summary for %s: networks=%d, nodes=%d, messages=%d, signals=%d",
+                pth,
+                summary["networks"],
+                summary["nodes"],
+                summary["messages"],
+                summary["signals"],
+            )
         else:
+            stats["failed"] += 1
             logging.error(f"Failed to import {pth}")
+
+    logging.warning(
+        "Run summary: total=%d, successful=%d, failed=%d (missing=%d, not_file=%d, unsupported=%d) | imported: networks=%d, nodes=%d, messages=%d, signals=%d",
+        stats["total"],
+        stats["success"],
+        stats["failed"],
+        stats["missing"],
+        stats["not_files"],
+        stats["unsupported"],
+        stats["networks"],
+        stats["nodes"],
+        stats["messages"],
+        stats["signals"],
+    )
 
 
 if __name__ == "__main__":
