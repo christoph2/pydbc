@@ -45,6 +45,7 @@ from pydbc.db.model import (
     Message_Signal,
     Value_Description,
     Valuetable,
+    Object_Valuetable,
     Node_RxSignal,
     Attribute_Definition,
     Attribute_Value,
@@ -126,6 +127,24 @@ class DBCCreator:
             self._signals[signal] = obj
             return obj
         return signal
+
+    def _get_valuetable(self, valuetable):
+        if isinstance(valuetable, str):
+            if valuetable in self._valuetables:
+                return self._valuetables[valuetable]
+            obj = self.session.query(Valuetable).filter_by(name=valuetable).first()
+            if obj is None:
+                raise KeyError(f"Valuetable '{valuetable}' not found")
+            self._valuetables[valuetable] = obj
+            return obj
+        if isinstance(valuetable, int):
+            obj = self.session.query(Valuetable).filter_by(rid=valuetable).first()
+            if obj is None:
+                raise KeyError(f"Valuetable rid '{valuetable}' not found")
+            if obj.name:
+                self._valuetables[obj.name] = obj
+            return obj
+        return valuetable
 
     def index_existing(self):
         """Optionally preload existing objects from the current session into caches."""
@@ -235,6 +254,8 @@ class DBCCreator:
         Returns:
             The created Signal object
         """
+        object_valuetable = kwargs.pop("object_valuetable", None)
+
         signal = Signal(
             name=name,
             bitsize=bitsize,
@@ -248,6 +269,21 @@ class DBCCreator:
             **kwargs
         )
         self.session.add(signal)
+        self.session.flush()
+
+        if object_valuetable is not None:
+            if isinstance(object_valuetable, Valuetable):
+                valuetable = object_valuetable
+            else:
+                valuetable = self._get_valuetable(object_valuetable)
+
+            signal_vt = Object_Valuetable(
+                object_type=0,
+                object_rid=signal.rid,
+                valuetable_id=valuetable.rid,
+            )
+            self.session.add(signal_vt)
+
         self._signals[name] = signal
         return signal
 

@@ -33,12 +33,14 @@ from typing import Optional, List, Union
 
 from sqlalchemy import BLOB, DateTime, String, Integer, Float, Boolean, Unicode
 from sqlalchemy import Column, ForeignKey, ForeignKeyConstraint, UniqueConstraint, func
+from sqlalchemy import and_
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm import (
     DeclarativeBase,
     declared_attr,
+    foreign,
     relationship,
     Mapped,
     mapped_column,
@@ -225,6 +227,16 @@ class Signal(Base, RidMixIn, CommentableMixIn):
     maximum: Mapped[float] = mapped_column(Float, default=0.0)
     unit: Mapped[Optional[str]] = mapped_column(Unicode(255))
     type: Mapped[str] = mapped_column(String(256))
+
+    object_valuetable = relationship(
+        "Object_Valuetable",
+        primaryjoin=lambda: and_(
+            Signal.rid == foreign(Object_Valuetable.object_rid),
+            Object_Valuetable.object_type == 0,
+        ),
+        uselist=False,
+        viewonly=True,
+    )
 
     __mapper_args__ = {
         "polymorphic_identity": "Signal",
