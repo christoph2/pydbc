@@ -40,7 +40,7 @@ from pydbc.db.model import (
     Vndb_Protocol
 )
 
-from pydbc.api.ldf import (
+from pydbc.db.model import (
     LinMasterNode, LinNetwork, LinNode, LinSlaveNode,
     LinResponseErrorSignal, LinSignal, LinSignalEncodingType, LinSignalEncodingEntry_Value, LinSignalEncodingEntry_Logical,
     LinSignalEncodingEntry_Physical, LinSignalRepresentation, LinScheduleTable, LinScheduleTable_Command_Frame,
