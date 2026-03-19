@@ -2,6 +2,10 @@
 cmake_minimum_required(VERSION 3.20...3.30)
 project(pydbc_extensions LANGUAGES C CXX)
 
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}" CACHE PATH "Install path prefix" FORCE)
+endif()
+
 cmake_policy(SET CMP0135 NEW)
 cmake_policy(SET CMP0094 NEW)
 
