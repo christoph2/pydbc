@@ -11,14 +11,7 @@ cmake_policy(SET CMP0094 NEW)
 
 find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED)
 
-include(FetchContent)
-FetchContent_Declare(
-  pybind11
-  GIT_REPOSITORY https://github.com/pybind/pybind11
-  GIT_TAG        v2.13.6
-)
-FetchContent_MakeAvailable(pybind11)
-
+find_package(pybind11 CONFIG REQUIRED)
 
 SET(CMAKE_C_STANDARD 17)
 # set(CMAKE_CXX_STANDARD 23)
@@ -102,16 +95,23 @@ set(LDF_EXTENSION_SOURCES
     pydbc/cpp_ext/ldf_extension.cpp
 )
 
+set(NCF_EXTENSION_SOURCES
+    pydbc/cpp_ext/ncf_extension.cpp
+)
+
 pybind11_add_module(dbc_extension ${DBC_EXTENSION_SOURCES})
 pybind11_add_module(ldf_extension ${LDF_EXTENSION_SOURCES})
+pybind11_add_module(ncf_extension ${NCF_EXTENSION_SOURCES})
 
 target_compile_options(dbc_extension PUBLIC "-DEXTENSION_NAME=dbc_extension" PUBLIC $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/utf-8>)
 target_compile_options(ldf_extension PUBLIC "-DEXTENSION_NAME=ldf_extension" PUBLIC $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/utf-8>)
+target_compile_options(ncf_extension PUBLIC "-DEXTENSION_NAME=ncf_extension" PUBLIC $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/utf-8>)
 
 IF (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_N_CLANG_BASE_OPTIONS} ${GCC_N_CLANG_EXTRA_OPTIONS}")
 	target_link_options(dbc_extension PUBLIC -flto=auto)
     target_link_options(ldf_extension PUBLIC -flto=auto)
+    target_link_options(ncf_extension PUBLIC -flto=auto)
 ELSEIF (MSVC)
 	SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${MSVC_BASE_OPTIONS} ${MSVC_EXTRA_OPTIONS}")
 ENDIF()
@@ -119,3 +119,4 @@ ENDIF()
 # Install to the correct location within the package
 install(TARGETS dbc_extension DESTINATION pydbc/cpp_ext)
 install(TARGETS ldf_extension DESTINATION pydbc/cpp_ext)
+install(TARGETS ncf_extension DESTINATION pydbc/cpp_ext)

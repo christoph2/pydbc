@@ -346,7 +346,7 @@ if __name__ == "__main__":
 
     # Run the examples
     dbc_example()
-    # ldf_example()
+    ldf_example()
     # ncf_example()
 
     print("All examples completed successfully.")
