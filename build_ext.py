@@ -119,6 +119,26 @@ def build_extension(debug: bool = False, use_temp_dir: bool = False) -> None:
     print(f"Bits: {bits!r} Linkage: {linkage!r} Build-Type: {cfg!r}")
 
     cmake_args = []
+
+    # Locate pybind11's CMake config directory so that `find_package(pybind11 CONFIG REQUIRED)`
+    # works reliably across all platforms (esp. Windows, where pybind11's install prefix
+    # inside the isolated PEP 517 build environment is not on CMAKE_PREFIX_PATH).
+    pybind11_cmake_dir = ""
+    try:
+        pybind11_cmake_dir = subprocess.check_output(  # nosec
+            [sys.executable, "-m", "pybind11", "--cmakedir"], text=True
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        try:
+            import pybind11  # type: ignore
+
+            pybind11_cmake_dir = pybind11.get_cmake_dir()
+        except Exception as exc:  # pragma: no cover
+            print(f"WARNING: Could not locate pybind11 CMake dir: {exc!r}")
+    if pybind11_cmake_dir:
+        print(f"Using pybind11 CMake dir: {pybind11_cmake_dir!r}")
+        os.environ["pybind11_DIR"] = pybind11_cmake_dir
+
     py_cfg = get_py_config()
     if py_cfg is not None:
         cmake_args = [
@@ -126,6 +146,8 @@ def build_extension(debug: bool = False, use_temp_dir: bool = False) -> None:
             f"-DPython3_INCLUDE_DIR={py_cfg['include']}",
             f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
         ]
+        if pybind11_cmake_dir:
+            cmake_args.append(f"-Dpybind11_DIR={pybind11_cmake_dir}")
         # Only add library path if we found one
         if py_cfg["libdir"]:
             cmake_args.append(
@@ -176,6 +198,4 @@ def build_extension(debug: bool = False, use_temp_dir: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    # includes = subprocess.getoutput("pybind11-config --cmakedir")  # nosec
-    # os.environ["pybind11_DIR"] = includes
     build_extension(use_temp_dir=False)
