@@ -62,6 +62,8 @@ class CGSignal:
     offset: float
     minimum: float
     maximum: float
+    is_multiplexer: bool = False
+    multiplexer_value: Optional[int] = None
 
 
 @dataclass
@@ -183,6 +185,8 @@ def _collect_messages(
                     offset=s.formula_offset or 0.0,
                     minimum=float(s.minimum) if s.minimum is not None else 0.0,
                     maximum=float(s.maximum) if s.maximum is not None else 0.0,
+                    is_multiplexer=ms.multiplexor_signal == 1,
+                    multiplexer_value=ms.multiplexer_value,
                 )
             )
         msgs.append(

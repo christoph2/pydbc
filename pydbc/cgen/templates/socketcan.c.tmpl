@@ -7,10 +7,6 @@
  *   gcc -O2 -Wall -o ${program_name} ${program_name}.c
  * Run (example):
  *   sudo ./${program_name} vcan0
- *
- * Limitations:
- * - Only little-endian signals handled in helpers below.
- * - Multiplexing not implemented in this minimal generator.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +30,8 @@ typedef struct {
     bool sign;      // true if signed
     double factor;
     double offset;
+    bool is_mux;
+    int32_t mux_val; // -1 if not multiplexed
 } cg_signal_t;
 
 typedef struct {
@@ -64,6 +62,30 @@ static inline void ins_bits_le(uint8_t *buf, uint16_t start, uint8_t size, int64
     }
 }
 
+static inline void ins_bits_be(uint8_t *buf, uint16_t start, uint8_t size, int64_t value) {
+    if (size == 0) return;
+    uint64_t mask = (size >= 64) ? ~0ULL : ((1ULL << size) - 1ULL);
+    uint64_t v = ((uint64_t)value) & mask;
+    uint16_t bit_pos = start;
+    uint8_t remaining = size;
+    while (remaining > 0) {
+        uint16_t byte_index = bit_pos / 8u;
+        uint8_t bit_index = bit_pos % 8u;
+        uint8_t bits_here = (uint8_t)((remaining < (bit_index + 1)) ? remaining : (bit_index + 1));
+        uint8_t chunk_mask = (uint8_t)((1u << bits_here) - 1u);
+        uint8_t chunk_shift = bit_index - bits_here + 1;
+        uint8_t chunk = (uint8_t)((v >> (remaining - bits_here)) & chunk_mask);
+        buf[byte_index] &= (uint8_t)~(chunk_mask << chunk_shift);
+        buf[byte_index] |= (uint8_t)(chunk << chunk_shift);
+        remaining -= bits_here;
+        if (bit_index < bits_here) {
+            bit_pos += 15; // Move to next byte (bit_pos is big-endian bit index)
+        } else {
+            bit_pos -= bits_here;
+        }
+    }
+}
+
 static inline int64_t ext_bits_le(const uint8_t *buf, uint16_t start, uint8_t size, bool sign) {
     if (size == 0) return 0;
     uint16_t bit_pos = start;
@@ -81,6 +103,37 @@ static inline int64_t ext_bits_le(const uint8_t *buf, uint16_t start, uint8_t si
         remaining -= bits_here;
         bit_pos += bits_here;
         shift += bits_here;
+    }
+    if (sign) {
+        uint64_t sign_bit = 1ULL << (size - 1);
+        if (out & sign_bit) {
+            out = out - (1ULL << size);
+        }
+    }
+    return (int64_t)out;
+}
+
+static inline int64_t ext_bits_be(const uint8_t *buf, uint16_t start, uint8_t size, bool sign) {
+    if (size == 0) return 0;
+    uint16_t bit_pos = start;
+    uint8_t remaining = size;
+    uint64_t out = 0;
+    while (remaining > 0) {
+        uint16_t byte_index = bit_pos / 8u;
+        uint8_t bit_index = bit_pos % 8u;
+        uint8_t bits_here = (uint8_t)((remaining < (bit_index + 1)) ? remaining : (bit_index + 1));
+        uint8_t chunk_mask = (uint8_t)((1u << bits_here) - 1u);
+        uint8_t byte_val = buf[byte_index];
+        uint8_t chunk_shift = bit_index - bits_here + 1;
+        uint8_t chunk = (uint8_t)((byte_val >> chunk_shift) & chunk_mask);
+        out <<= bits_here;
+        out |= chunk;
+        remaining -= bits_here;
+        if (bit_index < bits_here) {
+            bit_pos += 15;
+        } else {
+            bit_pos -= bits_here;
+        }
     }
     if (sign) {
         uint64_t sign_bit = 1ULL << (size - 1);
@@ -112,7 +165,7 @@ static inline int64_t phys_to_raw(double v, double factor, double offset, uint8_
 % for m in messages:
 static const cg_signal_t sigs_${m.message_id}[] = {
 %   for s in m.signals:
-    { "${s.name}", ${s.start_bit}, ${s.size}, ${'true' if s.little_endian else 'false'}, ${'true' if s.signed else 'false'}, ${float(s.factor)}, ${float(s.offset)} },
+    { "${s.name}", ${s.start_bit}, ${s.size}, ${'true' if s.little_endian else 'false'}, ${'true' if s.signed else 'false'}, ${float(s.factor)}, ${float(s.offset)}, ${'true' if s.is_multiplexer else 'false'}, ${s.multiplexer_value if s.multiplexer_value is not None else -1} },
 %   endfor
 };
 % endfor
@@ -141,27 +194,61 @@ static const cg_message_t* find_msg_by_id(uint32_t id) {
 /* Encode values[] (parallel arrays) into frame data */
 static void encode_message(const cg_message_t *m, const double *values, uint8_t *out_data) {
     memset(out_data, 0, m->dlc);
+    int32_t active_mux = -1;
+
+    /* First pass: find and encode multiplexer signal */
     for (size_t i = 0; i < m->num_signals; ++i) {
         const cg_signal_t *s = &m->signals[i];
-        if (!s->le) {
-            fprintf(stderr, "Big-endian signal not supported: %s\n", s->name);
-            continue;
+        if (s->is_mux) {
+            int64_t raw = phys_to_raw(values[i], s->factor, s->offset, s->size, s->sign);
+            if (s->le) ins_bits_le(out_data, s->start, s->size, raw);
+            else ins_bits_be(out_data, s->start, s->size, raw);
+            active_mux = (int32_t)raw;
+            break; 
         }
+    }
+
+    /* Second pass: encode other signals */
+    for (size_t i = 0; i < m->num_signals; ++i) {
+        const cg_signal_t *s = &m->signals[i];
+        if (s->is_mux) continue;
+        if (s->mux_val != -1 && s->mux_val != active_mux) continue;
+
         int64_t raw = phys_to_raw(values[i], s->factor, s->offset, s->size, s->sign);
-        ins_bits_le(out_data, s->start, s->size, raw);
+        if (s->le) ins_bits_le(out_data, s->start, s->size, raw);
+        else ins_bits_be(out_data, s->start, s->size, raw);
     }
 }
 
 /* Decode frame data into values[] */
 static void decode_message(const cg_message_t *m, const uint8_t *data, double *values_out) {
+    int32_t active_mux = -1;
+
+    /* First pass: find and decode multiplexer signal */
     for (size_t i = 0; i < m->num_signals; ++i) {
         const cg_signal_t *s = &m->signals[i];
-        if (!s->le) {
-            fprintf(stderr, "Big-endian signal not supported: %s\n", s->name);
-            values_out[i] = 0.0;
+        if (s->is_mux) {
+            int64_t raw;
+            if (s->le) raw = ext_bits_le(data, s->start, s->size, s->sign);
+            else raw = ext_bits_be(data, s->start, s->size, s->sign);
+            values_out[i] = raw * s->factor + s->offset;
+            active_mux = (int32_t)raw;
+            break;
+        }
+    }
+
+    /* Second pass: decode other signals */
+    for (size_t i = 0; i < m->num_signals; ++i) {
+        const cg_signal_t *s = &m->signals[i];
+        if (s->is_mux) continue;
+        if (s->mux_val != -1 && s->mux_val != active_mux) {
+            values_out[i] = 0.0; // Or keep previous value? Usually 0 or NAN
             continue;
         }
-        int64_t raw = ext_bits_le(data, s->start, s->size, s->sign);
+
+        int64_t raw;
+        if (s->le) raw = ext_bits_le(data, s->start, s->size, s->sign);
+        else raw = ext_bits_be(data, s->start, s->size, s->sign);
         values_out[i] = raw * s->factor + s->offset;
     }
 }
