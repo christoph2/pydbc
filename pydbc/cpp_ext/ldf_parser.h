@@ -10,8 +10,8 @@
 
 class LdfParser {
 public:
-    LdfParser(const std::string& filename = {})
-        : lexer(filename), file(filename) {
+    LdfParser(const std::string& filename = {}, const std::string& content = {})
+        : lexer(filename, content), file(filename) {
         advance();
     }
 

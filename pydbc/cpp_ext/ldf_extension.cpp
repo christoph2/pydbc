@@ -503,7 +503,8 @@ PYBIND11_MODULE(ldf_extension, m) {
         });
 
     py::class_<LdfParser>(m, "LdfParser")
-        .def(py::init<const std::string&>(), py::arg("filename"))
+        .def(py::init<const std::string&, const std::string&>(), 
+             py::arg("filename") = "", py::arg("content") = "")
         .def("parse", &LdfParser::parse)
         .def("set_trace", &LdfParser::setTrace)
         .def("get_diagnostics", &LdfParser::getDiagnostics);
