@@ -25,6 +25,20 @@ files = [
 ]
 
 [[package]]
+name = "arcrc"
+version = "0.1.1"
+description = "Autosar CRC-8, CRC-16-CCITT und CRC-32 (IEEE) – Runtime- and Tablevariants"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "arcrc-0.1.1.tar.gz", hash = "sha256:b3d3c6932c401df41e6ef743926041a18775e04ee76d0126c6a0d6f09997acf5"},
+]
+
+[package.extras]
+dev = ["bumpver", "pre-commit", "pytest"]
+
+[[package]]
 name = "babel"
 version = "2.18.0"
 description = "Internationalization utilities"
@@ -1479,4 +1493,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "45341cb461245285879805622e8e33313d7671c033da51954652d7d0c5cfb8b6"
+content-hash = "1aeb4f9b73c704fa4f2f30e6e1179ac96d9990a72967c8a8dbbf15c94f2a0037"
