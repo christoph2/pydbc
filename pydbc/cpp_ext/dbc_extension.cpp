@@ -168,12 +168,14 @@ PYBIND11_MODULE(dbc_extension, m) {
             .def_readonly("enum_values", &AttributeDefinition::enumValues)
             .def_readonly("min", &AttributeDefinition::min)
             .def_readonly("max", &AttributeDefinition::max)
+            .def_readonly("default_value", &AttributeDefinition::defaultValue)
             .def("__repr__", [](const AttributeDefinition& a) {
                 std::ostringstream oss;
                 oss << "AttributeDefinition(object_type=" << py::repr(py::cast(a.objectType)) 
                     << ", name='" << a.name << "', value_type='" << a.valueType 
                     << "', enum_values=" << list_to_string(a.enumValues) 
-                    << ", min=" << a.min << ", max=" << a.max << ")";
+                    << ", min=" << a.min << ", max=" << a.max 
+                    << ", default_value='" << a.defaultValue << "')";
                 return oss.str();
             })
             .def("__str__", [](const AttributeDefinition& a) {
@@ -304,7 +306,6 @@ PYBIND11_MODULE(dbc_extension, m) {
             .def_readonly("messages", &DbcFile::messages)
             .def_readonly("comments", &DbcFile::comments)
             .def_readonly("attribute_definitions", &DbcFile::attributeDefinitions)
-            .def_readonly("attribute_defaults", &DbcFile::attributeDefaults)
             .def_readonly("attribute_values", &DbcFile::attributeValues)
             .def_readonly("environment_variables", &DbcFile::environmentVariables)
             .def_readonly("signal_groups", &DbcFile::signalGroups)
@@ -323,7 +324,8 @@ PYBIND11_MODULE(dbc_extension, m) {
 
     // DbcParser
     py::class_<DbcParser>(m, "DbcParser")
-        .def(py::init<const std::string&>(), py::arg("filename") = "")
+        .def(py::init<const std::string&, const std::string&>(), 
+             py::arg("filename") = "", py::arg("content") = "")
         .def("parse", &DbcParser::parse)
         .def("set_trace", &DbcParser::setTrace)
         .def("get_diagnostics", &DbcParser::getDiagnostics);

@@ -55,6 +55,7 @@ struct AttributeDefinition {
     std::vector<std::string> enumValues;
     double min = 0;
     double max = 0;
+    std::string defaultValue;
 };
 
 struct AttributeValue {
@@ -109,7 +110,6 @@ struct DbcFile {
     std::vector<Message> messages;
     std::vector<Comment> comments;
     std::vector<AttributeDefinition> attributeDefinitions;
-    std::vector<AttributeValue> attributeDefaults;
     std::vector<AttributeValue> attributeValues;
     std::vector<EnvironmentVariable> environmentVariables;
     std::vector<SignalGroup> signalGroups;

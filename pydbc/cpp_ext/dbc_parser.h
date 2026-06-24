@@ -11,8 +11,8 @@
 
 class DbcParser {
 public:
-    DbcParser(const std::string& filename = {})
-    : lexer(filename), file(filename) {
+    DbcParser(const std::string& filename = {}, const std::string& content = {})
+    : lexer(filename, content), file(filename) {
         advance();
     }
 
@@ -382,16 +382,21 @@ private:
 
     void parseAttributeDefault(DbcFile& out) {
         TraceGuard tg(*this, "parseAttributeDefault");
-        bool isRel = (cur.type == TokenType::KW_BA_DEF_DEF_REL_);
         advance(); // BA_DEF_DEF_ or BA_DEF_DEF_REL_
-        AttributeValue av;
-        if (cur.type == TokenType::String) { av.name = cur.text; advance(); }
+        std::string name;
+        std::string value;
+        if (cur.type == TokenType::String) { name = cur.text; advance(); }
         if (cur.type == TokenType::String || cur.type == TokenType::Int || cur.type == TokenType::Float) {
-            av.value = cur.text; advance();
+            value = cur.text; advance();
         }
         expect(TokenType::Semicolon, "Expected ';' after attribute default");
-        if (isRel) out.attributeDefaults.push_back(av); // We could have a separate vector if needed
-        else out.attributeDefaults.push_back(av);
+        
+        for (auto& ad : out.attributeDefinitions) {
+            if (ad.name == name) {
+                ad.defaultValue = value;
+                break;
+            }
+        }
     }
 
     void parseAttributeValue(DbcFile& out) {
