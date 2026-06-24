@@ -40,12 +40,8 @@ import os
 import pathlib
 from typing import Optional, Union
 
-from pydbc.parser import ParserWrapper
-from pydbc.dbcListener import DbcListener
 from pydbc.db.model import Message, Network, Node, Signal
-
-from pydbc.ldfListener import LdfListener
-from pydbc.ncfListener import NcfListener
+from pydbc.api.imports import import_dbc, import_ldf, import_ncf
 from pydbc.types import FileType
 
 
@@ -68,33 +64,12 @@ def parseFile(
     Returns:
         SQLAlchemy session object or None if parsing failed
     """
-    if filetype == FileType.DBC:
-        grammar = "dbc"
-        start_symbol = "dbcfile"
-        listenerClass = DbcListener
-    elif filetype == FileType.LDF:
-        grammar = "ldf"
-        start_symbol = "lin_description_file"
-        listenerClass = LdfListener
-    elif filetype == FileType.NCF:
-        grammar = "ncf"
-        start_symbol = "toplevel"
-        listenerClass = NcfListener
-    else:
-        raise ValueError(f"Invalid filetype '{filetype}'")
-
-    parser = ParserWrapper(
-        grammar, start_symbol, listenerClass, debug=debug, logLevel=logLevel
-    )
     logging.info(f"Processing '{pth}'")
 
-    dbfn = f"{pth.stem}.vndb"
-    if remove_file:
+    dbfn = pth.with_suffix(".vndb")
+    if remove_file and dbfn.exists():
         try:
-            os.unlink(dbfn)
-        except FileNotFoundError:
-            # File doesn't exist, no need to remove
-            pass
+            dbfn.unlink()
         except PermissionError as e:
             logging.error(f"Permission error removing {dbfn}: {e}")
             return None
@@ -103,7 +78,15 @@ def parseFile(
             return None
 
     try:
-        session = parser.parseFromFile(str(pth))
+        if filetype == FileType.DBC:
+            session = import_dbc(pth, debug=debug, logLevel=logLevel.upper())
+        elif filetype == FileType.LDF:
+            session = import_ldf(pth, debug=debug, logLevel=logLevel.upper())
+        elif filetype == FileType.NCF:
+            session = import_ncf(pth, debug=debug, logLevel=logLevel.upper())
+        else:
+            raise ValueError(f"Invalid filetype '{filetype}'")
+
         logging.info(f"Successfully parsed {pth}")
         return session
     except Exception as e:
@@ -224,7 +207,7 @@ def main() -> None:
 
     for arg in args.vehicle_file:
         # print(arg)
-        pth=pathlib.Path(arg)
+        pth = pathlib.Path(arg)
         if not pth.exists():
             logging.error(f"File not found: {pth}")
             stats["failed"] += 1

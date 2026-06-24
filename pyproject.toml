@@ -38,7 +38,6 @@ packages = [{include = "pydbc"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10"
-antlr4-python3-runtime = "4.13.2"
 chardet = ">=5.0.0"
 mako = ">=1.2.0"
 colorama = ">=0.4.6"
