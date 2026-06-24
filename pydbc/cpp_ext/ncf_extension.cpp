@@ -253,7 +253,8 @@ PYBIND11_MODULE(ncf_extension, m) {
         .def("__str__", [](const NcfFile& f) { return py::repr(py::cast(f)); });
 
     py::class_<NcfParser>(m, "NcfParser")
-        .def(py::init<const std::string&>(), py::arg("filename"))
+        .def(py::init<const std::string&, const std::string&>(), 
+             py::arg("filename") = "", py::arg("content") = "")
         .def("parse",            &NcfParser::parse)
         .def("set_trace",        &NcfParser::setTrace)
         .def("get_diagnostics",  &NcfParser::getDiagnostics);

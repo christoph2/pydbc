@@ -14,15 +14,19 @@
 
 class NcfLexer {
 public:
-    NcfLexer(const std::string& filename = {})
+    NcfLexer(const std::string& filename = {}, const std::string& content = {})
         : file(filename) {
-        std::ifstream in(filename);
-        if (!in) {
-            throw std::runtime_error("Cannot open file " + filename);
+        if (!content.empty()) {
+            text = content;
+        } else if (!filename.empty()) {
+            std::ifstream in(filename);
+            if (!in) {
+                throw std::runtime_error("Cannot open file " + filename);
+            }
+            std::stringstream ss;
+            ss << in.rdbuf();
+            text = ss.str();
         }
-        std::stringstream ss;
-        ss << in.rdbuf();
-        text = ss.str();
         // Skip UTF-8 BOM if present
         if (text.size() >= 3 &&
             (unsigned char)text[0] == 0xEF &&
