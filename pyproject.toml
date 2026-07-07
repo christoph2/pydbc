@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pyvndb"
-version = "1.0.121"
+version = "1.0.122"
 description = "Vehicle description file handling for Python"
 authors = [
     {name = "Christoph Schueler", email = "cpu12.gems@googlemail.com"}
@@ -65,7 +65,7 @@ wheel.packages = ["pydbc"]
 wheel.exclude = []
 
 [tool.bumpver]
-current_version = "1.0.121"
+current_version = "1.0.122"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true
