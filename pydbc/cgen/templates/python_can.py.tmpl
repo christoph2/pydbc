@@ -162,6 +162,13 @@ MESSAGES = [
                 "offset": ${float(s.offset)},
                 "is_mux": ${'True' if s.is_multiplexer else 'False'},
                 "mux_val": ${s.multiplexer_value if s.multiplexer_value is not None else -1},
+                "values": {
+                % if s.valuetable:
+                    % for entry in s.valuetable.entries:
+                    ${float(entry.value)}: ${repr(entry.description)},
+                    % endfor
+                % endif
+                },
             },
         % endfor
         ],
@@ -229,6 +236,8 @@ def _decode_message(meta, data_bytes):
             phys = _raw_to_phys(raw, s["factor"], s["offset"])
             res[s["name"]] = phys
             active_mux = raw
+            if raw in s["values"]:
+                res[s["name"] + "_desc"] = s["values"][raw]
             break
 
     # Second pass: other signals
@@ -244,6 +253,8 @@ def _decode_message(meta, data_bytes):
             raw = _ext_bits_be(data_bytes, s["start"], s["size"], s["signed"])
         phys = _raw_to_phys(raw, s["factor"], s["offset"])
         res[s["name"]] = phys
+        if raw in s["values"]:
+            res[s["name"] + "_desc"] = s["values"][raw]
     return {"message": meta["name"], "signals": res}
 
 

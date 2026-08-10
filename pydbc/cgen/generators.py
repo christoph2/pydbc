@@ -24,7 +24,10 @@ from sqlalchemy.orm import Session
 from pydbc.db.model import (
     Message,
     Message_Signal,
+    Object_Valuetable,
     Signal,
+    Valuetable,
+    Value_Description,
     LinNetwork,
     LinMasterNode,
     LinSlaveNode,
@@ -52,6 +55,18 @@ from pydbc.template import renderTemplateFromText
 
 
 @dataclass
+class CGValuetableEntry:
+    value: float
+    description: str
+
+
+@dataclass
+class CGValuetable:
+    name: str
+    entries: List[CGValuetableEntry]
+
+
+@dataclass
 class CGSignal:
     name: str
     start_bit: int
@@ -64,6 +79,7 @@ class CGSignal:
     maximum: float
     is_multiplexer: bool = False
     multiplexer_value: Optional[int] = None
+    valuetable: Optional[CGValuetable] = None
 
 
 @dataclass
@@ -174,6 +190,18 @@ def _collect_messages(
         sigs: List[CGSignal] = []
         for ms in m.message_signals:
             s: Signal = ms.signal
+
+            # Collect valuetable if present
+            cg_vt = None
+            ovt = s.object_valuetable
+            if ovt and ovt.valuetable:
+                vt = ovt.valuetable
+                cg_entries = [
+                    CGValuetableEntry(value=vd.value, description=vd.value_description)
+                    for vd in vt.values
+                ]
+                cg_vt = CGValuetable(name=vt.name, entries=cg_entries)
+
             sigs.append(
                 CGSignal(
                     name=s.name,
@@ -186,7 +214,8 @@ def _collect_messages(
                     minimum=float(s.minimum) if s.minimum is not None else 0.0,
                     maximum=float(s.maximum) if s.maximum is not None else 0.0,
                     is_multiplexer=ms.multiplexor_signal == 1,
-                    multiplexer_value=ms.multiplexer_value,
+                    multiplexer_value=ms.multiplexor_value,
+                    valuetable=cg_vt,
                 )
             )
         msgs.append(

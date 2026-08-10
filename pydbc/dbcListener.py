@@ -665,8 +665,21 @@ class DbcListener(_get_base_listener()):
             tp = table["type"]
             description = table["description"]
             if tp == "SG":
-                object_rid = table["messageID"]
+                messageID = table["messageID"]
                 name = table["signalName"]
+                signal = (
+                    self.MESSAGE_SIGNAL_BY_NAME2(self.session)
+                    .params(messageID=messageID, signalName=name)
+                    .first()
+                )
+                if not signal:
+                    self.logger.error(
+                        "While inserting object value tables: signal '{}' in message {} does not exist.".format(
+                            name, messageID
+                        )
+                    )
+                    continue
+                object_rid = signal.rid
                 otype = 0
             elif tp == "EV":
                 name = table["envVarName"]

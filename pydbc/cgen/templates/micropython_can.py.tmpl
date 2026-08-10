@@ -110,6 +110,13 @@ MESSAGES = [
                 "signed": ${'True' if s.signed else 'False'},
                 "factor": ${float(s.factor)},
                 "offset": ${float(s.offset)},
+                "values": {
+                % if s.valuetable:
+                    % for entry in s.valuetable.entries:
+                    ${float(entry.value)}: ${repr(entry.description)},
+                    % endfor
+                % endif
+                },
             },
         % endfor
         ],
@@ -151,6 +158,8 @@ def _decode_message(meta, data_bytes):
         raw = _ext_bits_le(data_bytes, s["start"], s["size"], s["signed"])
         phys = _raw_to_phys(raw, s["factor"], s["offset"])
         res[s["name"]] = phys
+        if raw in s["values"]:
+            res[s["name"] + "_desc"] = s["values"][raw]
     return {"message": meta["name"], "signals": res}
 
 

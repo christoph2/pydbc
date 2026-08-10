@@ -11,7 +11,7 @@ It creates a .vndb file for each input file.
 __copyright__ = """
    pySART - Simplified AUTOSAR-Toolkit for Python.
 
-   (C) 2010-2023 by Christoph Schueler <cpu12.gems.googlemail.com>
+   (C) 2010-2026 by Christoph Schueler <cpu12.gems.googlemail.com>
 
    All Rights Reserved
 

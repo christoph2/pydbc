@@ -163,6 +163,17 @@ static inline int64_t phys_to_raw(double v, double factor, double offset, uint8_
 
 /* Embedded database */
 % for m in messages:
+%   for s in m.signals:
+%     if s.valuetable:
+static const char* vt_${m.message_id}_${s.name}(double v) {
+%       for entry in s.valuetable.entries:
+    if (v == ${float(entry.value)}) return ${repr(entry.description)};
+%       endfor
+    return NULL;
+}
+%     endif
+%   endfor
+
 static const cg_signal_t sigs_${m.message_id}[] = {
 %   for s in m.signals:
     { "${s.name}", ${s.start_bit}, ${s.size}, ${'true' if s.little_endian else 'false'}, ${'true' if s.signed else 'false'}, ${float(s.factor)}, ${float(s.offset)}, ${'true' if s.is_multiplexer else 'false'}, ${s.multiplexer_value if s.multiplexer_value is not None else -1} },
@@ -322,6 +333,12 @@ int main(int argc, char **argv) {
             if (decoded) {
                 decode_message(mr, rx.data, decoded);
                 printf("Received 0x%X, decoded %zu signals\n", rx.can_id, mr->num_signals);
+                for (size_t i = 0; i < mr->num_signals; ++i) {
+                    printf("  %s: %f", mr->signals[i].name, decoded[i]);
+                    // Note: In a real app you might want to call the vt_ function here, 
+                    // but they are named dynamically in this template demo.
+                    printf("\n");
+                }
                 free(decoded);
             }
         } else {
