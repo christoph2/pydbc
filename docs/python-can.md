@@ -52,7 +52,7 @@ print(decoded)
 ```
 
 Notes:
-- Currently, little-endian (Intel) signals are supported. Big-endian (Motorola) raises NotImplementedError.
+- Both little-endian (Intel) and big-endian (Motorola) signals are supported.
 - sign=1 is treated as unsigned, sign=0 as signed.
 - Physical conversion: phys = raw * factor + offset.
 
@@ -128,6 +128,5 @@ Try the virtual bus demo by uncommenting the call in that script and ensuring py
 
 ## 5) Limitations and next steps
 
-- Only little-endian signals are supported at the moment. Support for big-endian (Motorola) bit packing can be added next.
 - Multiplexed signals are not handled specifically here; if present in the DB, the current simple encoder will just place bits. For complex multiplexing behavior, extend the adapter to respect multiplexor rules.
 - This module intentionally keeps python-can as an optional dependency.

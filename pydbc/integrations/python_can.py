@@ -94,7 +94,7 @@ def get_message_by_id(session: Session, can_id: int) -> Message:
     return msg
 
 
-# --- Bit packing utilities (little-endian/Intel only) ---
+# --- Bit packing utilities ---
 
 def _insert_bits_le(buf: bytearray, start_bit: int, size: int, value: int) -> None:
     """Insert 'size' bits of 'value' into buf at little-endian start_bit.
@@ -125,6 +125,28 @@ def _insert_bits_le(buf: bytearray, start_bit: int, size: int, value: int) -> No
         bit_pos += bits_in_this_byte
 
 
+def _insert_bits_be(buf: bytearray, start_bit: int, size: int, value: int) -> None:
+    """Insert 'size' bits of 'value' into buf at big-endian (Motorola) start_bit."""
+    if size <= 0:
+        return
+    mask = (1 << size) - 1
+    value &= mask
+
+    bit_pos = start_bit
+    remaining = size
+    while remaining > 0:
+        byte_index = bit_pos // 8
+        bit_index = bit_pos % 8
+        bits_in_this_byte = min(remaining, bit_index + 1)
+        chunk_mask = (1 << bits_in_this_byte) - 1
+        chunk_shift = bit_index - bits_in_this_byte + 1
+        chunk = (value >> (remaining - bits_in_this_byte)) & chunk_mask
+        buf[byte_index] &= ~(chunk_mask << chunk_shift)
+        buf[byte_index] |= (chunk << chunk_shift)
+        remaining -= bits_in_this_byte
+        bit_pos = (byte_index + 1) * 8 + 7
+
+
 def _extract_bits_le(buf: bytes, start_bit: int, size: int, signed: bool) -> int:
     if size <= 0:
         return 0
@@ -145,6 +167,31 @@ def _extract_bits_le(buf: bytes, start_bit: int, size: int, signed: bool) -> int
         shift += bits_in_this_byte
     if signed:
         # sign-extend
+        sign_bit = 1 << (size - 1)
+        if out & sign_bit:
+            out = out - (1 << size)
+    return out
+
+
+def _extract_bits_be(buf: bytes, start_bit: int, size: int, signed: bool) -> int:
+    if size <= 0:
+        return 0
+    bit_pos = start_bit
+    remaining = size
+    out = 0
+    while remaining > 0:
+        byte_index = bit_pos // 8
+        bit_index = bit_pos % 8
+        bits_in_this_byte = min(remaining, bit_index + 1)
+        chunk_mask = (1 << bits_in_this_byte) - 1
+        byte_val = buf[byte_index]
+        chunk_shift = bit_index - bits_in_this_byte + 1
+        chunk = (byte_val >> chunk_shift) & chunk_mask
+        out <<= bits_in_this_byte
+        out |= chunk
+        remaining -= bits_in_this_byte
+        bit_pos = (byte_index + 1) * 8 + 7
+    if signed:
         sign_bit = 1 << (size - 1)
         if out & sign_bit:
             out = out - (1 << size)
@@ -183,17 +230,16 @@ def encode_message(session: Session, message_name: str, signal_values: Dict[str,
 
     # Place each signal
     for sig in cm.signals:
-        if not sig.little_endian:
-            raise NotImplementedError(
-                f"Signal '{sig.name}' is big-endian (Motorola); not supported yet."
-            )
         if sig.name not in signal_values:
             # Missing values default to 0 after scaling
             phys = 0.0
         else:
             phys = float(signal_values[sig.name])
         raw = _phys_to_raw(phys, sig.factor, sig.offset, sig.size, sig.signed)
-        _insert_bits_le(data, sig.start_bit, sig.size, raw)
+        if sig.little_endian:
+            _insert_bits_le(data, sig.start_bit, sig.size, raw)
+        else:
+            _insert_bits_be(data, sig.start_bit, sig.size, raw)
 
     return cm.message_id, bytes(data), cm.dlc
 
@@ -208,11 +254,10 @@ def decode_message(session: Session, can_id: int, data: bytes) -> Dict[str, Any]
     result: Dict[str, float] = {}
 
     for sig in cm.signals:
-        if not sig.little_endian:
-            raise NotImplementedError(
-                f"Signal '{sig.name}' is big-endian (Motorola); not supported yet."
-            )
-        raw = _extract_bits_le(data, sig.start_bit, sig.size, sig.signed)
+        if sig.little_endian:
+            raw = _extract_bits_le(data, sig.start_bit, sig.size, sig.signed)
+        else:
+            raw = _extract_bits_be(data, sig.start_bit, sig.size, sig.signed)
         phys = _raw_to_phys(raw, sig.factor, sig.offset)
         result[sig.name] = phys
 

@@ -18,6 +18,44 @@ ldf_example()
 ncf_example()
 ```
 
+## Unified API example (DBC/LDF-neutral)
+
+```python
+from pydbc.api import DBCCreator, as_network_database
+
+# Create a DBC model in memory
+can = DBCCreator(":memory:")
+node = can.create_node("Engine")
+message = can.create_message("EngineData", 0x100, 8, node)
+speed = can.create_signal(
+    "VehicleSpeed",
+    16,
+    byteorder=1,
+    sign=1,
+    formula_factor=0.1,
+    formula_offset=0.0,
+    minimum=0,
+    maximum=300,
+    unit="km/h",
+)
+can.add_signal_to_message(message, speed, 0)
+can.commit()
+
+# Adapt it to the shared abstraction
+model = as_network_database(can.session, name="vehicle")
+print(model.name)
+print([m.name for m in model.messages])
+print([s.name for s in model.signals])
+```
+
+```python
+from pydbc.api import load_database
+
+# Adapt a file directly without caring whether the source is DBC or LDF
+network = load_database("test_sample.dbc")
+print(f"messages={len(network.messages)}, signals={len(network.signals)}")
+```
+
 ## DBC example (CAN)
 
 ```python

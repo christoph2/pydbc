@@ -5,8 +5,32 @@ This reference summarizes the main public classes and methods of pyDBC. For deta
 - DBC (CAN) Creator: pydbc.api.dbc.DBCCreator
 - LDF (LIN) Creator: pydbc.api.ldf.LDFCreator
 - NCF (Vehicle/Network Config) Creator: pydbc.api.ncf.NCFCreator
+- Unified data model: pydbc.api.interface.NetworkDatabase
 - Parser Wrapper: pydbc.parser.ParserWrapper
 - Exporters: pydbc.db.imex.DbcExporter, pydbc.db.imex.LdfExporter
+
+## pydbc.api.interface — Unified network model
+
+The `pydbc.api.interface` module defines a format-neutral data model that can represent common DBC/LDF concepts.
+
+Primary classes:
+- NetworkDatabase(name="network", nodes=[], buses=[], messages=[], signals=[])
+- Bus(name, type, baudrate=None, messages=[])
+- Node(name, role=None, attributes={})
+- Signal(name, bit_length, factor=1.0, offset=0.0, minimum=None, maximum=None, unit=None, datatype=None, sender=[], receivers=[], attributes={})
+- Message(name, identifier=None, length=0, cycle_time=None, signals=[], sender=None, bus=None)
+- PDU(name, length, signals=[])
+- BusType: CAN, CANFD, LIN, FLEXRAY, ETHERNET
+- NodeRole: MASTER, SLAVE, ECU, NODE
+
+Primary helper functions:
+- as_network_database(session, name="network") -> NetworkDatabase
+- load_database(file_path, format=None) -> NetworkDatabase
+
+Notes:
+- `as_network_database(...)` adapts SQLAlchemy session objects returned by the import helpers into one shared abstraction.
+- The unified model intentionally keeps format-specific details out of the public interface so DBC and LDF can use the same access pattern.
+- When importing a DBC/LDF file, the loader automatically picks the parser based on the file extension.
 
 ## pydbc.api.dbc — DBCCreator
 

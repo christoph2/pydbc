@@ -78,11 +78,7 @@ static inline void ins_bits_be(uint8_t *buf, uint16_t start, uint8_t size, int64
         buf[byte_index] &= (uint8_t)~(chunk_mask << chunk_shift);
         buf[byte_index] |= (uint8_t)(chunk << chunk_shift);
         remaining -= bits_here;
-        if (bit_index < bits_here) {
-            bit_pos += 15; // Move to next byte (bit_pos is big-endian bit index)
-        } else {
-            bit_pos -= bits_here;
-        }
+        bit_pos = (uint16_t)((byte_index + 1u) * 8u + 7u);
     }
 }
 
@@ -129,11 +125,7 @@ static inline int64_t ext_bits_be(const uint8_t *buf, uint16_t start, uint8_t si
         out <<= bits_here;
         out |= chunk;
         remaining -= bits_here;
-        if (bit_index < bits_here) {
-            bit_pos += 15;
-        } else {
-            bit_pos -= bits_here;
-        }
+        bit_pos = (uint16_t)((byte_index + 1u) * 8u + 7u);
     }
     if (sign) {
         uint64_t sign_bit = 1ULL << (size - 1);

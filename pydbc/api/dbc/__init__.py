@@ -363,7 +363,21 @@ class DBCCreator:
         if isinstance(node, str):
             node = self._get_node(node)
 
-        node_rx_signal = Node_RxSignal(signal=signal, node=node)
+        self.session.flush()
+        message_signal = (
+            self.session.query(Message_Signal)
+            .filter_by(signal_id=signal.rid)
+            .first()
+        )
+        if message_signal is None:
+            raise ValueError(
+                f"Signal {signal.name!r} must be added to a message "
+                "(via add_signal_to_message) before assigning a receiver node."
+            )
+
+        node_rx_signal = Node_RxSignal(
+            signal=signal, node=node, message=message_signal.message
+        )
         self.session.add(node_rx_signal)
         return node_rx_signal
 

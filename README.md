@@ -129,6 +129,47 @@ ncf.commit()
 
 For more detailed examples, see the `pydbc/examples/api_examples.py` file.
 
+### Unified API for DBC/LDF data models
+
+The package also exposes a format-neutral interface that can adapt both CAN and LIN databases into a common `NetworkDatabase` model.
+
+```python
+from pydbc.api import DBCCreator, as_network_database
+
+# Build a simple CAN model
+can = DBCCreator(":memory:")
+engine = can.create_node("Engine")
+message = can.create_message("EngineData", 0x100, 8, engine)
+velocity = can.create_signal(
+    "VehicleSpeed",
+    16,
+    byteorder=1,
+    sign=1,
+    formula_factor=0.1,
+    formula_offset=0.0,
+    minimum=0,
+    maximum=300,
+    unit="km/h",
+)
+can.add_signal_to_message(message, velocity, 0)
+can.commit()
+
+# Adapt the ORM/session representation to a shared abstraction
+network = as_network_database(can.session, name="vehicle")
+print(network.name)
+print([msg.name for msg in network.messages])
+print([sig.name for sig in network.signals])
+```
+
+You can also load a `.dbc` or `.ldf` file into the unified model directly:
+
+```python
+from pydbc.api import load_database
+
+db = load_database("vehicle.dbc")
+print(db.name, len(db.messages), len(db.signals))
+```
+
 ## Features
 
 - High-level creational APIs for DBC, LDF, and NCF components

@@ -75,8 +75,6 @@ sudo ip link set up vcan0
 ```
 
 ## Limitations
-- Signals assumed little-endian (Intel). Big-endian (Motorola) signals are not yet generated.
-- Multiplexed signals are not yet handled specially.
 - DLC up to 8 supported in the simple templates (CAN FD can be added later).
 
 ## LIN generic generator (Python + C++)
