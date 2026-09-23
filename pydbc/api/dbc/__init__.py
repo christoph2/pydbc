@@ -50,6 +50,26 @@ from pydbc.db.model import (
     Attribute_Definition,
     Attribute_Value,
 )
+from pydbc.types import AttributeType, ValueType
+
+_ATTRIBUTE_OBJECT_TYPES = {
+    "NODE": AttributeType.NODE,
+    "MESSAGE": AttributeType.MESSAGE,
+    "SIGNAL": AttributeType.SIGNAL,
+    "ENV_VAR": AttributeType.ENV_VAR,
+    "NETWORK": AttributeType.NETWORK,
+    "REL_NODE": AttributeType.REL_NODE,
+    "REL_SIGNAL": AttributeType.REL_SIGNAL,
+    "REL_ENV_VAR": AttributeType.REL_ENV_VAR,
+}
+
+_ATTRIBUTE_VALUE_TYPES = {
+    "INT": ValueType.INT,
+    "HEX": ValueType.HEX,
+    "FLOAT": ValueType.FLOAT,
+    "STRING": ValueType.STRING,
+    "ENUM": ValueType.ENUM,
+}
 
 
 class DBCCreator:
@@ -382,21 +402,38 @@ class DBCCreator:
         return node_rx_signal
 
     def create_attribute_definition(
-        self, name: str, object_type: str, value_type: str, **kwargs
+        self, name: str, object_type: Union[str, int], value_type: Union[str, int], **kwargs
     ) -> Attribute_Definition:
         """Create an attribute definition.
 
         Args:
             name: Name of the attribute
-            object_type: Type of object the attribute applies to
-            value_type: Type of the attribute value
-            **kwargs: Additional attribute definition properties
+            object_type: Type of object the attribute applies to. Either one of
+                "NODE", "MESSAGE", "SIGNAL", "ENV_VAR", "NETWORK", "REL_NODE",
+                "REL_SIGNAL", "REL_ENV_VAR" or an integer/``AttributeType`` value.
+            value_type: Type of the attribute value. Either one of "INT", "HEX",
+                "FLOAT", "STRING", "ENUM" or an integer/``ValueType`` value.
+            **kwargs: Additional attribute definition properties (e.g. minimum,
+                maximum, enumvalues, default_number, default_string)
 
         Returns:
             The created Attribute_Definition object
         """
+        if isinstance(object_type, str):
+            resolved_object_type = _ATTRIBUTE_OBJECT_TYPES[object_type.upper()]
+        else:
+            resolved_object_type = object_type
+
+        if isinstance(value_type, str):
+            resolved_value_type = _ATTRIBUTE_VALUE_TYPES[value_type.upper()]
+        else:
+            resolved_value_type = value_type
+
         attr_def = Attribute_Definition(
-            name=name, object_type=object_type, value_type=value_type, **kwargs
+            name=name,
+            objecttype=resolved_object_type,
+            valuetype=resolved_value_type,
+            **kwargs
         )
         self.session.add(attr_def)
         return attr_def
@@ -411,8 +448,9 @@ class DBCCreator:
 
         Args:
             attribute_definition: Attribute definition name or object
-            object_id: ID of the object to set the attribute for
-            value: Value to set
+            object_id: ID (rid) of the object to set the attribute for
+            value: Value to set. Stored as a numeric value for INT/HEX/FLOAT
+                attribute definitions, otherwise as a string value.
 
         Returns:
             The created Attribute_Value object
@@ -423,11 +461,21 @@ class DBCCreator:
                 .filter_by(name=attribute_definition)
                 .first()
             )
+        if attribute_definition is None:
+            raise ValueError("Unknown attribute definition")
+
+        if attribute_definition.valuetype in (ValueType.INT, ValueType.HEX, ValueType.FLOAT):
+            num_value = float(value)
+            string_value = None
+        else:
+            num_value = None
+            string_value = str(value)
 
         attr_value = Attribute_Value(
             attribute_definition=attribute_definition,
             object_id=object_id,
-            value=str(value),
+            num_value=num_value,
+            string_value=string_value,
         )
         self.session.add(attr_value)
         return attr_value

@@ -28,11 +28,20 @@ def can_to_unified_model_example() -> None:
     )
     dbc.add_signal_to_message(message, speed, 0)
     dbc.add_node_as_receiver(speed, gateway)
+
+    # Attributes (DBC ``BA_DEF_``/``BA_``) become plain dict entries on the
+    # corresponding unified Node/Message/Signal objects.
+    cycle_time_def = dbc.create_attribute_definition(
+        "GenMsgCycleTime", "MESSAGE", "INT", minimum=0, maximum=10000
+    )
+    dbc.session.flush()
+    dbc.set_attribute_value(cycle_time_def, message.rid, 100)
     dbc.commit()
 
     database = as_network_database(dbc.session, name="vehicle")
     print(f"nodes={len(database.nodes)} messages={len(database.messages)} signals={len(database.signals)}")
     print(database.messages[0].name, database.signals[0].name)
+    print("message attributes:", database.messages[0].attributes)
 
 
 def lin_to_unified_model_example() -> None:

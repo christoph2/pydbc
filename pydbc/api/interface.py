@@ -98,6 +98,7 @@ class Bus:
     type: BusType
     baudrate: int | None = None
     messages: list["Message"] = field(default_factory=list)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
@@ -109,6 +110,7 @@ class Message:
     signals: list[Signal] = field(default_factory=list)
     sender: Node | None = None
     bus: Bus | None = None
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
@@ -221,6 +223,7 @@ def _signal_from_orm(signal: Any, session: Any = None) -> Signal:
         unit=getattr(signal, "unit", None),
         datatype=None,
         enumeration=_enumeration_for_signal(signal, session),
+        attributes=_attributes_for_object(session, "SIGNAL", getattr(signal, "rid", None)),
     )
 
 
@@ -284,14 +287,81 @@ def _enumeration_for_signal(signal: Any, session: Any) -> Enumeration | None:
     return _enumeration_from_lin_signal(signal, session)
 
 
-def _node_from_orm(node: Any) -> Node:
+# DBC ``Attribute_Definition.objecttype`` values (see ``pydbc.types.AttributeType``).
+_ATTRIBUTE_OBJECT_TYPES = {
+    "NODE": 0,
+    "MESSAGE": 1,
+    "SIGNAL": 2,
+    "ENV_VAR": 3,
+    "NETWORK": 4,
+}
+
+# DBC ``Attribute_Definition.valuetype`` values (see ``pydbc.types.ValueType``).
+_NUMERIC_ATTRIBUTE_VALUE_TYPES = {0, 1, 2}  # INT, HEX, FLOAT
+_INTEGRAL_ATTRIBUTE_VALUE_TYPES = {0, 1}  # INT, HEX
+
+
+def _attributes_for_object(
+    session: Any, object_kind: str, rid: int | None
+) -> dict[str, Any]:
+    """Fetch DBC ``Attribute_Value`` entries for a given object as a plain dict.
+
+    ``object_kind`` is one of ``"NODE"``, ``"MESSAGE"``, ``"SIGNAL"`` or
+    ``"NETWORK"`` and is mapped to the corresponding ``Attribute_Definition``
+    object type. Returns an empty dict for LIN sources or when no attributes
+    are present.
+    """
+    if session is None or rid is None:
+        return {}
+    object_type = _ATTRIBUTE_OBJECT_TYPES.get(object_kind)
+    if object_type is None:
+        return {}
+    try:
+        from pydbc.db.model import Attribute_Definition, Attribute_Value
+    except Exception:
+        return {}
+
+    rows = (
+        session.query(Attribute_Value)
+        .join(
+            Attribute_Definition,
+            Attribute_Value.attribute_definition_id == Attribute_Definition.rid,
+        )
+        .filter(
+            Attribute_Definition.objecttype == object_type,
+            Attribute_Value.object_id == rid,
+        )
+        .all()
+    )
+    result: dict[str, Any] = {}
+    for row in rows:
+        definition = row.attribute_definition
+        if definition is None:
+            continue
+        if definition.valuetype in _NUMERIC_ATTRIBUTE_VALUE_TYPES:
+            if row.num_value is None:
+                value: Any = None
+            elif definition.valuetype in _INTEGRAL_ATTRIBUTE_VALUE_TYPES:
+                value = int(row.num_value)
+            else:
+                value = row.num_value
+        else:
+            value = row.string_value
+        result[definition.name] = value
+    return result
+
+
+def _node_from_orm(node: Any, session: Any = None) -> Node:
+    rid = getattr(node, "rid", None)
+    attributes: dict[str, Any] = {
+        "rid": rid,
+        "node_id": getattr(node, "node_id", None),
+    }
+    attributes.update(_attributes_for_object(session, "NODE", rid))
     return Node(
         name=getattr(node, "name", str(node)),
         role=_node_role_for(node),
-        attributes={
-            "rid": getattr(node, "rid", None),
-            "node_id": getattr(node, "node_id", None),
-        },
+        attributes=attributes,
     )
 
 
@@ -316,7 +386,7 @@ def as_network_database(session: Any, *, name: str = "network") -> NetworkDataba
 
     node_by_rid: dict[int, Node] = {}
     for node in session.query(DbNode).all():
-        node_obj = _node_from_orm(node)
+        node_obj = _node_from_orm(node, session)
         node_by_rid[getattr(node, "rid", None)] = node_obj
         database.add_node(node_obj)
 
@@ -327,6 +397,9 @@ def as_network_database(session: Any, *, name: str = "network") -> NetworkDataba
                 type=_bus_type_for_network(network),
                 baudrate=getattr(network, "baudrate", None),
                 messages=[],
+                attributes=_attributes_for_object(
+                    session, "NETWORK", getattr(network, "rid", None)
+                ),
             )
         )
 
@@ -339,6 +412,9 @@ def as_network_database(session: Any, *, name: str = "network") -> NetworkDataba
             cycle_time=getattr(message, "cycle_time", None),
             sender=None,
             bus=None,
+            attributes=_attributes_for_object(
+                session, "MESSAGE", getattr(message, "rid", None)
+            ),
         )
         if getattr(message, "sender", None) is not None:
             sender_id = message.sender
