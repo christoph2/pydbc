@@ -82,6 +82,7 @@ class Signal:
     sender: list[Node] = field(default_factory=list)
     receivers: list[Node] = field(default_factory=list)
     attributes: dict[str, Any] = field(default_factory=dict)
+    enumeration: Enumeration | None = None
 
 
 @dataclass(slots=True)
@@ -209,7 +210,7 @@ def _message_identifier(message: Any) -> int | None:
     return getattr(message, "rid", None)
 
 
-def _signal_from_orm(signal: Any) -> Signal:
+def _signal_from_orm(signal: Any, session: Any = None) -> Signal:
     return Signal(
         name=getattr(signal, "name", str(signal)),
         bit_length=getattr(signal, "bitsize", getattr(signal, "bit_length", 0)) or 0,
@@ -219,7 +220,68 @@ def _signal_from_orm(signal: Any) -> Signal:
         maximum=getattr(signal, "maximum", None),
         unit=getattr(signal, "unit", None),
         datatype=None,
+        enumeration=_enumeration_for_signal(signal, session),
     )
+
+
+def _enumeration_from_dbc_signal(signal: Any) -> Enumeration | None:
+    """Extract a value table (DBC ``VALUE_TABLE``/``VAL_``) as an Enumeration."""
+    object_valuetable = getattr(signal, "object_valuetable", None)
+    if object_valuetable is None:
+        return None
+    valuetable = getattr(object_valuetable, "valuetable", None)
+    if valuetable is None:
+        return None
+    values = getattr(valuetable, "values", None) or []
+    if not values:
+        return None
+    return Enumeration(
+        values={int(vd.value): vd.value_description for vd in values}
+    )
+
+
+def _enumeration_from_lin_signal(signal: Any, session: Any) -> Enumeration | None:
+    """Extract a LIN signal encoding type (logical values) as an Enumeration."""
+    if session is None:
+        return None
+    signal_rid = getattr(signal, "rid", None)
+    if signal_rid is None:
+        return None
+    try:
+        from pydbc.db.model import (
+            LinSignalEncodingEntry_Logical,
+            LinSignalRepresentation,
+        )
+    except Exception:
+        return None
+
+    representation = (
+        session.query(LinSignalRepresentation)
+        .filter_by(signal_id=signal_rid)
+        .first()
+    )
+    if representation is None:
+        return None
+    encoding_type = representation.signal_encoding_type
+    if encoding_type is None:
+        return None
+    logical_entries = [
+        entry
+        for entry in (getattr(encoding_type, "entries", None) or [])
+        if isinstance(entry, LinSignalEncodingEntry_Logical)
+    ]
+    if not logical_entries:
+        return None
+    return Enumeration(
+        values={int(entry.signal_value): entry.text_info for entry in logical_entries}
+    )
+
+
+def _enumeration_for_signal(signal: Any, session: Any) -> Enumeration | None:
+    enumeration = _enumeration_from_dbc_signal(signal)
+    if enumeration is not None:
+        return enumeration
+    return _enumeration_from_lin_signal(signal, session)
 
 
 def _node_from_orm(node: Any) -> Node:
@@ -285,7 +347,7 @@ def as_network_database(session: Any, *, name: str = "network") -> NetworkDataba
                     message_obj.sender = node
                     break
         for signal in list(getattr(message, "signals", []) or []):
-            signal_obj = _signal_from_orm(signal)
+            signal_obj = _signal_from_orm(signal, session)
             if signal_obj not in database.signals:
                 database.add_signal(signal_obj)
             if signal_obj not in message_obj.signals:
@@ -295,7 +357,7 @@ def as_network_database(session: Any, *, name: str = "network") -> NetworkDataba
             message_by_rid[int(message.rid)] = message_obj
 
     for signal in session.query(DbSignal).all():
-        signal_obj = _signal_from_orm(signal)
+        signal_obj = _signal_from_orm(signal, session)
         if signal_obj.name not in {item.name for item in database.signals}:
             database.add_signal(signal_obj)
 
@@ -306,7 +368,7 @@ def as_network_database(session: Any, *, name: str = "network") -> NetworkDataba
                 continue
             signal_obj = next((item for item in database.signals if item.name == signal.name), None)
             if signal_obj is None:
-                signal_obj = _signal_from_orm(signal)
+                signal_obj = _signal_from_orm(signal, session)
                 database.add_signal(signal_obj)
             if signal_obj not in database.get_message(message.name).signals:
                 database.get_message(message.name).signals.append(signal_obj)
