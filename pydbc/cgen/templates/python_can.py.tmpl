@@ -231,7 +231,8 @@ def _decode_message(meta, data_bytes):
             res[s["name"]] = phys
             active_mux = raw
             if raw in s["values"]:
-                res[s["name"] + "_desc"] = s["values"][raw]
+                res[s["name"]] = s["values"][raw]
+                res[s["name"] + "_raw"] = phys
             break
 
     # Second pass: other signals
@@ -248,7 +249,8 @@ def _decode_message(meta, data_bytes):
         phys = _raw_to_phys(raw, s["factor"], s["offset"])
         res[s["name"]] = phys
         if raw in s["values"]:
-            res[s["name"] + "_desc"] = s["values"][raw]
+            res[s["name"]] = s["values"][raw]
+            res[s["name"] + "_raw"] = phys
     return {"message": meta["name"], "signals": res}
 
 
