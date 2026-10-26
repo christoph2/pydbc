@@ -26,7 +26,7 @@ classifiers = [
 ]
 dependencies = [
     "chardet>=5.0.0",
-    "mako>=1.2.0",
+    "mako>=1.4.2",
     "colorama>=0.4.6",
     "SQLAlchemy>=2.0.0",
     "typing-extensions>=4.0.0",
