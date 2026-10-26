@@ -38,7 +38,7 @@ can = ["python-can"]
 dev = [
     "pytest>=7.0.0",
     "pytest-runner>=6.0.0",
-    "black>=25.1,<27.0",
+    "black>=26.10.1,<27.0",
     "bumpver",
 ]
 docs = [
